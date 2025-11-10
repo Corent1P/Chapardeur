@@ -17,8 +17,6 @@ public class RelayManager : MonoBehaviour
 
     [Header("UI References")]
     public GameObject lobbyWaitingUI; // Panel d'attente du lobby
-    // public Transform playerListContainer; // Container pour la liste des joueurs
-    // public GameObject playerListItemPrefab; // Prefab pour afficher un joueur
     public GameObject startGameButton; // Bouton Start (visible uniquement pour l'hôte)
     public TextMeshProUGUI lobbyInfoText;
     public TextMeshProUGUI mapNameText;
@@ -42,7 +40,6 @@ public class RelayManager : MonoBehaviour
             new Tuple<string, string>("Game-Procedural", "Random")
         };
 
-        // listMaps = new Tuple<string, string>("Game-Procedural", "Random Map");
         mapNameText.text = listMaps[0].Item2;
         gameSceneName = listMaps[0].Item1;
     }
@@ -80,7 +77,7 @@ public class RelayManager : MonoBehaviour
 
             lobbyManager.joinLobby = await LobbyService.Instance.GetLobbyAsync(lobbyManager.joinLobby.Id);
             UpdatePlayerListUI();
-            
+
             // Si on n'est pas l'hôte, vérifier si le Relay Code est disponible
             if (!isHost && lobbyManager.joinLobby.Data != null && lobbyManager.joinLobby.Data.ContainsKey(KEY_RELAY_JOIN_CODE))
             {
@@ -95,8 +92,7 @@ public class RelayManager : MonoBehaviour
         catch (LobbyServiceException e)
         {
             Debug.LogError($"Lobby polling failed: {e.Message} | Reason: {e.Reason} | Code: {e.ErrorCode}");
-            
-            // Si le lobby n'existe plus, arrêter le polling
+
             if (e.Reason == LobbyExceptionReason.LobbyNotFound)
             {
                 Debug.LogWarning("Lobby no longer exists, stopping polling");
@@ -127,34 +123,13 @@ public class RelayManager : MonoBehaviour
     {
         if (lobbyWaitingUI != null)
             lobbyWaitingUI.SetActive(false);
-        
+
         isHost = false;
         hasJoinedRelay = false;
     }
 
     private void UpdatePlayerListUI()
     {
-        // if (lobbyManager.joinLobby == null || playerListContainer == null) return;
-
-        // // Nettoyer la liste actuelle
-        // foreach (Transform child in playerListContainer)
-        // {
-        //     Destroy(child.gameObject);
-        // }
-
-        // // Créer un élément UI pour chaque joueur
-        // foreach (Player player in lobbyManager.joinLobby.Players)
-        // {
-        //     GameObject playerItem = Instantiate(playerListItemPrefab, playerListContainer);
-        //     TMP_Text playerNameText = playerItem.GetComponentInChildren<TMP_Text>();
-
-        //     if (playerNameText != null && player.Data.ContainsKey("PlayerName"))
-        //     {
-        //         playerNameText.text = player.Data["PlayerName"].Value;
-        //     }
-        // }
-
-        // Afficher le nombre de joueurs 
         if (lobbyInfoText != null)
         {
             int currentPlayers = lobbyManager.joinLobby != null ? lobbyManager.joinLobby.Players.Count : 0;
@@ -162,7 +137,11 @@ public class RelayManager : MonoBehaviour
             string lobbyName = lobbyManager.joinLobby != null ? lobbyManager.joinLobby.Name : "N/A";
             lobbyInfoText.text = $"Lobby Name: {lobbyName}\nPlayers: {currentPlayers}/{maxPlayers}";
         }
-        Debug.Log($"Players in lobby: {lobbyManager.joinLobby.Players.Count}/{lobbyManager.joinLobby.MaxPlayers}");
+
+        if (lobbyManager.joinLobby != null)
+        {
+            Debug.Log($"Players in lobby: {lobbyManager.joinLobby.Players.Count}/{lobbyManager.joinLobby.MaxPlayers}");
+        }
     }
 
     public void NextMap()
@@ -179,7 +158,7 @@ public class RelayManager : MonoBehaviour
         gameSceneName = listMaps[currentMapIndex].Item1;
     }
 
-    public String GetCurrentMapName()
+    public string GetCurrentMapName()
     {
         return listMaps[currentMapIndex].Item2;
     }
@@ -188,13 +167,80 @@ public class RelayManager : MonoBehaviour
 
     #region Relay Integration
 
+    public async Task<string> CreateRelay()
+    {
+        try
+        {
+            Debug.Log("Creating Relay allocation...");
+
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3); 
+
+            string relayJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+
+            Debug.Log("Relay Join Code created: " + relayJoinCode);
+
+            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetHostRelayData(
+                allocation.RelayServer.IpV4,
+                (ushort)allocation.RelayServer.Port,
+                allocation.AllocationIdBytes,
+                allocation.Key,
+                allocation.ConnectionData
+            );
+
+            return relayJoinCode;
+        }
+        catch (RelayServiceException e)
+        {
+            Debug.LogError("Relay creation failed: " + e);
+            return null;
+        }
+    }
+
+    public async Task JoinRelay(string relayJoinCode)
+    {
+        if (hasJoinedRelay) return;
+
+        try
+        {
+            Debug.Log("Joining game via Relay with code: " + relayJoinCode);
+
+            JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(relayJoinCode);
+
+            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetClientRelayData(
+                joinAllocation.RelayServer.IpV4,
+                (ushort)joinAllocation.RelayServer.Port,
+                joinAllocation.AllocationIdBytes,
+                joinAllocation.Key,
+                joinAllocation.ConnectionData,
+                joinAllocation.HostConnectionData
+            );
+
+            NetworkManager.Singleton.StartClient();
+
+            hasJoinedRelay = true;
+
+            Debug.Log("Successfully joined Relay!");
+        }
+        catch (RelayServiceException e)
+        {
+            Debug.LogError("Relay join failed: " + e);
+        }
+    }
+
     public async void StartGame(string sceneToLoad)
     {
         gameSceneName = sceneToLoad;
-        StartGame();
+        await StartGameInternal();
     }
 
     public async void StartGame()
+    {
+        await StartGameInternal();
+    }
+
+    private async Task StartGameInternal()
     {
         if (!isHost)
         {
@@ -212,15 +258,16 @@ public class RelayManager : MonoBehaviour
         {
             Debug.Log("Starting game and creating Relay allocation...");
 
-            // Créer une allocation Relay
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(lobbyManager.joinLobby.MaxPlayers - 1);
-            
-            // Obtenir le Join Code
-            string relayJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            
+            string relayJoinCode = await CreateRelay();
+
+            if (string.IsNullOrEmpty(relayJoinCode))
+            {
+                Debug.LogError("Failed to create relay!");
+                return;
+            }
+
             Debug.Log("Relay Join Code: " + relayJoinCode);
 
-            // Mettre à jour le Lobby avec le Relay Join Code
             await LobbyService.Instance.UpdateLobbyAsync(lobbyManager.joinLobby.Id, new UpdateLobbyOptions
             {
                 Data = new Dictionary<string, DataObject>
@@ -229,24 +276,12 @@ public class RelayManager : MonoBehaviour
                 }
             });
 
-            // Configurer le transport Unity pour l'hôte
-            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            transport.SetHostRelayData(
-                allocation.RelayServer.IpV4,
-                (ushort)allocation.RelayServer.Port,
-                allocation.AllocationIdBytes,
-                allocation.Key,
-                allocation.ConnectionData
-            );
-
-            // Démarrer l'hôte
             NetworkManager.Singleton.StartHost();
 
             hasJoinedRelay = true;
             PlayerPrefs.SetInt("MaxPlayers", lobbyManager.joinLobby.MaxPlayers);
 
-            // Charger la scène de jeu
-            // NetworkManager.Singleton.SceneManager.LoadScene(gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
+  
             var status = NetworkManager.Singleton.SceneManager.LoadScene(gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
             if (status != SceneEventProgressStatus.Started)
             {
@@ -262,41 +297,6 @@ public class RelayManager : MonoBehaviour
         catch (LobbyServiceException e)
         {
             Debug.LogError("Lobby update failed: " + e);
-        }
-    }
-
-    private async Task JoinRelay(string relayJoinCode)
-    {
-        if (hasJoinedRelay) return;
-
-        try
-        {
-            Debug.Log("Joining game via Relay with code: " + relayJoinCode);
-
-            // Rejoindre l'allocation Relay
-            JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(relayJoinCode);
-
-            // Configurer le transport Unity pour le client
-            UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            transport.SetClientRelayData(
-                joinAllocation.RelayServer.IpV4,
-                (ushort)joinAllocation.RelayServer.Port,
-                joinAllocation.AllocationIdBytes,
-                joinAllocation.Key,
-                joinAllocation.ConnectionData,
-                joinAllocation.HostConnectionData
-            );
-
-            // Démarrer le client
-            NetworkManager.Singleton.StartClient();
-
-            hasJoinedRelay = true;
-
-            Debug.Log("Successfully joined Relay!");
-        }
-        catch (RelayServiceException e)
-        {
-            Debug.LogError("Relay join failed: " + e);
         }
     }
 
