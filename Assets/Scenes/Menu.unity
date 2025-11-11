@@ -13063,7 +13063,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIJoinMenu
   lobbyManager: {fileID: 1279185765}
-  LobbyInfoPrefab: {fileID: 4460382333375672196, guid: e34adda15578b4cecaebcd76599ac41f, type: 3}
+  LobbyInfoPrefab: {fileID: 4460382333375672196, guid: f95863d91bf464afb9df4623933c3f76, type: 3}
   RefreshButton: {fileID: 737860473}
 --- !u!1 &1980891731
 GameObject:
