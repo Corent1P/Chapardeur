@@ -13,9 +13,12 @@ public class GrapplingHook : ASkills
     [Header("Rope Settings")]
     [SerializeField] private LineRenderer ropeRenderer;
     [SerializeField] private Transform ropeOrigin;
-    [SerializeField] private float maxRopeLength = 20f; // Longueur maximale de la corde
-    [SerializeField] private float ropeTensionForce = 10f; // Force appliquée quand la corde est tendue
-    [SerializeField] private int ropeSegments = 15; // Nombre de segments pour la courbe de la corde
+    private float maxRopeLength;
+    [SerializeField] private float ropeTensionForce = 30f;
+    [SerializeField] private float ropeSpringStiffness = 50f; // Spring constant for soft constraint
+    [SerializeField] private float ropeDamping = 0.8f; // Velocity damping (0-1, higher = more damped)
+    [SerializeField] private float gravityCounterFactor = 0.3f; // How much gravity is counteracted (0-1)
+    [SerializeField] private int ropeSegments = 15;
     [SerializeField] private float ropeWaveAmount = 0.5f; // Amplitude de la courbe de la corde
     
     private bool hasGrabbed = false;
@@ -23,11 +26,13 @@ public class GrapplingHook : ASkills
     private Material originalMaterial;
     private Rigidbody playerRigidbody;
     private Vector3 grapplePoint; // Position du point d'ancrage
+    private PlayerController playerController;
 
     private void Start()
     {
         playerTransform = GetComponentInParent<Transform>();
         playerRigidbody = GetComponentInParent<Rigidbody>();
+        playerController = GetComponentInParent<PlayerController>();
         
         if (playerTransform == null)
         {
@@ -37,6 +42,10 @@ public class GrapplingHook : ASkills
         if (playerRigidbody == null)
         {
             Debug.LogWarning("PlayerRigidbody n'est pas trouvé dans le GrapplingHook!");
+        }
+        if (playerController == null)
+        {
+            Debug.LogWarning("PlayerController n'est pas trouvé dans le GrapplingHook!");
         }
         
         // Configurer le LineRenderer
@@ -120,26 +129,43 @@ public class GrapplingHook : ASkills
     
     private void ApplyRopeTension()
     {
-        if (playerRigidbody == null || !hasGrabbed)
+        if (playerRigidbody == null || !hasGrabbed) {
+            if (playerController != null)
+                playerController.SetSpeedFactor(1f);
             return;
+        }
 
         Vector3 playerPosition = playerTransform.position;
-        float currentDistance = Vector3.Distance(playerPosition, grapplePoint);
+        Vector3 grapplePointTmp = new Vector3(grapplePoint.x, playerPosition.y + 0.2f, grapplePoint.z);
+        Vector3 directionToAnchor = (grapplePointTmp - playerPosition).normalized;
+        float currentDistance = Vector3.Distance(playerPosition, grapplePointTmp);
 
-        // Si le joueur dépasse la longueur maximale de la corde
+        // Spring force: pull towards anchor point with soft constraint
+        float distanceError = currentDistance - maxRopeLength;
+        if (distanceError > 0)
+        {
+            // Player exceeded max rope length - apply restoring force
+            float springForce = ropeSpringStiffness * distanceError;
+            playerRigidbody.AddForce(directionToAnchor * springForce, ForceMode.Force);
+        }
+
+        // Apply damping to reduce oscillations (proportional to velocity towards/away from anchor)
+        Vector3 velocityTowardsAnchor = Vector3.Project(playerRigidbody.linearVelocity, directionToAnchor);
+        float dampingForce = -ropeDamping * velocityTowardsAnchor.magnitude;
+        playerRigidbody.AddForce(directionToAnchor * dampingForce, ForceMode.Force);
+
+        // Partial gravity counteraction for more natural swinging motion
+        Vector3 gravityForce = Physics.gravity * playerRigidbody.mass;
+        playerRigidbody.AddForce(-gravityForce * gravityCounterFactor, ForceMode.Force);
+
+        // Adjust player speed factor based on rope tension
+        float speedFactor = Mathf.Clamp01(maxRopeLength / currentDistance);
+        if (playerController != null)
+            playerController.SetSpeedFactor(speedFactor);
+
+        // Debug visualization
         if (currentDistance > maxRopeLength)
         {
-            // Calculer la direction vers le point d'ancrage
-            Vector3 directionToAnchor = (grapplePoint - playerPosition).normalized;
-            
-            // Calculer la force proportionnelle à la distance dépassée
-            float overshoot = currentDistance - maxRopeLength;
-            float forceMagnitude = ropeTensionForce * overshoot;
-
-            // Appliquer la force vers le point d'ancrage
-            playerRigidbody.AddForce(directionToAnchor * forceMagnitude, ForceMode.Force);
-            
-            // Debug visuel
             Debug.DrawLine(playerPosition, grapplePoint, Color.red);
         }
         else
@@ -244,6 +270,7 @@ public class GrapplingHook : ASkills
 
         hasGrabbed = true;
         grapplePoint = currentSelectedPoint.transform.position;
+        maxRopeLength = Vector3.Distance(playerTransform.position, grapplePoint);
 
         Debug.Log($"Grappin lancé vers: {currentSelectedPoint.name} à {Vector3.Distance(playerTransform.position, grapplePoint):F2}m");
 
