@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
+    private float speedFactor = 1f;
     public float jumpForce = 5f;
 
     [Header("Mouse")]
@@ -55,7 +56,7 @@ public class PlayerController : MonoBehaviour
     private void HandleMovement()
     {
         Vector3 moveDirection = (transform.forward * moveInput.y + transform.right * moveInput.x).normalized;
-        Vector3 targetVelocity = moveDirection * moveSpeed;
+        Vector3 targetVelocity = moveDirection * moveSpeed * speedFactor;
         Vector3 currentVelocity = rb.linearVelocity;
 
         // Conserve la vitesse verticale (gravité / saut)
@@ -95,5 +96,10 @@ public class PlayerController : MonoBehaviour
                 isGrounded = true;
             }
         }
+    }
+
+    public void SetSpeedFactor(float newSpeedFactor)
+    {
+        speedFactor = newSpeedFactor;
     }
 }

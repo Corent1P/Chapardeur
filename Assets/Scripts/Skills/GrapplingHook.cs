@@ -6,7 +6,7 @@ public class GrapplingHook : ASkills
     [SerializeField] private Material grapplingPointMaterial;
     [SerializeField] [Range(0f, 30f)] private float hookRange = 15f;
     private Transform playerTransform;
-    [SerializeField][Range(0f, 180f)] private float maxAngle = 60f; // Angle maximum en degrés
+    [SerializeField][Range(0f, 180f)] private float maxAngle = 60f;
     [SerializeField] private float grapplingCooldown = 0.5f;
     private float lastGrappleTime = -Mathf.Infinity;
 
@@ -15,11 +15,11 @@ public class GrapplingHook : ASkills
     [SerializeField] private Transform ropeOrigin;
     private float maxRopeLength;
     [SerializeField] private float ropeTensionForce = 30f;
-    [SerializeField] private float ropeSpringStiffness = 50f; // Spring constant for soft constraint
-    [SerializeField] private float ropeDamping = 0.8f; // Velocity damping (0-1, higher = more damped)
-    [SerializeField] private float gravityCounterFactor = 0.3f; // How much gravity is counteracted (0-1)
+    [SerializeField] private float ropeSpringStiffness = 50f;
+    [SerializeField] private float ropeDamping = 0.8f;
+    [SerializeField] private float gravityCounterFactor = 0.3f;
     [SerializeField] private int ropeSegments = 15;
-    [SerializeField] private float ropeWaveAmount = 0.5f; // Amplitude de la courbe de la corde
+    [SerializeField] private float ropeWaveAmount = 0.5f;
     
     private bool hasGrabbed = false;
     private GameObject currentSelectedPoint;
@@ -272,9 +272,6 @@ public class GrapplingHook : ASkills
         grapplePoint = currentSelectedPoint.transform.position;
         maxRopeLength = Vector3.Distance(playerTransform.position, grapplePoint);
 
-        Debug.Log($"Grappin lancé vers: {currentSelectedPoint.name} à {Vector3.Distance(playerTransform.position, grapplePoint):F2}m");
-
-        // Activer le LineRenderer
         if (ropeRenderer != null)
         {
             ropeRenderer.enabled = true;
@@ -288,8 +285,6 @@ public class GrapplingHook : ASkills
             return;
 
         hasGrabbed = false;
-
-        Debug.Log("Grappin relâché");
 
         // Désactiver la ligne de la corde
         if (ropeRenderer != null)
