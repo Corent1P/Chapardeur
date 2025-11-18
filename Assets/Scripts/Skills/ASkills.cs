@@ -31,7 +31,7 @@ public class ASkills : MonoBehaviour, ISkills
                 meshCollider.sharedMesh = AppearanceMesh;
         }
     }
-    public ISkills ActivateSkill()
+    public virtual ISkills ActivateSkill()
     {
         ChangeAppearance();
         isActive = true;
@@ -39,7 +39,7 @@ public class ASkills : MonoBehaviour, ISkills
         return this;
     }
 
-    public ISkills DeactivateSkill()
+    public virtual ISkills DeactivateSkill()
     {
         isActive = false;
         return this;

@@ -2357,6 +2357,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GrapplingHook
   AppearanceMesh: {fileID: 4300010, guid: 03c8aeba68e321f47bd1c217cbec963a, type: 3}
   AppearanceMaterial: {fileID: 2100000, guid: d86c5b5e192e64f31a6917823c3847e6, type: 2}
+  grappleGun: {fileID: 1394716697}
   grapplingPointMaterial: {fileID: 2100000, guid: 59dc9568aeea740018d337bd65dd92cb, type: 2}
   hookRange: 15
   maxAngle: 60
