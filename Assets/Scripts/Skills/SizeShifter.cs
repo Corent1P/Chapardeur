@@ -1,10 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 public class SizeShifter : ASkills
 {
-    [SerializeField] private Vector3 smallSize = new Vector3(0.5f, 0.5f, 0.5f);
+    [SerializeField] private Vector3 smallSize = new Vector3(1f, 1f, 1f);
     [SerializeField] private Vector3 normalSize = new Vector3(1f, 1f, 1f);
-    [SerializeField] private Vector3 largeSize = new Vector3(2f, 2f, 2f);
+    [SerializeField] private Vector3 largeSize = new Vector3(1f, 1f, 1f);
     [SerializeField] private float shiftCooldown = 0.5f;
     private float lastShiftTime = -Mathf.Infinity;
     private bool isSmall = false;
@@ -13,6 +14,10 @@ public class SizeShifter : ASkills
     private void Start()
     {
         normalSize = transform.localScale;
+        if (smallSize == Vector3.one)
+            smallSize = normalSize * 0.5f;
+        if (largeSize == Vector3.one)
+            largeSize = normalSize * 2f;
         playerController = GetComponentInParent<PlayerController>();
         if (playerController == null)
         {
@@ -41,29 +46,57 @@ public class SizeShifter : ASkills
     {
         if (lastShiftTime > 0) return;
 
-        SetNormalSize();
+        if (transform.localScale != normalSize)
+            SetNormalSize();
         lastShiftTime = shiftCooldown;
     }
 
     private void SetSmallSize()
     {
-        transform.localScale = smallSize;
         isSmall = true;
         playerController.SetSpeedFactor(1.8f);
         playerController.SetJumpFactor(1.5f);
+        StartCoroutine(ScaleDownTo(smallSize));
+    }
+
+    IEnumerator ScaleDownTo(Vector3 targetSize)
+    {
+        Vector3 initialSize = transform.localScale;
+        float elapsedTime = 0f;
+        float duration = 0.2f;
+
+        while (elapsedTime < duration)
+        {
+            transform.localScale = Vector3.Lerp(initialSize, targetSize, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        transform.localScale = targetSize;
+    }
+
+    IEnumerator ScaleUpTo(Vector3 targetSize)
+    {
+        Vector3 initialSize = transform.localScale;
+        transform.localScale = (targetSize + initialSize) / 2f;
+        yield return new WaitForSeconds(0.1f);
+        transform.localScale = (targetSize * 2 + initialSize) / 2f;
+        yield return new WaitForSeconds(0.1f);
+        transform.localScale = targetSize;
     }
 
     private void SetNormalSize()
     {
-        transform.localScale = normalSize;
-        isSmall = false;
+        if (isSmall)
+            StartCoroutine(ScaleUpTo(normalSize));
+        else
+            StartCoroutine(ScaleDownTo(normalSize));
         playerController.SetSpeedFactor(1f);
         playerController.SetJumpFactor(1f);
     }
 
     private void SetLargeSize()
     {
-        transform.localScale = largeSize;
+        StartCoroutine(ScaleUpTo(largeSize));
         isSmall = false;
         playerController.SetSpeedFactor(0.75f);
         playerController.SetJumpFactor(0.9f);
