@@ -312,6 +312,26 @@ public class GrapplingHook : ASkills
             }
     }
 
+    public override void SecondaryAction()
+    {
+        // Pas d'action secondaire pour le grappin
+    }
+
+    private void PullPlayerTowardsPoint()
+    {
+        if (playerRigidbody == null || !hasGrabbed)
+            return;
+
+        Vector3 directionToAnchor = (grapplePoint - playerTransform.position).normalized;
+        float pullForce = 10f; // Force de traction ajustable
+        playerRigidbody.AddForce(directionToAnchor * pullForce, ForceMode.Acceleration);
+    }
+
+    private void PullObjectTowardsPlayer()
+    {
+        // Implémentation si nécessaire
+    }
+
     private void OnDisable()
     {
         StopGrapple();

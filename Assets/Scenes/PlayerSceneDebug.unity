@@ -1016,7 +1016,8 @@ Transform:
   m_LocalPosition: {x: -4.91, y: 0.5, z: -4.05}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1850577858}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1391916296
@@ -1657,12 +1658,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1850577854}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.4, y: 0.48, z: -4.08}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.50999975, y: -0.02000001, z: -0.029999733}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1261837893}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1987810209
 GameObject:
@@ -1916,10 +1917,41 @@ MonoBehaviour:
   grapplingCooldown: 0.5
   ropeRenderer: {fileID: 1394716699}
   ropeOrigin: {fileID: 857008226}
-  maxRopeLength: 20
   ropeTensionForce: 10
+  ropeSpringStiffness: 50
+  ropeDamping: 0.8
+  gravityCounterFactor: 0.3
   ropeSegments: 15
   ropeWaveAmount: 0.5
+  pullForceMultiplier: 50
+  maxPullSpeed: 25
+  pullForceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  objectPullMultiplier: 30
+  pullStopDistance: 2
+  continuousPull: 1
 --- !u!1001 &2852259953058167370
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2017,4 +2049,3 @@ SceneRoots:
   - {fileID: 881601001}
   - {fileID: 1391916300}
   - {fileID: 2012498604}
-  - {fileID: 1850577858}
