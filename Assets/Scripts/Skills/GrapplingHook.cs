@@ -3,6 +3,7 @@ using UnityEngine;
 public class GrapplingHook : ASkills
 {
     [Header("Grappling Settings")]
+    [SerializeField] private GameObject grappleGun;
     [SerializeField] private Material grapplingPointMaterial;
     [SerializeField] [Range(0f, 30f)] private float hookRange = 15f;
     private Transform playerTransform;
@@ -46,6 +47,10 @@ public class GrapplingHook : ASkills
         if (playerController == null)
         {
             Debug.LogWarning("PlayerController n'est pas trouvé dans le GrapplingHook!");
+        }
+        if (grappleGun != null)
+        {
+            grappleGun.SetActive(false);
         }
         
         // Configurer le LineRenderer
@@ -284,6 +289,8 @@ public class GrapplingHook : ASkills
         if (!hasGrabbed)
             return;
 
+        if (playerController != null)
+            playerController.SetSpeedFactor(1f);
         hasGrabbed = false;
 
         // Désactiver la ligne de la corde
@@ -409,5 +416,26 @@ public class GrapplingHook : ASkills
                 Gizmos.DrawLine(playerTransform.position, grapplePoint);
             }
         }
+    }
+
+    public override ISkills ActivateSkill()
+    {
+        base.ActivateSkill();
+        if (grappleGun != null)
+        {
+            grappleGun.SetActive(true);
+        }
+        return this;
+    }
+
+    public override ISkills DeactivateSkill()
+    {
+        base.DeactivateSkill();
+        if (grappleGun != null)
+        {
+            grappleGun.SetActive(false);
+        }
+        StopGrapple();
+        return this;
     }
 }
