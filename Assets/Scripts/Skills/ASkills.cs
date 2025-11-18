@@ -4,6 +4,7 @@ public class ASkills : MonoBehaviour, ISkills
 {
     [SerializeField] private Mesh AppearanceMesh;
     [SerializeField] private Material AppearanceMaterial;
+    protected bool isActive = false;
 
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
@@ -33,17 +34,22 @@ public class ASkills : MonoBehaviour, ISkills
     public ISkills ActivateSkill()
     {
         ChangeAppearance();
+        isActive = true;
 
+        return this;
+    }
+
+    public ISkills DeactivateSkill()
+    {
+        isActive = false;
         return this;
     }
 
     public virtual void MainAction()
     {
-        Debug.Log("Main Action Executed");
     }
 
     public virtual void SecondaryAction()
     {
-        Debug.Log("Secondary Action Executed");
     }
 }

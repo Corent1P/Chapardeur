@@ -18,27 +18,36 @@ public class SkillManager : MonoBehaviour
 
         inputActions.PlayerControls.NextSkill.performed += ctx => NextSkill();
         inputActions.PlayerControls.PreviousSkill.performed += ctx => PreviousSkill();
+        EquipSkill(currentSkillIndex = 0);
     }
 
     private void OnDisable()
     {
         inputActions.PlayerControls.Disable();
+
+        inputActions.PlayerControls.NextSkill.performed -= ctx => NextSkill();
+        inputActions.PlayerControls.PreviousSkill.performed -= ctx => PreviousSkill();
+        if (currentSkill != null)
+        {
+            inputActions.PlayerControls.MainAction.performed -= ctx => currentSkill.MainAction();
+            inputActions.PlayerControls.SecondaryAction.performed -= ctx => currentSkill.SecondaryAction();
+        }
     }
 
-
-    private void Start()
-    {
-        EquipSkill(currentSkillIndex = 0);
-    }
 
     private void EquipSkill(int skillIndex)
     {
         if (skillIndex >= 0 && skillIndex < skillsList.Length)
         {
-            inputActions.PlayerControls.MainAction.performed -= ctx => currentSkill.MainAction();
-            inputActions.PlayerControls.SecondaryAction.performed -= ctx => currentSkill.SecondaryAction();
+            transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+            if (currentSkill != null)
+            {
+                inputActions.PlayerControls.MainAction.performed -= ctx => currentSkill.MainAction();
+                inputActions.PlayerControls.SecondaryAction.performed -= ctx => currentSkill.SecondaryAction();
+                currentSkill.DeactivateSkill();
+            }
             currentSkill = skillsList[skillIndex];
-            currentSkill.ChangeAppearance();
+            currentSkill.ActivateSkill();
             inputActions.PlayerControls.MainAction.performed += ctx => currentSkill.MainAction();
             inputActions.PlayerControls.SecondaryAction.performed += ctx => currentSkill.SecondaryAction();
         }

@@ -190,7 +190,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9670d35c0a9c74458b3fa5a54103011b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Skill1
-  AppearanceMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  AppearanceMesh: {fileID: 4300000, guid: 4f0eef2b4f2238a40ae0eaf749301ce6, type: 3}
   AppearanceMaterial: {fileID: 2100000, guid: 59dc9568aeea740018d337bd65dd92cb, type: 2}
 --- !u!114 &2214823498951494533
 MonoBehaviour:
