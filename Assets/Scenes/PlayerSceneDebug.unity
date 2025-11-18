@@ -2370,6 +2370,24 @@ MonoBehaviour:
   gravityCounterFactor: 0.3
   ropeSegments: 15
   ropeWaveAmount: 0.5
+--- !u!114 &2096117411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2096117389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11b2de1283b1d4d699169e4c0c687f67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SizeShifter
+  AppearanceMesh: {fileID: 4300000, guid: 03c8aeba68e321f47bd1c217cbec963a, type: 3}
+  AppearanceMaterial: {fileID: 2100000, guid: 337f4c356befd48b98f5018fb49ce570, type: 2}
+  smallSize: {x: 0.5, y: 0.5, z: 0.5}
+  normalSize: {x: 1, y: 1, z: 1}
+  largeSize: {x: 2, y: 2, z: 2}
+  shiftCooldown: 0.5
 --- !u!1001 &2852259953058167370
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2392,12 +2410,16 @@ PrefabInstance:
       objectReference: {fileID: 4300000, guid: 03c8aeba68e321f47bd1c217cbec963a, type: 3}
     - target: {fileID: 4934702317958397456, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
       propertyPath: skillsList.Array.size
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4934702317958397456, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
       propertyPath: 'skillsList.Array.data[3]'
       value: 
       objectReference: {fileID: 2096117401}
+    - target: {fileID: 4934702317958397456, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
+      propertyPath: 'skillsList.Array.data[4]'
+      value: 
+      objectReference: {fileID: 2096117411}
     - target: {fileID: 5775433684836835058, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 7.4
@@ -2448,6 +2470,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1108535939751489905, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2096117401}
+    - targetCorrespondingSourceObject: {fileID: 1108535939751489905, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2096117411}
   m_SourcePrefab: {fileID: 100100000, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

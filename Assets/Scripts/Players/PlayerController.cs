@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     private float speedFactor = 1f;
     public float jumpForce = 5f;
+    private float jumpFactor = 1f;
 
     [Header("Mouse")]
     public float mouseSensitivity = 2f;
@@ -68,7 +69,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isGrounded)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            rb.AddForce(Vector3.up * jumpForce * jumpFactor, ForceMode.Impulse);
             isGrounded = false;
         }
     }
@@ -101,5 +102,10 @@ public class PlayerController : MonoBehaviour
     public void SetSpeedFactor(float newSpeedFactor)
     {
         speedFactor = newSpeedFactor;
+    }
+
+    public void SetJumpFactor(float newJumpFactor)
+    {
+        jumpFactor = newJumpFactor;
     }
 }
