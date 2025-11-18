@@ -314,7 +314,17 @@ public class GrapplingHook : ASkills
 
     public override void SecondaryAction()
     {
+        if (transform.position.y >= grapplePoint.y) return;
         // Pas d'action secondaire pour le grappin
+        if (hasGrabbed)
+        {
+            Debug.Log("Secondary Action: Pulling player towards grapple point.");
+            // PullPlayerTowardsPoint();
+            // maxRopeLength = (grapplePoint - playerTransform.position).normalized.magnitude * 0.1f;
+            maxRopeLength *= 0.1f;
+            if (maxRopeLength < 0.1f)
+                maxRopeLength = 0.1f;
+        }
     }
 
     private void PullPlayerTowardsPoint()
@@ -322,8 +332,10 @@ public class GrapplingHook : ASkills
         if (playerRigidbody == null || !hasGrabbed)
             return;
 
+        Debug.Log("Pulling player towards grapple point...");
+
         Vector3 directionToAnchor = (grapplePoint - playerTransform.position).normalized;
-        float pullForce = 10f; // Force de traction ajustable
+        float pullForce = 100f; // Force de traction ajustable
         playerRigidbody.AddForce(directionToAnchor * pullForce, ForceMode.Acceleration);
     }
 
