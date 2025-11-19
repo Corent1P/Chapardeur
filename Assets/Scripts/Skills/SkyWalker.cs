@@ -122,10 +122,22 @@ public class SkyWalker : ASkills
     {
         if (!isActive) return;
 
-        if (isAgainstGlass != status)
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1f) && status)
         {
-            isAgainstGlass = status;
-            OnAgainstGlassChanged();
+            if (hit.collider.CompareTag("Glass"))
+            {
+                if (isAgainstGlass != status)
+                {
+                    isAgainstGlass = status;
+                    OnAgainstGlassChanged();
+                }
+            }
+        } else if (!status) {
+            if (isAgainstGlass != status)
+            {
+                isAgainstGlass = status;
+                OnAgainstGlassChanged();
+            }
         }
     }
 
