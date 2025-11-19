@@ -41,9 +41,9 @@ Material:
     - _RevealSoftness: 0.2
     - _Smoothness: 0.471
     m_Colors:
-    - _BaseColor: {r: 0.11307406, g: 0.7264151, b: 0.39607844, a: 1}
+    - _BaseColor: {r: 0.44705883, g: 0.40392157, b: 0.69411767, a: 1}
     - _Color: {r: 0.8396226, g: 0.1544589, b: 0.1544589, a: 1}
     - _LightDir: {r: -0, g: -0, b: -1, a: 0}
-    - _LightPos: {r: 5.85, g: 1.72, b: 1.37, a: 0}
+    - _LightPos: {r: 5.85, g: 2.21, b: 1.37, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
