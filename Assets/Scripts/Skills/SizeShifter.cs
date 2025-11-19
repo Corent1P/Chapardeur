@@ -9,6 +9,7 @@ public class SizeShifter : ASkills
     [SerializeField] private float shiftCooldown = 0.5f;
     private float lastShiftTime = -Mathf.Infinity;
     private bool isSmall = false;
+    private bool isLocked = false;
     private PlayerController playerController;
 
     private void Start()
@@ -33,6 +34,7 @@ public class SizeShifter : ASkills
 
     public override void MainAction()
     {
+        if (isLocked) return;
         if (lastShiftTime > 0) return;
 
         if (isSmall)
@@ -44,6 +46,7 @@ public class SizeShifter : ASkills
 
     public override void SecondaryAction()
     {
+        if (isLocked) return;
         if (lastShiftTime > 0) return;
 
         if (transform.localScale != normalSize)
@@ -100,6 +103,18 @@ public class SizeShifter : ASkills
         isSmall = false;
         playerController.SetSpeedFactor(0.75f);
         playerController.SetJumpFactor(0.9f);
+    }
+
+    public void LockSize()
+    {
+        if (!isActive) return;
+        isLocked = true;
+    }
+
+    public void UnlockSize()
+    {
+        if (!isActive) return;
+        isLocked = false;
     }
 
     public override ISkills ActivateSkill()
