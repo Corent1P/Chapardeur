@@ -5,7 +5,13 @@ using UnityEditor.Experimental.GraphView;
 public class SkyWalker : ASkills
 {
     [SerializeField] private float backwardForcePush = 5f;
+    [Header("Glass Movement")]
+    [SerializeField] private float hopForce = 10f;
+    [SerializeField] private float hopDuration = 0.1f;
+    [SerializeField] private float hopCooldown = 0.2f;
+
     private bool isAgainstGlass = false;
+    private bool isHopping = false;
     private bool isDetaching = false;
     private PlayerController playerController;
     private Rigidbody playerRigidbody;
@@ -24,6 +30,7 @@ public class SkyWalker : ASkills
     private void OnDisable()
     {
         inputActions.PlayerControls.Disable();
+        isHopping = false;
     }
 
     private void Start()
@@ -48,10 +55,37 @@ public class SkyWalker : ASkills
         if (!isActive) return;
         if (!isAgainstGlass) return;
 
-        // Keep the player stuck to the glass surface
+        if (isHopping) return;
+
+        if (moveInput.sqrMagnitude > 0.01f)
+        {
+            StartCoroutine(HopRoutine());
+        }
+        else
+        {
+            playerRigidbody.linearVelocity = Vector3.zero;
+        }
+    }
+
+    private IEnumerator HopRoutine()
+    {
+        isHopping = true;
+
         Vector3 moveDirection = (transform.up * moveInput.y + transform.right * moveInput.x).normalized;
         moveDirection.z = 0;
-        playerRigidbody.linearVelocity = moveDirection * (playerController.moveSpeed * 0.5f);
+
+        playerRigidbody.AddForce(moveDirection * hopForce, ForceMode.Impulse);
+
+        yield return new WaitForSeconds(hopDuration);
+
+        if (isAgainstGlass)
+        {
+            playerRigidbody.linearVelocity = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(hopCooldown);
+
+        isHopping = false;
     }
 
     public override void MainAction()
