@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Grappling Point
+  - Glass
   layers:
   - Default
   - TransparentFX
