@@ -184,7 +184,7 @@ public class GrapplingHook : ASkills
         if (playerTransform == null) return;
 
         // Trouver tous les points de grappin dans la scène
-        GameObject[] grapplingPoints = GameObject.FindGameObjectsWithTag("Grappling Point");
+        GameObject[] grapplingPoints = GameObject.FindGameObjectsWithTag("MimeObject");
         
         GameObject bestPoint = null;
         float minDistance = float.MaxValue;

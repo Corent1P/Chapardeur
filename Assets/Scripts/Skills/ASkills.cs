@@ -7,7 +7,7 @@ public class ASkills : MonoBehaviour, ISkills
     protected bool isActive = false;
 
     private MeshFilter meshFilter;
-    private MeshRenderer meshRenderer;
+    protected MeshRenderer meshRenderer;
     private MeshCollider meshCollider;
 
     private void Awake()
