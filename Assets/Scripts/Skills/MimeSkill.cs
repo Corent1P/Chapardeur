@@ -1,5 +1,8 @@
+using System.Collections;
 using System.Linq;
+using Mono.Cecil.Cil;
 using UnityEngine;
+using UnityEngine.VFX;
 
 
 public class MimeSkill : ASkills
@@ -10,14 +13,28 @@ public class MimeSkill : ASkills
     [SerializeField] private float mimeRange = 3f;
     private Transform playerTransform;
     [SerializeField][Range(0f, 180f)] private float maxAngle = 60f;
+    [SerializeField] private VisualEffect morphVFX;
     [SerializeField] private GameObject[] MimeObjects;
 
+    [Header("Scale Animation Settings")]
+    [SerializeField] private float scaleAnimationDuration = 0.3f;
+    [SerializeField] private AnimationCurve scaleCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     private GameObject currentSelectedObject;
+    private string currentMorphObjectName;
+
+    private float morphCooldownTime = 2f;
+    private float currentCooldownTime = 0f;
     private Mesh basePlayerMesh;
     private Material basePlayerMaterial;
     private Vector3 baseplayerScale;
     private Material[] originalMaterials;
     private Material[] updatedMaterials;
+
+    private void Start()
+    {
+        morphVFX = GetComponentInChildren<VisualEffect>();
+        morphVFX.Stop();
+    }
 
     private void Update()
     {
@@ -25,6 +42,8 @@ public class MimeSkill : ASkills
             return;
         else
             FindNearestMimeObject();
+        if (currentCooldownTime > 0f)
+            currentCooldownTime -= Time.deltaTime;
     }
     public override void MainAction()
     {
@@ -33,7 +52,6 @@ public class MimeSkill : ASkills
 
     public override void SecondaryAction()
     {
-        Debug.Log("Resetting player morph");
         ResetPlayerMorph();
     }
 
@@ -133,12 +151,14 @@ public class MimeSkill : ASkills
 
     private void MorphPlayer(GameObject obj)
     {
-        if (obj == null)
+        if (obj == null || currentCooldownTime > 0f)
+            return;
+        if (currentMorphObjectName != null && obj.name.Contains(currentMorphObjectName))
             return;
         string objName = obj.name;
         foreach (GameObject mimeObj in MimeObjects)
         {
-            if (mimeObj.name == objName)
+            if (objName.Contains(mimeObj.name))
             {
                 Mesh sharedMesh = mimeObj.GetComponent<MeshFilter>().sharedMesh;
                 MeshRenderer objMeshRenderer = mimeObj.GetComponent<MeshRenderer>();
@@ -149,11 +169,15 @@ public class MimeSkill : ASkills
                     MeshCollider playerMeshCollider = GetComponent<MeshCollider>();
                     if (playerMeshFilter != null && playerMeshRenderer != null && playerMeshCollider != null)
                     {
+                        currentMorphObjectName = mimeObj.name;
+                        morphVFX.Play();
                         playerMeshFilter.sharedMesh = sharedMesh;
                         playerMeshRenderer.material = objMeshRenderer.sharedMaterial;
                         playerMeshCollider.sharedMesh = sharedMesh;
-                        Vector3 objScale = mimeObj.transform.localScale;
-                        transform.localScale = objScale;
+                        transform.localScale = mimeObj.transform.localScale;
+                        currentCooldownTime = morphCooldownTime;
+
+                        StartCoroutine(AnimateScale(mimeObj.transform.localScale));
                     }
                 }
                 break;
@@ -163,10 +187,56 @@ public class MimeSkill : ASkills
 
     private void ResetPlayerMorph()
     {
+        if (currentMorphObjectName == null)
+            return;
+        morphVFX.Play();
         GetComponent<MeshFilter>().mesh = basePlayerMesh;
         GetComponent<MeshRenderer>().material = basePlayerMaterial;
         GetComponent<MeshCollider>().sharedMesh = basePlayerMesh;
         transform.localScale = baseplayerScale;
+        currentMorphObjectName = null;
+        StartCoroutine(AnimateScale(baseplayerScale));
+    }
+
+    private IEnumerator AnimateScale(Vector3 targetScale)
+    {
+        Vector3 startScale = Vector3.zero;
+        float elapsed = 0f;
+
+        // Compenser le scale du VFX pour qu'il reste à taille normale
+        if (morphVFX != null && morphVFX.transform.parent == transform)
+        {
+            morphVFX.transform.SetParent(null); // Détacher temporairement
+        }
+
+        while (elapsed < scaleAnimationDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / scaleAnimationDuration;
+            float curveValue = scaleCurve.Evaluate(t);
+
+            Vector3 currentScale = Vector3.Lerp(startScale, targetScale, curveValue);
+            transform.localScale = currentScale;
+
+            // Garder le VFX à la position du player
+            if (morphVFX != null)
+            {
+                morphVFX.transform.position = transform.position;
+            }
+
+            yield return null;
+        }
+
+        transform.localScale = targetScale;
+
+        // Réattacher le VFX au player
+        if (morphVFX != null)
+        {
+            morphVFX.transform.SetParent(transform);
+            morphVFX.transform.localPosition = Vector3.zero;
+            morphVFX.transform.localScale = Vector3.one;
+        }
+
     }
 
     private void OnDrawGizmos()
@@ -224,4 +294,10 @@ public class MimeSkill : ASkills
         return this;
     }
 
+    public override ISkills DeactivateSkill()
+    {
+        base.DeactivateSkill();
+        morphVFX.Stop();
+        return this;
+    }
 }
