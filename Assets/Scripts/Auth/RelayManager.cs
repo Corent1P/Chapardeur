@@ -1,14 +1,15 @@
-using UnityEngine;
-using Unity.Services.Relay;
-using Unity.Services.Relay.Models;
-using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
-using Unity.Services.Lobbies;
-using Unity.Services.Lobbies.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
-using System;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Unity.Services.Core;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using UnityEngine;
 
 public class RelayManager : MonoBehaviour
 {
@@ -22,7 +23,7 @@ public class RelayManager : MonoBehaviour
     public TextMeshProUGUI mapNameText;
 
     [Header("Game Settings")]
-    public string gameSceneName = "Game"; // Nom de votre scène de jeu
+    public string gameSceneName = "Demo"; // Nom de votre scène de jeu
 
     private const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
     private float lobbyUpdateTimer;
@@ -32,12 +33,18 @@ public class RelayManager : MonoBehaviour
     private Tuple<string, string>[] listMaps; // (MapID, MapName)
     private int currentMapIndex = 0;
 
-    private void Start()
+    private async void Start()
     {
+        // Inicializar Unity Services
+        if (UnityServices.State != ServicesInitializationState.Initialized)
+        {
+            await UnityServices.InitializeAsync();
+        }
+
         listMaps = new Tuple<string, string>[]
         {
-            new Tuple<string, string>("Game", "Mansion"),
-            new Tuple<string, string>("Game-Procedural", "Random")
+        new Tuple<string, string>("Demo", "Mansion"), // Cambié "Game" por "Demo"
+        new Tuple<string, string>("Game-Procedural", "Random")
         };
 
         mapNameText.text = listMaps[0].Item2;
