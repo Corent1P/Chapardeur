@@ -9,7 +9,6 @@ public class SuperGlasses : ASkills
     [SerializeField] private float glassesCooldown = 0.5f;
     [SerializeField] private Reveal tmpObject;
     [SerializeField] private AHackingGame[] hackingGameList;
-    [SerializeField] private Transform miniGameContainer;
     private float lastGlassesTime = -Mathf.Infinity;
 
     private bool isGlassesOn = false;
@@ -46,7 +45,7 @@ public class SuperGlasses : ASkills
     {
         // Implementation for SuperGlasses secondary action
         Debug.Log("Is element revealed: " + tmpObject.GetIsIlluminated());
-        if (!tmpObject.GetIsIlluminated())
+        if (tmpObject.GetIsIlluminated())
         {
             Debug.Log("Element is not revealed, starting lockpicking mini-game.");
             StartLockpicking(2); // Exemple de difficulté
@@ -59,23 +58,18 @@ public class SuperGlasses : ASkills
 
     public void StartLockpicking(int difficulty)
     {
-        // 1. Choisir un jeu aléatoire
         AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
 
-        // 2. Instancier le jeu dans l'UI
-        AHackingGame instance = Instantiate(selectedPrefab, miniGameContainer.transform);
-
-        // 3. Initialiser et lancer
-        instance.Initialize(difficulty, 10f); // Exemple de timeLimit de 10 secondes
-        instance.BeginGame(
+        selectedPrefab.Initialize(difficulty, 10f); // Exemple de timeLimit de 10 secondes
+        selectedPrefab.BeginGame(
             onWin: () => {
                 Debug.Log("Coffre ouvert !");
-                Destroy(instance.gameObject);
+                Destroy(selectedPrefab.gameObject);
                 // Donner le loot au joueur
             },
             onLose: () => {
                 Debug.Log("Échec, le garde a entendu !");
-                Destroy(instance.gameObject);
+                Destroy(selectedPrefab.gameObject);
                 // Alerter les gardes
             }
         );
