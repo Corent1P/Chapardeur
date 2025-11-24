@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Grappling Point
   - MimeObject
+  - Glass
   layers:
   - Default
   - TransparentFX
