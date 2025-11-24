@@ -18,9 +18,13 @@ Shader "Custom/RevealLight"
     
     SubShader
     {
-        Tags { "RenderType" = "Transparent" "Queue" = "Transparent" }
+        Tags { "RenderType" = "Transparent" "Queue" = "Transparent" "ShadowCastingMode" = "Off" }
         LOD 100
         Blend SrcAlpha OneMinusSrcAlpha
+        
+        // Désactiver les ombres
+        ZWrite Off
+        Cull Off
         
         Pass
         {
@@ -50,6 +54,8 @@ Shader "Custom/RevealLight"
             struct appdata
             {
                 float4 vertex : POSITION;
+                float3 normal : NORMAL;
+                float4 tangent : TANGENT;
                 float2 uv : TEXCOORD0;
             };
             
@@ -58,6 +64,9 @@ Shader "Custom/RevealLight"
                 float2 uv : TEXCOORD0;
                 float4 pos : SV_POSITION;
                 float3 worldPos : TEXCOORD1;
+                float3 worldNormal : TEXCOORD2;
+                float3 worldTangent : TEXCOORD3;
+                float3 worldBitangent : TEXCOORD4;
             };
             
             v2f vert(appdata v)
@@ -66,6 +75,9 @@ Shader "Custom/RevealLight"
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.worldNormal = normalize(mul((float3x3)unity_ObjectToWorld, v.normal));
+                o.worldTangent = normalize(mul((float3x3)unity_ObjectToWorld, v.tangent.xyz));
+                o.worldBitangent = cross(o.worldNormal, o.worldTangent) * v.tangent.w;
                 return o;
             }
             
@@ -105,12 +117,20 @@ Shader "Custom/RevealLight"
                 float distFalloff = 1.0 / (1.0 + dist * dist * _DistanceAttenuation);
                 reveal *= distFalloff;
                 
-                // 7. Appliquer la révélation
-                finalColor.rgb *= reveal;
+                // 7. Éclairage standard pour voir les détails
+                float3 normal = normalize(i.worldNormal);
+                float3 lightDirNorm = normalize(toLight);
+                float ndotl = max(0.0, dot(normal, lightDirNorm));
+                
+                // Éclairage diffus + un peu d'ambient pour voir même sans lumière directe
+                float lighting = ndotl * 0.7 + 0.3;
+                
+                // 8. Appliquer la révélation et l'éclairage
+                finalColor.rgb *= reveal * lighting;
                 finalColor.a = texColor.a * reveal;
                 
-                // 8. Emission légère pour voir l'objet même dans le noir
-                finalColor.rgb += finalColor.rgb * reveal * 0.3;
+                // 9. Emission légère pour voir l'objet même dans le noir
+                finalColor.rgb += finalColor.rgb * reveal * 0.2;
                 
                 return finalColor;
             }

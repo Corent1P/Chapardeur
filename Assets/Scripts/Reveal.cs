@@ -7,7 +7,7 @@ public class Reveal : MonoBehaviour
     [SerializeField] private Light revealLight;
     
     [Header("Reveal Settings")]
-    [SerializeField] private float revealPower = 10f;
+    [SerializeField] private float revealPower = 5f;
     [SerializeField] private float revealSoftness = 0.2f;
     [SerializeField] private float distanceAttenuation = 0f;
 
@@ -40,6 +40,21 @@ public class Reveal : MonoBehaviour
 
         revealMaterial.SetFloat("_LightEnabled", 1f);
         
+        // // Calculer si l'objet est éclairé
+        // Vector3 toLight = (revealLight.transform.position - transform.position).normalized;
+        // Vector3 lightDir = -revealLight.transform.forward;
+        // float dotProduct = Vector3.Dot(toLight, lightDir);
+        // float coneAngle = Mathf.Cos(Mathf.Deg2Rad * revealLight.spotAngle * 0.5f);
+        
+        // // Calculer la distance
+        // float dist = Vector3.Distance(revealLight.transform.position, transform.position);
+        // float distFalloff = 1f / (1f + dist * dist * distanceAttenuation);
+        
+        // // Déterminer si éclairé
+        // float revealFactor = Mathf.Pow(Mathf.Clamp01((dotProduct - coneAngle) * revealPower), revealPower) * distFalloff;
+        // isIlluminated = revealFactor > 0.01f; // Seuil de 1% pour éviter les artefacts
+        // lastRevealFactor = revealFactor;
+        
         // Mettre à jour les propriétés du shader
         revealMaterial.SetVector("_LightPos", revealLight.transform.position);
         revealMaterial.SetVector("_LightDir", -revealLight.transform.forward);
@@ -47,5 +62,21 @@ public class Reveal : MonoBehaviour
         revealMaterial.SetFloat("_RevealPower", revealPower);
         revealMaterial.SetFloat("_RevealSoftness", revealSoftness);
         revealMaterial.SetFloat("_DistanceAttenuation", distanceAttenuation);
+    }
+
+    public bool GetIsIlluminated()
+    {
+        Vector3 toLight = (revealLight.transform.position - transform.position).normalized;
+        Vector3 lightDir = -revealLight.transform.forward;
+        float dotProduct = Vector3.Dot(toLight, lightDir);
+        float coneAngle = Mathf.Cos(Mathf.Deg2Rad * revealLight.spotAngle * 0.5f);
+        
+        // Calculer la distance
+        float dist = Vector3.Distance(revealLight.transform.position, transform.position);
+        float distFalloff = 1f / (1f + dist * dist * distanceAttenuation);
+        
+        // Déterminer si éclairé
+        float revealFactor = Mathf.Pow(Mathf.Clamp01((dotProduct - coneAngle) * revealPower), revealPower) * distFalloff;
+        return revealFactor > 0.01f; // Seuil de 1% pour éviter les artefacts
     }
 }

@@ -7,6 +7,7 @@ public class SuperGlasses : ASkills
     [SerializeField] private GameObject superGlassesObject;
     [SerializeField] private Light superGlassesLight;
     [SerializeField] private float glassesCooldown = 0.5f;
+    [SerializeField] private Reveal tmpObject;
     private float lastGlassesTime = -Mathf.Infinity;
 
     private bool isGlassesOn = false;
@@ -42,6 +43,7 @@ public class SuperGlasses : ASkills
     public override void SecondaryAction()
     {
         // Implementation for SuperGlasses secondary action
+        Debug.Log("Is element revealed: " + tmpObject.GetIsIlluminated());
     }
 
     private void ToggleGlasses()
