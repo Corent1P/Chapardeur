@@ -23,6 +23,7 @@
     "com.unity.searcher": "4.9.2",
     "com.unity.services.cloudsave": "3.2.2",
     "com.unity.services.friends": "1.1.1",
+    "com.unity.services.leaderboards": "2.3.3",
     "com.unity.services.lobby": "1.2.2",
     "com.unity.services.relay": "1.0.5",
     "com.unity.services.vivox": "16.7.0",
