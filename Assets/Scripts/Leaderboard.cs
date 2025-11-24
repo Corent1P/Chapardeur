@@ -9,10 +9,9 @@ public class Leaderboard : MonoBehaviour
         try
         {
             AddPlayerScoreOptions options = new AddPlayerScoreOptions();
-            options.Metadata = "Img_20"; // Optional: add metadata if needed
 
 
-            LeaderboardEntry entry = await LeaderboardsService.Instance.AddPlayerScoreAsync(leaderboardId, score, options);
+            LeaderboardEntry entry = await LeaderboardsService.Instance.AddPlayerScoreAsync(leaderboardId, score);
 
             Debug.Log($"Score submitted successfully! Player ID: {entry.PlayerId} ({entry.PlayerName}), Score: {entry.Score}");
         }
