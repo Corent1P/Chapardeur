@@ -24,7 +24,7 @@ public class RelayManager : MonoBehaviour
     public TextMeshProUGUI mapNameText;
 
     [Header("Game Settings")]
-    public string gameSceneName = "Game"; // Nom de votre scène de jeu
+    public string gameSceneName = "Game-Leaderboards"; // Nom de votre scène de jeu
 
     private const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
     private float lobbyUpdateTimer;
@@ -38,6 +38,8 @@ public class RelayManager : MonoBehaviour
     {
         listMaps = new Tuple<string, string>[]
         {
+            //                       Game Scene Name,   Display Name
+            new Tuple<string, string>("Game-Leaderboards", "Leaderboards"),
             new Tuple<string, string>("Game", "Mansion"),
             new Tuple<string, string>("Game-Procedural", "Random")
         };
