@@ -10,7 +10,7 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject usernameMenu;
     [SerializeField] private GameObject authMenu;
 
-    private void Start()
+    private void Awake()
     {
         ShowMainMenu();
     }

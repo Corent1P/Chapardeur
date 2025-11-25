@@ -110,7 +110,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void CreateLobby()
+    public void CreateLobby()
     {
         if (string.IsNullOrEmpty(inputFieldName.text))
             CreateLobby("Default Lobby", maxPlayers, relayManager.GetCurrentMapName());
@@ -195,7 +195,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void JoinLobby(Lobby lobby)
+    public void JoinLobby(Lobby lobby)
     {
         JoinLobbyById(lobby.Id);
     }

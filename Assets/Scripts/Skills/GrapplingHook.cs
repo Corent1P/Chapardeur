@@ -15,7 +15,7 @@ public class GrapplingHook : ASkills
     [SerializeField] private LineRenderer ropeRenderer;
     [SerializeField] private Transform ropeOrigin;
     private float maxRopeLength;
-    [SerializeField] private float ropeTensionForce = 30f;
+    // [SerializeField] private float ropeTensionForce = 30f;
     [SerializeField] private float ropeSpringStiffness = 50f;
     [SerializeField] private float ropeDamping = 0.8f;
     [SerializeField] private float gravityCounterFactor = 0.3f;
