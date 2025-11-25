@@ -12,6 +12,8 @@ public class SuperGlasses : ASkills
     private float lastGlassesTime = -Mathf.Infinity;
 
     private bool isGlassesOn = false;
+    private bool isHackingGameActive = false;
+    private Rigidbody playerRigidbody;
 
     private void Start()
     {
@@ -22,6 +24,11 @@ public class SuperGlasses : ASkills
         if (superGlassesLight != null)
         {
             superGlassesLight.enabled = false;
+        }
+        playerRigidbody = GetComponentInParent<Rigidbody>();
+        if (playerRigidbody == null)
+        {
+            Debug.LogWarning("Rigidbody component not found on PlayerController.");
         }
     }
 
@@ -43,6 +50,7 @@ public class SuperGlasses : ASkills
 
     public override void SecondaryAction()
     {
+        if (isGlassesOn == false) return;
         // Implementation for SuperGlasses secondary action
         Debug.Log("Is element revealed: " + tmpObject.GetIsIlluminated());
         if (tmpObject.GetIsIlluminated())
@@ -60,14 +68,18 @@ public class SuperGlasses : ASkills
     {
         AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
 
+        isHackingGameActive = true;
+        playerRigidbody.linearVelocity = Vector3.zero;
         selectedPrefab.Initialize(difficulty, 100f); // Exemple de timeLimit de 10 secondes
         selectedPrefab.BeginGame(
             onWin: () => {
                 Debug.Log("Coffre ouvert !");
+                isHackingGameActive = false;
                 // Donner le loot au joueur
             },
             onLose: () => {
                 Debug.Log("Échec, le garde a entendu !");
+                isHackingGameActive = false;
                 // Alerter les gardes
             }
         );
@@ -75,6 +87,7 @@ public class SuperGlasses : ASkills
 
     private void ToggleGlasses()
     {
+        if (isHackingGameActive) return;
         isGlassesOn = !isGlassesOn;
         StartCoroutine(MoveGlasses(isGlassesOn ? 0f : -90f));
     }
