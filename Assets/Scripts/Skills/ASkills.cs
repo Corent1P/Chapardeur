@@ -5,6 +5,7 @@ public class ASkills : MonoBehaviour, ISkills
     [SerializeField] private Mesh AppearanceMesh;
     [SerializeField] private Material AppearanceMaterial;
     protected bool isActive = false;
+    protected bool isSkillLocked = false;
 
     private MeshFilter meshFilter;
     protected MeshRenderer meshRenderer;
@@ -31,6 +32,12 @@ public class ASkills : MonoBehaviour, ISkills
                 meshCollider.sharedMesh = AppearanceMesh;
         }
     }
+
+    public bool IsSkillLocked()
+    {
+        return isSkillLocked;
+    }
+
     public virtual ISkills ActivateSkill()
     {
         ChangeAppearance();

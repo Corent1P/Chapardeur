@@ -68,6 +68,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Leave",
+                    "type": "Button",
+                    "id": "044aab5e-bad1-4fe2-a02b-c1e1105af2ee",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -266,6 +275,12 @@
                     "processors": "",
                     "groups": "",
                     "action": "SecondaryAction",
+                    "id": "cc390cc7-01bd-49c4-bc5d-656cd3dd8065",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Leave",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

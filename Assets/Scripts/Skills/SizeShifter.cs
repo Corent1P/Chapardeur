@@ -109,25 +109,31 @@ public class SizeShifter : ASkills
     {
         if (!isActive) return;
         isLocked = true;
+        isSkillLocked = true;
     }
 
     public void UnlockSize()
     {
         if (!isActive) return;
         isLocked = false;
+        isSkillLocked = false;
     }
 
     public override ISkills ActivateSkill()
     {
         base.ActivateSkill();
-        SetNormalSize();
+        playerController.SetSpeedFactor(1f);
+        playerController.SetJumpFactor(1f);
+        transform.localScale = normalSize;
         return this;
     }
 
     public override ISkills DeactivateSkill()
     {
         base.DeactivateSkill();
-        SetNormalSize();
+        playerController.SetSpeedFactor(1f);
+        playerController.SetJumpFactor(1f);
+        transform.localScale = normalSize;
         return this;
     }
 }
