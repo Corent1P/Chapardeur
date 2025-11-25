@@ -69,17 +69,20 @@ public class SuperGlasses : ASkills
         AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
 
         isHackingGameActive = true;
+        isSkillLocked = true;
         playerRigidbody.linearVelocity = Vector3.zero;
         selectedPrefab.Initialize(difficulty, 100f); // Exemple de timeLimit de 10 secondes
         selectedPrefab.BeginGame(
             onWin: () => {
                 Debug.Log("Coffre ouvert !");
                 isHackingGameActive = false;
+                isSkillLocked = false;
                 // Donner le loot au joueur
             },
             onLose: () => {
                 Debug.Log("Échec, le garde a entendu !");
                 isHackingGameActive = false;
+                isSkillLocked = false;
                 // Alerter les gardes
             }
         );

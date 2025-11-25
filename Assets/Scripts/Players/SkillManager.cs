@@ -55,12 +55,14 @@ public class SkillManager : MonoBehaviour
 
     private void NextSkill()
     {
+        if (currentSkill.IsSkillLocked()) return;
         currentSkillIndex = (currentSkillIndex + 1) % skillsList.Length;
         EquipSkill(currentSkillIndex);
     }
 
     private void PreviousSkill()
     {
+        if (currentSkill.IsSkillLocked()) return;
         currentSkillIndex = (currentSkillIndex - 1 + skillsList.Length) % skillsList.Length;
         EquipSkill(currentSkillIndex);
     }
