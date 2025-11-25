@@ -64,6 +64,8 @@ public abstract class AHackingGame : MonoBehaviour, IHackingGame
         Debug.Log("Serrure crochetée !");
         OnWinCallback?.Invoke();
         // Optionnel : Animation de victoire ici
+
+        ResetVisuals();
     }
 
     protected void FailGame()
@@ -73,6 +75,8 @@ public abstract class AHackingGame : MonoBehaviour, IHackingGame
         Debug.Log("Crochet cassé !");
         OnLoseCallback?.Invoke();
         // Optionnel : Animation de défaite ici
+
+        ResetVisuals();
     }
 
     // 4. Méthodes Abstraites (Les enfants DOIVENT les implémenter)

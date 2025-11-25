@@ -60,16 +60,14 @@ public class SuperGlasses : ASkills
     {
         AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
 
-        selectedPrefab.Initialize(difficulty, 10f); // Exemple de timeLimit de 10 secondes
+        selectedPrefab.Initialize(difficulty, 100f); // Exemple de timeLimit de 10 secondes
         selectedPrefab.BeginGame(
             onWin: () => {
                 Debug.Log("Coffre ouvert !");
-                Destroy(selectedPrefab.gameObject);
                 // Donner le loot au joueur
             },
             onLose: () => {
                 Debug.Log("Échec, le garde a entendu !");
-                Destroy(selectedPrefab.gameObject);
                 // Alerter les gardes
             }
         );
