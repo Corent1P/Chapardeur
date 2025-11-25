@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Grappling Point
   - Glass
+  - Hiding Element
   layers:
   - Default
   - TransparentFX

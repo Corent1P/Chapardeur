@@ -2934,7 +2934,7 @@ GameObject:
   - component: {fileID: 1530654163}
   m_Layer: 0
   m_Name: Cube (3)
-  m_TagString: Untagged
+  m_TagString: Hiding Element
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4133,6 +4133,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Prop_GoldBar_01
       objectReference: {fileID: 0}
+    - target: {fileID: 150096, guid: e2f3d2fd53001e647bf9d788ec6d25fb, type: 3}
+      propertyPath: m_TagString
+      value: Hiding Element
+      objectReference: {fileID: 0}
     - target: {fileID: 427198, guid: e2f3d2fd53001e647bf9d788ec6d25fb, type: 3}
       propertyPath: m_LocalScale.x
       value: 5
@@ -4317,9 +4321,10 @@ MonoBehaviour:
   superGlassesObject: {fileID: 796766278}
   superGlassesLight: {fileID: 1877396309}
   glassesCooldown: 0.5
-  tmpObject: {fileID: 2059501733}
   hackingGameList:
   - {fileID: 2096117435}
+  selectionRange: 10
+  maxAngle: 20
 --- !u!114 &2096117435
 MonoBehaviour:
   m_ObjectHideFlags: 0
