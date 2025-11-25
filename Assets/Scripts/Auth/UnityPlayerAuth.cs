@@ -78,7 +78,7 @@ public class UnityPlayerAuth : MonoBehaviour
             var name = await AuthenticationService.Instance.GetPlayerNameAsync();
             
             OnSingedIn?.Invoke(playerInfo, name);
-            menuManager?.ShowPlayMenu();
+            menuManager?.ShowPlayOnlineMenu();
         }
         catch (Exception ex)
         {
@@ -132,7 +132,7 @@ public class UnityPlayerAuth : MonoBehaviour
 
             OnSingedIn?.Invoke(playerInfo, name);
             Debug.Log("Sign In Successful");
-            menuManager?.ShowPlayMenu();
+            menuManager?.ShowPlayOnlineMenu();
         }
         catch (AuthenticationException ex)
         {   

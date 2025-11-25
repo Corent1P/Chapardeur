@@ -136,6 +136,12 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    public void SetMaxPlayer(int value)
+    {
+        maxPlayers = value;
+        Debug.Log("Max players set to: " + maxPlayers);
+    }
+
     private List<Lobby> cachedLobbies = new List<Lobby>();
 
     public async void ListLobbies()
