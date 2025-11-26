@@ -13,28 +13,39 @@ public class PlayerController : NetworkBehaviour
     private float jumpFactor = 1f;
 
     private Rigidbody rb;
-    private PlayerInputs inputActions;
+    private PlayerInput inputActions;
     private Vector2 moveInput;
     private bool isGrounded = true;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        inputActions = new PlayerInputs();
+        inputActions = GetComponentInParent<PlayerInput>();
+
     }
 
     private void OnEnable()
     {
-        inputActions.PlayerControls.Enable();
-        inputActions.PlayerControls.Move.performed += ctx => moveInput = -ctx.ReadValue<Vector2>();
-        inputActions.PlayerControls.Move.canceled += ctx => moveInput = Vector2.zero;
+        // inputActions.PlayerControls.Enable();
+        InputAction moveAction = inputActions.actions["Move"];
+        InputAction jumpAction = inputActions.actions["Jump"];
 
-        inputActions.PlayerControls.Jump.performed += ctx => Jump();
+        moveAction.performed += ctx => moveInput = -ctx.ReadValue<Vector2>();
+        moveAction.canceled += ctx => moveInput = Vector2.zero;
+
+        jumpAction.performed += ctx => Jump();
     }
 
     private void OnDisable()
     {
-        inputActions.PlayerControls.Disable();
+        // inputActions.PlayerControls.Disable();
+        InputAction moveAction = inputActions.actions["Move"];
+        InputAction jumpAction = inputActions.actions["Jump"];
+
+        moveAction.performed -= ctx => moveInput = -ctx.ReadValue<Vector2>();
+        moveAction.canceled -= ctx => moveInput = Vector2.zero;
+
+        jumpAction.performed -= ctx => Jump();
     }
 
     private void FixedUpdate()

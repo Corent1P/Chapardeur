@@ -222,6 +222,7 @@ GameObject:
   - component: {fileID: 7241386218014610551}
   - component: {fileID: 6905869759966016907}
   - component: {fileID: 2530948444610960395}
+  - component: {fileID: 6356008046402965441}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -393,8 +394,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   moveSpeed: 5
   jumpForce: 5
-  mouseSensitivity: 2
-  cameraTransform: {fileID: 0}
 --- !u!114 &4934702317958397456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -519,6 +518,68 @@ MonoBehaviour:
   - -45
   - 70
   alignmentSpeed: 100
+--- !u!114 &6356008046402965441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108535939751489905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: f9d2c27d533a34dfe96bdb4fcbae0503, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 72b7fb5b-6710-407e-957f-e3b3dfb8f00d
+    m_ActionName: 'PlayerControls/Move[/XboxGamepadMacOSNative/leftStick,/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f8324406-e817-4db6-91cd-4e845c057e93
+    m_ActionName: 'PlayerControls/Look[/XboxGamepadMacOSNative/rightStick,/Mouse/delta]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 39619196-6b7c-4fb5-97ee-9c7d1f5f4818
+    m_ActionName: 'PlayerControls/Jump[/XboxGamepadMacOSNative/buttonSouth,/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2739c5c8-9c75-49ac-8194-80581abe4268
+    m_ActionName: 'PlayerControls/PreviousSkill[/XboxGamepadMacOSNative/leftShoulder,/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 7b44e9e6-1ad9-4e69-b58f-822e2c053f0a
+    m_ActionName: 'PlayerControls/NextSkill[/XboxGamepadMacOSNative/rightShoulder,/Keyboard/2]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: fc7c83c0-978a-4d9d-a603-d152a1058cd9
+    m_ActionName: 'PlayerControls/MainAction[/XboxGamepadMacOSNative/rightTrigger,/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 756c3adf-e0bf-4d0a-ad75-5a1b7034584e
+    m_ActionName: 'PlayerControls/SecondaryAction[/XboxGamepadMacOSNative/leftTrigger,/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 044aab5e-bad1-4fe2-a02b-c1e1105af2ee
+    m_ActionName: 'PlayerControls/Leave[/XboxGamepadMacOSNative/buttonEast,/Keyboard/escape]'
+  m_NeverAutoSwitchControlSchemes: 1
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: PlayerControls
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &1187447766414085388
 GameObject:
   m_ObjectHideFlags: 0
