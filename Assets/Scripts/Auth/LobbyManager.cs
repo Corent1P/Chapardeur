@@ -28,6 +28,12 @@ public class LobbyManager : MonoBehaviour
 
     private async void Start()
     {
+        #if DISABLE_ONLINE
+            // Sur Xbox, on désactive ce composant immédiatement
+            // car on n'a pas le droit d'utiliser l'Auth Unity.
+            this.enabled = false; 
+            return;
+        #endif
         Debug.Log("Starting LobbyManager...");
         // S'assurer que les services sont initialisés
         if (UnityServices.State != ServicesInitializationState.Initialized)

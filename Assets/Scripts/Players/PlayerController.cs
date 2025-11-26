@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
