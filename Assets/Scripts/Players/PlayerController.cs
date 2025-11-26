@@ -1,8 +1,10 @@
+using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
@@ -10,43 +12,40 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 5f;
     private float jumpFactor = 1f;
 
-    [Header("Mouse")]
-    public float mouseSensitivity = 2f;
-    public Transform cameraTransform;
-
     private Rigidbody rb;
-    private PlayerInputs inputActions;
+    private PlayerInput inputActions;
     private Vector2 moveInput;
-    private Vector2 lookInput;
-    private float xRotation = 0f;
     private bool isGrounded = true;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        inputActions = new PlayerInputs();
+        inputActions = GetComponentInParent<PlayerInput>();
+
     }
 
     private void OnEnable()
     {
-        inputActions.PlayerControls.Enable();
-        inputActions.PlayerControls.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerControls.Move.canceled += ctx => moveInput = Vector2.zero;
+        // inputActions.PlayerControls.Enable();
+        InputAction moveAction = inputActions.actions["Move"];
+        InputAction jumpAction = inputActions.actions["Jump"];
 
-        inputActions.PlayerControls.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerControls.Look.canceled += ctx => lookInput = Vector2.zero;
+        moveAction.performed += ctx => moveInput = -ctx.ReadValue<Vector2>();
+        moveAction.canceled += ctx => moveInput = Vector2.zero;
 
-        inputActions.PlayerControls.Jump.performed += ctx => Jump();
+        jumpAction.performed += ctx => Jump();
     }
 
     private void OnDisable()
     {
-        inputActions.PlayerControls.Disable();
-    }
+        // inputActions.PlayerControls.Disable();
+        InputAction moveAction = inputActions.actions["Move"];
+        InputAction jumpAction = inputActions.actions["Jump"];
 
-    private void Update()
-    {
-        HandleLook();
+        moveAction.performed -= ctx => moveInput = -ctx.ReadValue<Vector2>();
+        moveAction.canceled -= ctx => moveInput = Vector2.zero;
+
+        jumpAction.performed -= ctx => Jump();
     }
 
     private void FixedUpdate()
@@ -56,13 +55,21 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        Vector3 moveDirection = (transform.forward * moveInput.y + transform.right * moveInput.x).normalized;
-        Vector3 targetVelocity = moveDirection * moveSpeed * speedFactor;
-        Vector3 currentVelocity = rb.linearVelocity;
+        Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
 
-        // Conserve la vitesse verticale (gravité / saut)
-        targetVelocity.y = currentVelocity.y;
-        rb.linearVelocity = targetVelocity;
+        if (moveDirection.sqrMagnitude > 0.01f)
+        {
+            moveDirection.Normalize();
+            transform.rotation = Quaternion.LookRotation(moveDirection);
+
+            Vector3 targetVelocity = moveDirection * moveSpeed * speedFactor;
+            targetVelocity.y = rb.linearVelocity.y;
+            rb.linearVelocity = targetVelocity;
+        }
+        else
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        }
     }
 
     private void Jump()
@@ -72,18 +79,6 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Vector3.up * jumpForce * jumpFactor, ForceMode.Impulse);
             isGrounded = false;
         }
-    }
-
-    private void HandleLook()
-    {
-        float mouseX = lookInput.x * mouseSensitivity;
-        float mouseY = lookInput.y * mouseSensitivity;
-
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        // cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        transform.Rotate(Vector3.up * mouseX);
     }
 
     private void OnCollisionEnter(Collision collision)

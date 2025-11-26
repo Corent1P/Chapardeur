@@ -1,36 +1,45 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SkillManager : MonoBehaviour
 {
     [SerializeField] private int currentSkillIndex = 0;
     [SerializeField] private ASkills[] skillsList;
-    private PlayerInputs inputActions;
+    private PlayerInput inputActions;
     private ASkills currentSkill;
 
     private void Awake()
     {
-        inputActions = new PlayerInputs();
+        inputActions = GetComponentInParent<PlayerInput>();
     }
 
     private void OnEnable()
     {
-        inputActions.PlayerControls.Enable();
+        // inputActions.PlayerControls.Enable();
+        InputAction nextAction = inputActions.actions["NextSkill"];
+        InputAction prevAction = inputActions.actions["PreviousSkill"];
 
-        inputActions.PlayerControls.NextSkill.performed += ctx => NextSkill();
-        inputActions.PlayerControls.PreviousSkill.performed += ctx => PreviousSkill();
+        nextAction.performed += ctx => NextSkill();
+        prevAction.performed += ctx => PreviousSkill();
         EquipSkill(currentSkillIndex = 0);
     }
 
     private void OnDisable()
     {
-        inputActions.PlayerControls.Disable();
+        // inputActions.PlayerControls.Disable();
 
-        inputActions.PlayerControls.NextSkill.performed -= ctx => NextSkill();
-        inputActions.PlayerControls.PreviousSkill.performed -= ctx => PreviousSkill();
+        InputAction nextAction = inputActions.actions["NextSkill"];
+        InputAction prevAction = inputActions.actions["PreviousSkill"];
+        InputAction mainAction = inputActions.actions["MainAction"];
+        InputAction secondaryAction = inputActions.actions["SecondaryAction"];
+
+        nextAction.performed -= ctx => NextSkill();
+        prevAction.performed -= ctx => PreviousSkill();
+
         if (currentSkill != null)
         {
-            inputActions.PlayerControls.MainAction.performed -= ctx => currentSkill.MainAction();
-            inputActions.PlayerControls.SecondaryAction.performed -= ctx => currentSkill.SecondaryAction();
+            mainAction.performed -= ctx => currentSkill.MainAction();
+            secondaryAction.performed -= ctx => currentSkill.SecondaryAction();
         }
     }
 
@@ -39,17 +48,20 @@ public class SkillManager : MonoBehaviour
     {
         if (skillIndex >= 0 && skillIndex < skillsList.Length)
         {
+            InputAction mainAction = inputActions.actions["MainAction"];
+            InputAction secondaryAction = inputActions.actions["SecondaryAction"];
+
             transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
             if (currentSkill != null)
             {
-                inputActions.PlayerControls.MainAction.performed -= ctx => currentSkill.MainAction();
-                inputActions.PlayerControls.SecondaryAction.performed -= ctx => currentSkill.SecondaryAction();
+                mainAction.performed -= ctx => currentSkill.MainAction();
+                secondaryAction.performed -= ctx => currentSkill.SecondaryAction();
                 currentSkill.DeactivateSkill();
             }
             currentSkill = skillsList[skillIndex];
             currentSkill.ActivateSkill();
-            inputActions.PlayerControls.MainAction.performed += ctx => currentSkill.MainAction();
-            inputActions.PlayerControls.SecondaryAction.performed += ctx => currentSkill.SecondaryAction();
+            mainAction.performed += ctx => currentSkill.MainAction();
+            secondaryAction.performed += ctx => currentSkill.SecondaryAction();
         }
     }
 

@@ -36,6 +36,12 @@ public class RelayManager : MonoBehaviour
 
     private void Start()
     {
+        #if DISABLE_ONLINE
+            // Sur Xbox, on désactive ce composant immédiatement
+            // car on n'a pas le droit d'utiliser l'Auth Unity.
+            this.enabled = false; 
+            return;
+        #endif
         listMaps = new Tuple<string, string>[]
         {
             new Tuple<string, string>("Game", "Mansion"),
@@ -188,7 +194,7 @@ public class RelayManager : MonoBehaviour
 
     #region Relay Integration
 
-    public async void StartGame(string sceneToLoad)
+    public void StartGame(string sceneToLoad)
     {
         gameSceneName = sceneToLoad;
         StartGame();

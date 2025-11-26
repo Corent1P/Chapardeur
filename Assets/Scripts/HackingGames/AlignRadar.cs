@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class AlignRadarGame : AHackingGame
 {
@@ -13,7 +14,7 @@ public class AlignRadarGame : AHackingGame
     private Tuple<GameObject, float>[] alignementList;
     private int currentAlignementIndex = 0;
     private PlayerController playerController;
-    private PlayerInputs inputActions;
+    private PlayerInput inputActions;
     private Vector2 moveInput;
 
 
@@ -35,7 +36,7 @@ public class AlignRadarGame : AHackingGame
             Debug.LogWarning("PlayerController not found in scene.");
         }
         if (inputActions == null)
-            inputActions = new PlayerInputs();
+            inputActions = GetComponentInParent<PlayerInput>();
         alignementList = new Tuple<GameObject, float>[radarScreen.Length];
         for (int i = 0; i < radarScreen.Length; i++)
         {
@@ -87,10 +88,13 @@ public class AlignRadarGame : AHackingGame
         currentAlignment = 0f;
         alignmentIndicators.transform.localRotation = Quaternion.Euler(0, 0, currentAlignment);
 
-        inputActions.Enable();
-        inputActions.PlayerControls.Leave.performed += ctx => FailGame();
-        inputActions.PlayerControls.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerControls.Move.canceled += ctx => moveInput = Vector2.zero;
+        // inputActions.Enable();
+        InputAction leaveAction = inputActions.actions["Leave"];
+        InputAction moveAction = inputActions.actions["Move"];
+
+        leaveAction.performed += ctx => FailGame();
+        moveAction.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        moveAction.canceled += ctx => moveInput = Vector2.zero;
 
         playerController.enabled = false;
     }
@@ -102,7 +106,13 @@ public class AlignRadarGame : AHackingGame
         alignementList[currentAlignementIndex].Item1.SetActive(false);
         alignmentIndicators.SetActive(false);
 
-        inputActions.Disable();
+        // inputActions.Disable();
+        InputAction leaveAction = inputActions.actions["Leave"];
+        InputAction moveAction = inputActions.actions["Move"];
+
+        leaveAction.performed -= ctx => FailGame();
+        moveAction.performed -= ctx => moveInput = Vector2.zero;
+        moveAction.canceled -= ctx => moveInput = Vector2.zero;
 
         playerController.enabled = true;
     }

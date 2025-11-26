@@ -36,7 +36,7 @@ public class UIJoinMenu : MonoBehaviour
         RefreshButton.SetActive(true);
     }
 
-    private async void PopulateLobbies()
+    private void PopulateLobbies()
     {
         foreach (GameObject entry in lobbyEntries)
         {

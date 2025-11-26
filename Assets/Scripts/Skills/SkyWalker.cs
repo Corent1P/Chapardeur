@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEditor.Experimental.GraphView;
+using UnityEngine.InputSystem;
 
 public class SkyWalker : ASkills
 {
@@ -15,28 +16,33 @@ public class SkyWalker : ASkills
     private bool isDetaching = false;
     private PlayerController playerController;
     private Rigidbody playerRigidbody;
-    private PlayerInputs inputActions;
+    private PlayerInput inputActions;
     private Vector2 moveInput;
 
     private void OnEnable()
     {
         if (inputActions == null)
-            inputActions = new PlayerInputs();
-        inputActions.PlayerControls.Enable();
-        inputActions.PlayerControls.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerControls.Move.canceled += ctx => moveInput = Vector2.zero;
+            inputActions = GetComponentInParent<PlayerInput>();
+        // inputActions.PlayerControls.Enable();
+        InputAction moveAction = inputActions.actions["Move"];
+
+        moveAction.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        moveAction.canceled += ctx => moveInput = Vector2.zero;
     }
 
     private void OnDisable()
     {
-        inputActions.PlayerControls.Disable();
+        // inputActions.PlayerControls.Disable();
         isHopping = false;
+        InputAction moveAction = inputActions.actions["Move"];
+        moveAction.performed -= ctx => moveInput = ctx.ReadValue<Vector2>();
+        moveAction.canceled -= ctx => moveInput = Vector2.zero;
     }
 
     private void Start()
     {
         if (inputActions == null)
-            inputActions = new PlayerInputs();
+            inputActions = GetComponentInParent<PlayerInput>();
         playerController = GetComponentInParent<PlayerController>();
         if (playerController == null)
         {
