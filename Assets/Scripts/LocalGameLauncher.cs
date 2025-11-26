@@ -7,7 +7,7 @@ using UnityEditor;
 public class LocalGameLauncher : MonoBehaviour
 {
     [Header("Settings")]
-    public string gameSceneName = "Game";
+    public string gameSceneName = "LocalGameScene";
     [Range(1, 4)] public int localPlayerCount = 1;
     public void StartLocalSession()
     {

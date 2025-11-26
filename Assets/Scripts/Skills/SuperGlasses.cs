@@ -71,13 +71,10 @@ public class SuperGlasses : ASkills
     {
         if (element != null)
         {
-            Debug.Log("Best Hidding element Selected: " + element.name);
-            // Vous pouvez ajouter ici des effets visuels ou autres indicateurs
             currentSelectedElement = element.GetComponent<Reveal>();
         }
         else
         {
-            Debug.Log("No valid Hidding element found.");
             currentSelectedElement = null;
         }
     }

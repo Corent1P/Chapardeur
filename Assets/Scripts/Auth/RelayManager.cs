@@ -24,7 +24,7 @@ public class RelayManager : MonoBehaviour
     public TextMeshProUGUI mapNameText;
 
     [Header("Game Settings")]
-    public string gameSceneName = "Game"; // Nom de votre scène de jeu
+    public string gameSceneName = "MuseumGameScene"; // Nom de votre scène de jeu
 
     private const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
     private float lobbyUpdateTimer;
@@ -44,8 +44,8 @@ public class RelayManager : MonoBehaviour
         #endif
         listMaps = new Tuple<string, string>[]
         {
-            new Tuple<string, string>("Game", "Mansion"),
-            new Tuple<string, string>("Game-Procedural", "Random")
+            new Tuple<string, string>("MuseumGameScene", "Museum"),
+            new Tuple<string, string>("BankGameScene", "Bank")
         };
 
         // listMaps = new Tuple<string, string>("Game-Procedural", "Random Map");
@@ -176,6 +176,7 @@ public class RelayManager : MonoBehaviour
         currentMapIndex = (currentMapIndex + 1) % listMaps.Length;
         mapNameText.text = listMaps[currentMapIndex].Item2;
         gameSceneName = listMaps[currentMapIndex].Item1;
+        Debug.Log("Selected Map: " + gameSceneName);
     }
 
     public void PreviousMap()
@@ -183,6 +184,7 @@ public class RelayManager : MonoBehaviour
         currentMapIndex = (currentMapIndex - 1 + listMaps.Length) % listMaps.Length;
         mapNameText.text = listMaps[currentMapIndex].Item2;
         gameSceneName = listMaps[currentMapIndex].Item1;
+        Debug.Log("Selected Map: " + gameSceneName);
     }
 
     public String GetCurrentMapName()
