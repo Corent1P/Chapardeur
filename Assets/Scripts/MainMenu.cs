@@ -15,7 +15,6 @@ public class MainMenu : MonoBehaviour
         #if DISABLE_ONLINE
             // On force le bouton à lancer le mode local direct
             playButton.onClick.AddListener(StartLocalGame);
-            playButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "JOUER (LOCAL)";
         #else
             // Sinon (PC / Mobile), on lance le menu de connexion normal
             playButton.onClick.AddListener(StartOnlineGame);

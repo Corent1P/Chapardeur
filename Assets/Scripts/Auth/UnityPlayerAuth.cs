@@ -10,44 +10,52 @@ using UnityEngine.UI;
 
 public class UnityPlayerAuth : MonoBehaviour
 {
-    [SerializeField] private Button loginButton;
+    [SerializeField] private Button loginUnityButton;
+    [SerializeField] private Button loginAnoButton;
     [SerializeField] private MenuManager menuManager;
 
-    public event Action<PlayerInfo, string> OnSingedIn;
+    public event Action<PlayerInfo, string> OnSignedIn;
     public event Action<String> OnUpdateName;
     private PlayerInfo playerInfo;
 
     void OnEnable()
     {
-        loginButton?.onClick.AddListener(LoginButton);
+        loginUnityButton?.onClick.AddListener(LoginUnityButton);
+        loginAnoButton?.onClick.AddListener(AnonymousLoginButton);
     }
 
     void OnDisable()
     {
-        loginButton?.onClick.RemoveListener(LoginButton);
+        loginUnityButton?.onClick.RemoveListener(LoginUnityButton);
+        loginAnoButton?.onClick.RemoveListener(AnonymousLoginButton);
     }
 
-    private async void LoginButton()
+    private async void LoginUnityButton()
     {
         await InitSignIn();
+    }
+
+    private async void AnonymousLoginButton()
+    {
+        loginAnoButton.interactable = false;
+        await SignInAnonymouslyAsync();
+        loginAnoButton.interactable = true;
     }
 
     private async void Start()
     {
         #if DISABLE_ONLINE
-            // Sur Xbox, on désactive ce composant immédiatement
-            // car on n'a pas le droit d'utiliser l'Auth Unity.
             this.enabled = false; 
             return;
         #endif
+
         await UnityServices.InitializeAsync();
         SetupEvents();
         PlayerAccountService.Instance.SignedIn += SignIn;
 
-        // Vérifier si déjà connecté au démarrage
         if (AuthenticationService.Instance.IsSignedIn)
         {
-            Debug.Log("Already signed in");
+            Debug.Log("Already signed in (Auto-Login)");
             await HandleAlreadySignedIn();
         }
     }
@@ -62,7 +70,7 @@ public class UnityPlayerAuth : MonoBehaviour
 
         AuthenticationService.Instance.SignInFailed += (err) =>
         {
-            Debug.Log(err);
+            Debug.LogError(err);
         };
         
         AuthenticationService.Instance.SignedOut += () =>
@@ -83,7 +91,7 @@ public class UnityPlayerAuth : MonoBehaviour
             playerInfo = AuthenticationService.Instance.PlayerInfo;
             var name = await AuthenticationService.Instance.GetPlayerNameAsync();
             
-            OnSingedIn?.Invoke(playerInfo, name);
+            OnSignedIn?.Invoke(playerInfo, name);
             menuManager?.ShowPlayOnlineMenu();
         }
         catch (Exception ex)
@@ -94,23 +102,18 @@ public class UnityPlayerAuth : MonoBehaviour
 
     public async Task InitSignIn()
     {
-        // Si déjà connecté, ne rien faire ou gérer directement
         if (AuthenticationService.Instance.IsSignedIn)
         {
-            Debug.Log("Already signed in, skipping sign in process");
             await HandleAlreadySignedIn();
             return;
         }
-
         await PlayerAccountService.Instance.StartSignInAsync();
     }
 
     private async void SignIn()
     {
-        // Vérifier si déjà connecté avant de tenter la connexion
         if (AuthenticationService.Instance.IsSignedIn)
         {
-            Debug.Log("Already signed in during SignIn callback");
             await HandleAlreadySignedIn();
             return;
         }
@@ -132,12 +135,11 @@ public class UnityPlayerAuth : MonoBehaviour
             string accessToken = PlayerAccountService.Instance.AccessToken;
             await AuthenticationService.Instance.SignInWithUnityAsync(accessToken);
             
-            Debug.Log("Login Successful");
             playerInfo = AuthenticationService.Instance.PlayerInfo;
             var name = await AuthenticationService.Instance.GetPlayerNameAsync();
 
-            OnSingedIn?.Invoke(playerInfo, name);
-            Debug.Log("Sign In Successful");
+            OnSignedIn?.Invoke(playerInfo, name);
+            Debug.Log("Sign In Successful (Unity Account)");
             menuManager?.ShowPlayOnlineMenu();
         }
         catch (AuthenticationException ex)
@@ -149,117 +151,96 @@ public class UnityPlayerAuth : MonoBehaviour
             Debug.Log(ex);
         }
     }
+    private async Task SignInAnonymouslyAsync()
+    {
+        try
+        {
+            // Vérification si déjà connecté
+            if (AuthenticationService.Instance.IsSignedIn)
+            {
+                Debug.Log("User already signed in.");
+                await HandleAlreadySignedIn();
+                return;
+            }
+
+            Debug.Log("Attempting Anonymous Sign In...");
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log("Sign In Anonymous Successful");
+
+            playerInfo = AuthenticationService.Instance.PlayerInfo;
+
+            var name = await AuthenticationService.Instance.GetPlayerNameAsync();
+
+            OnSignedIn?.Invoke(playerInfo, name);
+            menuManager?.ShowPlayOnlineMenu();
+        }
+        catch (AuthenticationException ex)
+        {
+            Debug.LogError($"Auth Error: {ex.ErrorCode} - {ex.Message}");
+        }
+        catch (RequestFailedException ex)
+        {
+            Debug.LogError($"Request Error: {ex.ErrorCode} - {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Unexpected Error: {ex.Message}");
+        }
+    }
 
     public async Task UpdateName(string newName)
     {
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            Debug.LogWarning("Cannot update name: not signed in");
-            return;
-        }
-
+        if (!AuthenticationService.Instance.IsSignedIn) return;
         try
         {
             await AuthenticationService.Instance.UpdatePlayerNameAsync(newName);
             var name = await AuthenticationService.Instance.GetPlayerNameAsync();
             OnUpdateName?.Invoke(name);
         }
-        catch (Exception ex)
-        {
-            Debug.LogError("Error updating name: " + ex.Message);
-        }
+        catch (Exception ex) { Debug.LogError(ex.Message); }
     }
 
     public async Task DeleteAccountUnityAsync()
     {
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            Debug.LogWarning("Cannot delete account: not signed in");
-            return;
-        }
-
-        try
-        {
-            await AuthenticationService.Instance.DeleteAccountAsync();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("Error deleting account: " + ex.Message);
-            throw;
-        }
+        if (!AuthenticationService.Instance.IsSignedIn) return;
+        try { await AuthenticationService.Instance.DeleteAccountAsync(); }
+        catch (Exception ex) { Debug.LogError(ex.Message); throw; }
     }
-
-    // Cloud Save
 
     public async void SaveData(string key, string value)
     {
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            Debug.LogWarning("Cannot save data: not signed in");
-            return;
-        }
-
+        if (!AuthenticationService.Instance.IsSignedIn) return;
         try
         {
-            var playerData = new Dictionary<string, object>()
-            {
-                {key, value}
-            };
-
+            var playerData = new Dictionary<string, object>() { {key, value} };
             await CloudSaveService.Instance.Data.Player.SaveAsync(playerData);
-            Debug.Log($"Data saved successfully: {key}");
+            Debug.Log($"Data saved: {key}");
         }
-        catch (Exception ex)
-        {
-            Debug.LogError("Error saving data: " + ex.Message);
-        }
+        catch (Exception ex) { Debug.LogError(ex.Message); }
     }
 
     public async void LoadData(string key)
     {
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            Debug.LogWarning("Cannot load data: not signed in");
-            return;
-        }
-
+        if (!AuthenticationService.Instance.IsSignedIn) return;
         try
         {
-            var playerData = await CloudSaveService.Instance.Data.Player.LoadAsync(
-               new HashSet<string> { key }
-            );
-            
+            var playerData = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { key });
             if (playerData.TryGetValue(key, out var value))
-            {
                 Debug.Log(key + " value: " + value.Value.GetAs<String>());
-            }
             else
-            {
                 Debug.Log($"No data found for key: {key}");
-            }
         }
-        catch (Exception ex)
-        {
-            Debug.LogError("Error loading data: " + ex.Message);
-        }
+        catch (Exception ex) { Debug.LogError(ex.Message); }
     }
 
     public async void DeleteData(string key)
     {
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            Debug.LogWarning("Cannot delete data: not signed in");
-            return;
-        }
-
+        if (!AuthenticationService.Instance.IsSignedIn) return;
         try
         {
             await CloudSaveService.Instance.Data.Player.DeleteAsync(key);
-            Debug.Log($"Data deleted successfully: {key}");
+            Debug.Log($"Data deleted: {key}");
         }
-        catch (Exception ex)
-        {
-            Debug.LogError("Error deleting data: " + ex.Message);
-        }
+        catch (Exception ex) { Debug.LogError(ex.Message); }
     }
 }
