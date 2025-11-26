@@ -2,15 +2,13 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine.SceneManagement;
+using UnityEditor;
 
 public class LocalGameLauncher : MonoBehaviour
 {
     [Header("Settings")]
     public string gameSceneName = "Game";
-    
-    [Range(1, 4)]
-    public int localPlayerCount = 2;
-
+    [Range(1, 4)] public int localPlayerCount = 1;
     public void StartLocalSession()
     {
         Debug.Log($"Préparation session locale pour {localPlayerCount} joueurs...");
@@ -31,6 +29,12 @@ public class LocalGameLauncher : MonoBehaviour
         {
             Debug.LogError("Impossible de démarrer le Host Local.");
         }
+    }
+
+    public void SetLocalPlayerCount(int count)
+    {
+        localPlayerCount = Mathf.Clamp(count, 1, 4);
+        Debug.Log($"Nombre de joueurs locaux défini à : {localPlayerCount}");
     }
 
     private void LoadGameScene()

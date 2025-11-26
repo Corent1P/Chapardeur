@@ -38,6 +38,7 @@ public class MainMenu : MonoBehaviour
         Debug.Log("Lancement Local...");
         
         // On appelle le nouveau script dédié
-        localGameLauncher.StartLocalSession();
+        // localGameLauncher.StartLocalSession();
+        menuManager?.ShowPlayLocalMenu();
     }
 }
