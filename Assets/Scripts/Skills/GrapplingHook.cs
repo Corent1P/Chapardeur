@@ -258,7 +258,7 @@ public class GrapplingHook : ASkills
             Renderer renderer = currentSelectedPoint.GetComponent<Renderer>();
             if (renderer != null)
             {
-                originalMaterial = renderer.material;
+                originalMaterial = renderer.sharedMaterial;
                 renderer.material = grapplingPointMaterial;
             }
         }

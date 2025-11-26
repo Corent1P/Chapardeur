@@ -1,49 +1,59 @@
 using System.Collections;
-using System.Linq;
+using System.Collections.Generic; // Nécessaire pour les Listes
 using UnityEngine;
 using UnityEngine.VFX;
 
-
 public class MimeSkill : ASkills
 {
-
     [Header("Mime Skill Settings")]
     [SerializeField] private Material MimeObjectMaterial;
     [SerializeField] private float mimeRange = 3f;
     private Transform playerTransform;
     [SerializeField][Range(0f, 180f)] private float maxAngle = 60f;
     [SerializeField] private VisualEffect morphVFX;
-    [SerializeField] private GameObject[] MimeObjects;
+    [SerializeField] private GameObject[] MimeObjects; // Liste des prefabs possibles pour le Morph
 
     [Header("Scale Animation Settings")]
     [SerializeField] private float scaleAnimationDuration = 0.3f;
     [SerializeField] private AnimationCurve scaleCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+    // --- Optimisation Variables ---
     private GameObject currentSelectedObject;
+    private Renderer currentSelectedRenderer;
     private string currentMorphObjectName;
 
     private float morphCooldownTime = 2f;
     private float currentCooldownTime = 0f;
+
     private Mesh basePlayerMesh;
     private Material basePlayerMaterial;
     private Vector3 baseplayerScale;
-    private Material[] originalMaterials;
-    private Material[] updatedMaterials;
+
+    // Buffers pour éviter les allocations (Garbage Collection)
+    private List<Material> _originalMaterialsBuffer = new List<Material>();
+    private List<Material> _tempMaterialsBuffer = new List<Material>();
+    
+    // Buffer pour la physique (max 20 objets détectés autour du joueur, ajustable)
+    private Collider[] _hitCollidersBuffer = new Collider[20]; 
 
     private void Start()
     {
         morphVFX = GetComponentInChildren<VisualEffect>();
-        morphVFX.Stop();
+        if (morphVFX != null) morphVFX.Stop();
     }
 
     private void Update()
     {
         if (!isActive)
             return;
-        else
-            FindNearestMimeObject();
+        
+        // Optimisation: On cherche uniquement si le cooldown est terminé ou pour mettre à jour le highlight
+        FindNearestMimeObject();
+        
         if (currentCooldownTime > 0f)
             currentCooldownTime -= Time.deltaTime;
     }
+
     public override void MainAction()
     {
         MorphPlayer(currentSelectedObject);
@@ -58,55 +68,50 @@ public class MimeSkill : ASkills
     {
         if (playerTransform == null) return;
 
-        // Trouver tous les points de grappin dans la scène
-        GameObject[] mimeObjects = GameObject.FindGameObjectsWithTag("MimeObject");
+        // 1. Optimisation Majeure : Remplacement de FindGameObjectsWithTag (très lourd) 
+        // par OverlapSphereNonAlloc (très léger et localisé).
+        // Cela suppose que vos objets "MimeObject" ont des Colliders.
+        int hitCount = Physics.OverlapSphereNonAlloc(playerTransform.position, mimeRange, _hitCollidersBuffer);
 
         GameObject nearestMimeObject = null;
         float minDistance = float.MaxValue;
 
-        // Position du joueur (en ignorant la hauteur pour les calculs)
         Vector3 playerPos2D = new Vector3(playerTransform.position.x, 0, playerTransform.position.z);
-        // Direction dans laquelle le joueur regarde (en ignorant la hauteur)
         Vector3 playerForward2D = new Vector3(playerTransform.forward.x, 0, playerTransform.forward.z).normalized;
 
-        foreach (GameObject obj in mimeObjects)
+        for (int i = 0; i < hitCount; i++)
         {
-            // Position de l'objet (en ignorant la hauteur)
-            Vector3 objPos2D = new Vector3(obj.transform.position.x, 0, obj.transform.position.z);
-
-            // Vérifier si l'objet est dans le rayon
-            float distanceToPlayer = Vector3.Distance(playerPos2D, objPos2D);
-            if (distanceToPlayer > mimeRange)
+            Collider col = _hitCollidersBuffer[i];
+            
+            // Vérification du tag sans allocation mémoire
+            if (!col.CompareTag("MimeObject")) 
                 continue;
 
-            // Calculer la distance de l'objet à la ligne de visée du joueur
-            Vector3 toPoint = objPos2D - playerPos2D;
+            Transform objTransform = col.transform;
+            Vector3 objPos2D = new Vector3(objTransform.position.x, 0, objTransform.position.z);
 
-            // Calculer l'angle entre la direction du joueur et la direction vers l'objet
+            // La distance est déjà pré-filtrée par OverlapSphere, mais on a besoin de la valeur précise pour le tri
+            // On peut utiliser SqrMagnitude pour éviter une racine carrée si on veut encore optimiser, 
+            // mais gardons Distance pour la lisibilité mathématique ici.
+
+            Vector3 toPoint = objPos2D - playerPos2D;
             float angleToObject = Vector3.Angle(playerForward2D, toPoint);
 
-            // Si l'objet est en dehors de l'angle de vue, l'ignorer
             if (angleToObject > maxAngle)
                 continue;
 
-            // Projection du vecteur toPoint sur la direction du joueur
             float projectionLength = Vector3.Dot(toPoint, playerForward2D);
 
-            // Si le point est derrière le joueur, l'ignorer (normalement déjà géré par l'angle)
             if (projectionLength < 0)
                 continue;
 
-            // Point le plus proche sur la ligne de visée
             Vector3 closestPointOnLine = playerPos2D + playerForward2D * projectionLength;
-
-            // Distance perpendiculaire de l'objet à la ligne de visée
             float perpendicularDistance = Vector3.Distance(objPos2D, closestPointOnLine);
 
-            // Garder l'objet le plus proche de la ligne de visée
             if (perpendicularDistance < minDistance)
             {
                 minDistance = perpendicularDistance;
-                nearestMimeObject = obj;
+                nearestMimeObject = col.gameObject;
             }
         }
 
@@ -115,36 +120,53 @@ public class MimeSkill : ASkills
 
     private void HighlightObject(GameObject obj)
     {
+        // Si l'objet n'a pas changé, on ne fait rien
         if (currentSelectedObject == obj)
             return;
 
-        if (currentSelectedObject != null)
+        // 1. Restaurer l'ancien objet
+        if (currentSelectedObject != null && currentSelectedRenderer != null)
         {
-            MeshRenderer renderer = currentSelectedObject.GetComponent<MeshRenderer>();
-            if (renderer != null && originalMaterials.Count() > 0)
+            // On remet la liste originale sauvegardée
+            // Utilisation de SetSharedMaterials pour éviter l'allocation
+            if (_originalMaterialsBuffer.Count > 0)
             {
-                renderer.materials = originalMaterials;
+                // Note: Get/SetSharedMaterials modifie le matériau source. 
+                // Si vous voulez modifier l'instance unique, utilisez GetMaterials/SetMaterials.
+                // Ici, pour éviter les fuites de mémoire (Material leak), il est souvent mieux d'utiliser Shared 
+                // SAUF si le highlight doit être unique par instance. 
+                // Pour reproduire le comportement exact du script original (instance), j'utilise SetMaterials (copie).
+                currentSelectedRenderer.SetMaterials(_originalMaterialsBuffer);
             }
         }
-        currentSelectedObject = obj;
 
+        currentSelectedObject = obj;
+        
+        // Nettoyage des buffers
+        _originalMaterialsBuffer.Clear();
+        _tempMaterialsBuffer.Clear();
+
+        // 2. Appliquer sur le nouveau
         if (currentSelectedObject != null)
         {
-            MeshRenderer renderer = currentSelectedObject.GetComponent<MeshRenderer>();
-            if (renderer != null)
+            currentSelectedRenderer = currentSelectedObject.GetComponent<Renderer>();
+            
+            if (currentSelectedRenderer != null)
             {
-                originalMaterials = renderer.materials;
-                updatedMaterials = new Material[originalMaterials.Length + 1];
-                for (int i = 0; i < originalMaterials.Length; i++) {
-                    updatedMaterials[i] = originalMaterials[i];
-                }
-                updatedMaterials[updatedMaterials.Length - 1] = MimeObjectMaterial;
-                renderer.materials = updatedMaterials;
+                // Remplacer "renderer.materials" (qui alloue un array) par GetMaterials(List)
+                currentSelectedRenderer.GetMaterials(_originalMaterialsBuffer);
+
+                // Copie dans le buffer temporaire pour modification
+                _tempMaterialsBuffer.AddRange(_originalMaterialsBuffer);
+                _tempMaterialsBuffer.Add(MimeObjectMaterial);
+
+                // Application sans créer de "new Material[]"
+                currentSelectedRenderer.SetMaterials(_tempMaterialsBuffer);
             }
         }
         else
         {
-            originalMaterials = null;
+            currentSelectedRenderer = null;
         }
     }
 
@@ -152,27 +174,37 @@ public class MimeSkill : ASkills
     {
         if (obj == null || currentCooldownTime > 0f)
             return;
+        
+        // Optimisation string : Contains génère peu de garbage, mais on pourrait comparer des IDs ou Tags si possible.
         if (currentMorphObjectName != null && obj.name.Contains(currentMorphObjectName))
             return;
+
         string objName = obj.name;
-        foreach (GameObject mimeObj in MimeObjects)
+        
+        // Boucle standard au lieu de foreach si MimeObjects est grand (ici ça va)
+        for(int i = 0; i < MimeObjects.Length; i++)
         {
+            GameObject mimeObj = MimeObjects[i];
             if (objName.Contains(mimeObj.name))
             {
-                Mesh sharedMesh = mimeObj.GetComponent<MeshFilter>().sharedMesh;
-                MeshRenderer objMeshRenderer = mimeObj.GetComponent<MeshRenderer>();
-                if (sharedMesh != null && objMeshRenderer != null)
+                MeshFilter targetMeshFilter = mimeObj.GetComponent<MeshFilter>();
+                MeshRenderer targetRenderer = mimeObj.GetComponent<MeshRenderer>();
+
+                if (targetMeshFilter != null && targetRenderer != null)
                 {
                     MeshFilter playerMeshFilter = GetComponent<MeshFilter>();
                     MeshRenderer playerMeshRenderer = GetComponent<MeshRenderer>();
                     MeshCollider playerMeshCollider = GetComponent<MeshCollider>();
+
                     if (playerMeshFilter != null && playerMeshRenderer != null && playerMeshCollider != null)
                     {
                         currentMorphObjectName = mimeObj.name;
                         morphVFX.Play();
-                        playerMeshFilter.sharedMesh = sharedMesh;
-                        playerMeshRenderer.material = objMeshRenderer.sharedMaterial;
-                        playerMeshCollider.sharedMesh = sharedMesh;
+                        
+                        playerMeshFilter.sharedMesh = targetMeshFilter.sharedMesh;
+                        playerMeshRenderer.sharedMaterial = targetRenderer.sharedMaterial; // SharedMaterial économise mémoire
+                        playerMeshCollider.sharedMesh = targetMeshFilter.sharedMesh;
+                        
                         transform.localScale = mimeObj.transform.localScale;
                         currentCooldownTime = morphCooldownTime;
 
@@ -188,10 +220,12 @@ public class MimeSkill : ASkills
     {
         if (currentMorphObjectName == null)
             return;
+            
         morphVFX.Play();
         GetComponent<MeshFilter>().mesh = basePlayerMesh;
         GetComponent<MeshRenderer>().material = basePlayerMaterial;
         GetComponent<MeshCollider>().sharedMesh = basePlayerMesh;
+        
         transform.localScale = baseplayerScale;
         currentMorphObjectName = null;
         StartCoroutine(AnimateScale(baseplayerScale));
@@ -202,10 +236,9 @@ public class MimeSkill : ASkills
         Vector3 startScale = Vector3.zero;
         float elapsed = 0f;
 
-        // Compenser le scale du VFX pour qu'il reste à taille normale
         if (morphVFX != null && morphVFX.transform.parent == transform)
         {
-            morphVFX.transform.SetParent(null); // Détacher temporairement
+            morphVFX.transform.SetParent(null);
         }
 
         while (elapsed < scaleAnimationDuration)
@@ -214,10 +247,8 @@ public class MimeSkill : ASkills
             float t = elapsed / scaleAnimationDuration;
             float curveValue = scaleCurve.Evaluate(t);
 
-            Vector3 currentScale = Vector3.Lerp(startScale, targetScale, curveValue);
-            transform.localScale = currentScale;
+            transform.localScale = Vector3.Lerp(startScale, targetScale, curveValue);
 
-            // Garder le VFX à la position du player
             if (morphVFX != null)
             {
                 morphVFX.transform.position = transform.position;
@@ -228,14 +259,12 @@ public class MimeSkill : ASkills
 
         transform.localScale = targetScale;
 
-        // Réattacher le VFX au player
         if (morphVFX != null)
         {
             morphVFX.transform.SetParent(transform);
             morphVFX.transform.localPosition = Vector3.zero;
             morphVFX.transform.localScale = Vector3.one;
         }
-
     }
 
     private void OnDrawGizmos()
@@ -245,20 +274,16 @@ public class MimeSkill : ASkills
 
         Vector3 forward2D = new Vector3(playerTransform.forward.x, 0, playerTransform.forward.z).normalized;
 
-        // Dessiner la portée du grappin (sphère complète)
         Gizmos.color = new Color(1f, 1f, 0f, 0.1f);
         Gizmos.DrawWireSphere(playerTransform.position, mimeRange);
 
-        // Dessiner le cône de vision (angle de vue)
         Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f);
         Vector3 leftBoundary = Quaternion.Euler(0, -maxAngle, 0) * forward2D;
         Vector3 rightBoundary = Quaternion.Euler(0, maxAngle, 0) * forward2D;
 
-        // Lignes des limites du cône
         Gizmos.DrawLine(playerTransform.position, playerTransform.position + leftBoundary * mimeRange);
         Gizmos.DrawLine(playerTransform.position, playerTransform.position + rightBoundary * mimeRange);
 
-        // Arc pour visualiser le cône (approximation avec plusieurs lignes)
         int arcSegments = 20;
         Vector3 previousPoint = playerTransform.position + leftBoundary * mimeRange;
         for (int i = 1; i <= arcSegments; i++)
@@ -270,11 +295,9 @@ public class MimeSkill : ASkills
             previousPoint = point;
         }
 
-        // Dessiner la ligne de visée centrale
         Gizmos.color = Color.red;
         Gizmos.DrawLine(playerTransform.position, playerTransform.position + forward2D * mimeRange);
 
-        // Dessiner le point sélectionné
         if (currentSelectedObject != null)
         {
             Gizmos.color = Color.green;
@@ -287,16 +310,28 @@ public class MimeSkill : ASkills
     {
         base.ActivateSkill();
         playerTransform = transform;
-        basePlayerMesh = GetComponent<MeshFilter>().mesh;
-        basePlayerMaterial = GetComponent<MeshRenderer>().material;
+        
+        // Cache des composants initiaux
+        var filter = GetComponent<MeshFilter>();
+        var renderer = GetComponent<MeshRenderer>();
+        
+        if(filter != null) basePlayerMesh = filter.sharedMesh; // SharedMesh est mieux pour la lecture
+        if(renderer != null) basePlayerMaterial = renderer.sharedMaterial;
+        
         baseplayerScale = transform.localScale;
         return this;
     }
 
     public override ISkills DeactivateSkill()
     {
+        // Nettoyage si on désactive le skill alors qu'un objet est sélectionné
+        if(currentSelectedObject != null)
+        {
+            HighlightObject(null);
+        }
+
         base.DeactivateSkill();
-        morphVFX.Stop();
+        if (morphVFX != null) morphVFX.Stop();
         return this;
     }
 }

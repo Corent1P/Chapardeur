@@ -12,7 +12,7 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         // Si on est en mode "Build Xbox / Offline"
-        #if DISABLE_ONLINE
+        #if (!DISABLE_ONLINE)
             // On force le bouton à lancer le mode local direct
             playButton.onClick.AddListener(StartLocalGame);
         #else
@@ -24,7 +24,7 @@ public class MainMenu : MonoBehaviour
     private void StartOnlineGame()
     {
         // Ce code n'existera QUE sur PC/Mobile
-        #if !DISABLE_ONLINE
+        #if !(!DISABLE_ONLINE)
             Debug.Log("Mode Online : Affichage Auth...");
             menuManager?.ShowAuthMenu();
         #endif

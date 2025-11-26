@@ -826,9 +826,8 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Standalone: PROBUILDER_EXPERIMENTAL_FEATURES
+    Standalone: PROBUILDER_EXPERIMENTAL_FEATURES;DISABLE_ONLINE
     Windows Store Apps: PROBUILDER_EXPERIMENTAL_FEATURES
-    Standalone: DISABLE_ONLINE
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

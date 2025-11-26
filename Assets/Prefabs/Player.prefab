@@ -576,7 +576,7 @@ MonoBehaviour:
     m_ActionId: 044aab5e-bad1-4fe2-a02b-c1e1105af2ee
     m_ActionName: 'PlayerControls/Leave[/XboxGamepadMacOSNative/buttonEast,/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 1
-  m_DefaultControlScheme: 
+  m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: PlayerControls
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
