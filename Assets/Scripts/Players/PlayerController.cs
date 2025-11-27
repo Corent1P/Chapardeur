@@ -1,5 +1,4 @@
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,7 +12,7 @@ public class PlayerController : NetworkBehaviour
     private float jumpFactor = 1f;
 
     private Rigidbody rb;
-    private PlayerInput inputActions;
+    private PlayerInput playerInput;
     private Vector2 moveInput;
     private Vector2 lookInput;
     private bool isGrounded = true;
@@ -21,44 +20,91 @@ public class PlayerController : NetworkBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        inputActions = GetComponentInParent<PlayerInput>();
-
+        playerInput = GetComponentInParent<PlayerInput>();
     }
 
-    private void OnEnable()
+    public override void OnNetworkSpawn()
     {
-        // inputActions.PlayerControls.Enable();
-        InputAction moveAction = inputActions.actions["Move"];
-        InputAction jumpAction = inputActions.actions["Jump"];
-        InputAction lookAction = inputActions.actions["Look"];
+        base.OnNetworkSpawn();
 
-        moveAction.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        moveAction.canceled += ctx => moveInput = Vector2.zero;
+        if (!IsOwner)
+        {
+            this.enabled = false; 
+            return;
+        }
 
-        lookAction.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
-        lookAction.canceled += ctx => lookInput = Vector2.zero;
-
-        jumpAction.performed += ctx => Jump();
+        SubscribeToInputs();
     }
 
-    private void OnDisable()
+    public override void OnNetworkDespawn()
     {
-        // inputActions.PlayerControls.Disable();
-        InputAction moveAction = inputActions.actions["Move"];
-        InputAction jumpAction = inputActions.actions["Jump"];
-        InputAction lookAction = inputActions.actions["Look"];
-
-        moveAction.performed -= ctx => moveInput = ctx.ReadValue<Vector2>();
-        moveAction.canceled -= ctx => moveInput = Vector2.zero;
-
-        lookAction.performed -= ctx => lookInput = ctx.ReadValue<Vector2>();
-        lookAction.canceled -= ctx => lookInput = Vector2.zero;
-
-        jumpAction.performed -= ctx => Jump();
+        base.OnNetworkDespawn();
+        if (IsOwner)
+        {
+            UnsubscribeFromInputs();
+        }
     }
+
+    private void SubscribeToInputs()
+    {
+        if (playerInput == null) return;
+
+        var moveAction = playerInput.actions["Move"];
+        var lookAction = playerInput.actions["Look"];
+        var jumpAction = playerInput.actions["Jump"];
+
+        if (moveAction != null)
+        {
+            moveAction.performed += OnMove;
+            moveAction.canceled += OnMove;
+        }
+
+        if (lookAction != null)
+        {
+            lookAction.performed += OnLook;
+            lookAction.canceled += OnLook;
+        }
+
+        if (jumpAction != null)
+        {
+            jumpAction.performed += OnJump;
+        }
+    }
+
+    private void UnsubscribeFromInputs()
+    {
+        if (playerInput == null) return;
+
+        var moveAction = playerInput.actions["Move"];
+        var lookAction = playerInput.actions["Look"];
+        var jumpAction = playerInput.actions["Jump"];
+
+        if (moveAction != null)
+        {
+            moveAction.performed -= OnMove;
+            moveAction.canceled -= OnMove;
+        }
+
+        if (lookAction != null)
+        {
+            lookAction.performed -= OnLook;
+            lookAction.canceled -= OnLook;
+        }
+
+        if (jumpAction != null)
+        {
+            jumpAction.performed -= OnJump;
+        }
+    }
+
+    private void OnMove(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
+    private void OnLook(InputAction.CallbackContext ctx) => lookInput = ctx.ReadValue<Vector2>();
+    private void OnJump(InputAction.CallbackContext ctx) => Jump();
 
     private void FixedUpdate()
     {
+        if (!IsOwner) return;
+
         HandleMovement();
         HandleLook();
     }
@@ -73,6 +119,7 @@ public class PlayerController : NetworkBehaviour
             transform.rotation = Quaternion.LookRotation(moveDirection);
 
             Vector3 targetVelocity = moveDirection * moveSpeed * speedFactor;
+
             targetVelocity.y = rb.linearVelocity.y;
             rb.linearVelocity = targetVelocity;
         }
@@ -105,7 +152,8 @@ public class PlayerController : NetworkBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Détection sol simplifiée (par contact)
+        if (!IsOwner) return; 
+
         if (collision.contacts.Length > 0)
         {
             ContactPoint contact = collision.contacts[0];
