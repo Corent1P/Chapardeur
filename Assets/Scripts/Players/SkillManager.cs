@@ -1,82 +1,164 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
+using Unity.Netcode.Components;
 
-public class SkillManager : MonoBehaviour
+public class SkillManager : NetworkBehaviour
 {
-    [SerializeField] private int currentSkillIndex = 0;
+    [Header("Configuration")]
     [SerializeField] private ASkills[] skillsList;
+
+    private NetworkVariable<int> netCurrentSkillIndex = new NetworkVariable<int>(
+        0, 
+        NetworkVariableReadPermission.Everyone, 
+        NetworkVariableWritePermission.Server
+    );
+
     private PlayerInput inputActions;
-    private ASkills currentSkill;
+    private ASkills currentSkillInstance;
 
     private void Awake()
     {
         inputActions = GetComponentInParent<PlayerInput>();
     }
 
-    private void OnEnable()
+    public override void OnNetworkSpawn()
     {
-        // inputActions.PlayerControls.Enable();
-        InputAction nextAction = inputActions.actions["NextSkill"];
-        InputAction prevAction = inputActions.actions["PreviousSkill"];
+        netCurrentSkillIndex.OnValueChanged += OnSkillIndexChanged;
 
-        nextAction.performed += ctx => NextSkill();
-        prevAction.performed += ctx => PreviousSkill();
-        EquipSkill(currentSkillIndex = 0);
-    }
+        EquipSkillLocal(netCurrentSkillIndex.Value);
 
-    private void OnDisable()
-    {
-        // inputActions.PlayerControls.Disable();
-
-        InputAction nextAction = inputActions.actions["NextSkill"];
-        InputAction prevAction = inputActions.actions["PreviousSkill"];
-        InputAction mainAction = inputActions.actions["MainAction"];
-        InputAction secondaryAction = inputActions.actions["SecondaryAction"];
-
-        nextAction.performed -= ctx => NextSkill();
-        prevAction.performed -= ctx => PreviousSkill();
-
-        if (currentSkill != null)
+        if (IsOwner)
         {
-            mainAction.performed -= ctx => currentSkill.MainAction();
-            secondaryAction.performed -= ctx => currentSkill.SecondaryAction();
+            SubscribeToInputs();
         }
     }
 
-
-    private void EquipSkill(int skillIndex)
+    public override void OnNetworkDespawn()
     {
-        if (skillIndex >= 0 && skillIndex < skillsList.Length)
-        {
-            InputAction mainAction = inputActions.actions["MainAction"];
-            InputAction secondaryAction = inputActions.actions["SecondaryAction"];
+        netCurrentSkillIndex.OnValueChanged -= OnSkillIndexChanged;
 
-            transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
-            if (currentSkill != null)
+        if (IsOwner)
+        {
+            UnsubscribeFromInputs();
+        }
+    }
+
+    private void OnSkillIndexChanged(int previousIndex, int newIndex)
+    {
+        EquipSkillLocal(newIndex);
+    }
+
+    #region Input Management (Owner Only)
+
+    private void SubscribeToInputs()
+    {
+        if (inputActions == null) return;
+
+        inputActions.actions["NextSkill"].performed += OnNextSkill;
+        inputActions.actions["PreviousSkill"].performed += OnPrevSkill;
+        inputActions.actions["MainAction"].performed += OnMainAction;
+        inputActions.actions["SecondaryAction"].performed += OnSecondaryAction;
+    }
+
+    private void UnsubscribeFromInputs()
+    {
+        if (inputActions == null) return;
+
+        inputActions.actions["NextSkill"].performed -= OnNextSkill;
+        inputActions.actions["PreviousSkill"].performed -= OnPrevSkill;
+        inputActions.actions["MainAction"].performed -= OnMainAction;
+        inputActions.actions["SecondaryAction"].performed -= OnSecondaryAction;
+    }
+
+    private void OnNextSkill(InputAction.CallbackContext ctx) => ChangeSkill(1);
+    private void OnPrevSkill(InputAction.CallbackContext ctx) => ChangeSkill(-1);
+
+    private void OnMainAction(InputAction.CallbackContext ctx)
+    {
+        if (currentSkillInstance != null && !currentSkillInstance.IsSkillLocked())
+            currentSkillInstance.MainAction();
+    }
+
+    private void OnSecondaryAction(InputAction.CallbackContext ctx)
+    {
+        if (currentSkillInstance != null && !currentSkillInstance.IsSkillLocked())
+            currentSkillInstance.SecondaryAction();
+    }
+
+    #endregion
+
+    #region Skill Logic
+
+    private void ChangeSkill(int direction)
+    {
+        if (currentSkillInstance != null && currentSkillInstance.IsSkillLocked()) return;
+
+        int newIndex = netCurrentSkillIndex.Value;
+        int attempts = 0;
+        bool foundFreeSkill = false;
+
+        while (attempts < skillsList.Length)
+        {
+            newIndex = (newIndex + direction) % skillsList.Length;
+            if (newIndex < 0) newIndex += skillsList.Length;
+
+            if (!IsSkillTakenByOthers(newIndex))
             {
-                mainAction.performed -= ctx => currentSkill.MainAction();
-                secondaryAction.performed -= ctx => currentSkill.SecondaryAction();
-                currentSkill.DeactivateSkill();
+                foundFreeSkill = true;
+                break;
             }
-            currentSkill = skillsList[skillIndex];
-            currentSkill.ActivateSkill();
-            mainAction.performed += ctx => currentSkill.MainAction();
-            secondaryAction.performed += ctx => currentSkill.SecondaryAction();
+            
+            attempts++;
+        }
+
+        if (foundFreeSkill && newIndex != netCurrentSkillIndex.Value)
+        {
+            RequestChangeSkillServerRpc(newIndex);
+        }
+        else
+        {
+            Debug.Log("Aucun autre skill disponible !");
         }
     }
 
-    private void NextSkill()
+    private bool IsSkillTakenByOthers(int indexToCheck)
     {
-        if (currentSkill.IsSkillLocked()) return;
-        currentSkillIndex = (currentSkillIndex + 1) % skillsList.Length;
-        EquipSkill(currentSkillIndex);
+        SkillManager[] allPlayers = FindObjectsByType<SkillManager>(FindObjectsSortMode.None);
+
+        foreach (var player in allPlayers)
+        {
+            if (player == this) continue;
+
+            if (player.netCurrentSkillIndex.Value == indexToCheck)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private void PreviousSkill()
+    [ServerRpc]
+    private void RequestChangeSkillServerRpc(int newIndex)
     {
-        if (currentSkill.IsSkillLocked()) return;
-        currentSkillIndex = (currentSkillIndex - 1 + skillsList.Length) % skillsList.Length;
-        EquipSkill(currentSkillIndex);
+        netCurrentSkillIndex.Value = newIndex;
     }
 
+    private void EquipSkillLocal(int skillIndex)
+    {
+        if (skillIndex < 0 || skillIndex >= skillsList.Length) return;
+
+        if (currentSkillInstance != null)
+        {
+            currentSkillInstance.DeactivateSkill();
+        }
+
+        currentSkillInstance = skillsList[skillIndex];
+        
+        GetComponent<NetworkTransform>().transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+
+        currentSkillInstance.ActivateSkill();
+    }
+
+    #endregion
 }
