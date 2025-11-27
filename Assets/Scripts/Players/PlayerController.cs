@@ -15,6 +15,7 @@ public class PlayerController : NetworkBehaviour
     private Rigidbody rb;
     private PlayerInput inputActions;
     private Vector2 moveInput;
+    private Vector2 lookInput;
     private bool isGrounded = true;
 
     private void Awake()
@@ -29,9 +30,13 @@ public class PlayerController : NetworkBehaviour
         // inputActions.PlayerControls.Enable();
         InputAction moveAction = inputActions.actions["Move"];
         InputAction jumpAction = inputActions.actions["Jump"];
+        InputAction lookAction = inputActions.actions["Look"];
 
-        moveAction.performed += ctx => moveInput = -ctx.ReadValue<Vector2>();
+        moveAction.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         moveAction.canceled += ctx => moveInput = Vector2.zero;
+
+        lookAction.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
+        lookAction.canceled += ctx => lookInput = Vector2.zero;
 
         jumpAction.performed += ctx => Jump();
     }
@@ -41,9 +46,13 @@ public class PlayerController : NetworkBehaviour
         // inputActions.PlayerControls.Disable();
         InputAction moveAction = inputActions.actions["Move"];
         InputAction jumpAction = inputActions.actions["Jump"];
+        InputAction lookAction = inputActions.actions["Look"];
 
-        moveAction.performed -= ctx => moveInput = -ctx.ReadValue<Vector2>();
+        moveAction.performed -= ctx => moveInput = ctx.ReadValue<Vector2>();
         moveAction.canceled -= ctx => moveInput = Vector2.zero;
+
+        lookAction.performed -= ctx => lookInput = ctx.ReadValue<Vector2>();
+        lookAction.canceled -= ctx => lookInput = Vector2.zero;
 
         jumpAction.performed -= ctx => Jump();
     }
@@ -51,6 +60,7 @@ public class PlayerController : NetworkBehaviour
     private void FixedUpdate()
     {
         HandleMovement();
+        HandleLook();
     }
 
     private void HandleMovement()
@@ -69,6 +79,18 @@ public class PlayerController : NetworkBehaviour
         else
         {
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        }
+    }
+
+    private void HandleLook()
+    {
+        if (lookInput == Vector2.zero) return;
+
+        Vector3 moveDirection = new Vector3(lookInput.x, 0f, lookInput.y);
+
+        if (moveDirection.sqrMagnitude > 0.01f)
+        {
+            transform.rotation = Quaternion.LookRotation(moveDirection);
         }
     }
 
