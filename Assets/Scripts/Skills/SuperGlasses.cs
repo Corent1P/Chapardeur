@@ -90,41 +90,55 @@ public class SuperGlasses : ASkills
     {
         if (!IsOwner) return;
         if (lastGlassesTime > 0) return;
+        if (isHackingGameActive) return;
         lastGlassesTime = glassesCooldown;
-        
-        // On demande au serveur de changer l'état
+
         ToggleGlassesServerRpc();
     }
 
     [ServerRpc]
     private void ToggleGlassesServerRpc()
     {
-        // Le serveur inverse la valeur, ce qui déclenche OnValueChanged partout
         netIsGlassesOn.Value = !netIsGlassesOn.Value;
+
+        if (superGlassesLight != null)
+        {
+             if (isGlassesOn) 
+                 Reveal.RegisterLight(superGlassesLight);
+             else 
+                 Reveal.UnregisterLight(superGlassesLight);
+        }
+    }
+
+    private void UpdateLightRegistration()
+    {
+        if (superGlassesLight != null)
+        {
+            if (isGlassesOn && superGlassesLight.enabled)
+                Reveal.RegisterLight(superGlassesLight);
+            else
+                Reveal.UnregisterLight(superGlassesLight);
+        }
     }
 
     public override void SecondaryAction()
     {
         if (!IsOwner) return;
-        
-        // Vérification locale
+
         if (!isGlassesOn || currentSelectedElement == null) return;
 
         if (currentSelectedElement.GetIsIlluminated())
         {
-            // Lance le mini-jeu LOCALEMENT (UI)
             StartLockpicking(2); 
         }
     }
 
     public void StartLockpicking(int difficulty)
     {
-        // ... (Initialisation du jeu UI local) ...
         AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
         isHackingGameActive = true;
         isSkillLocked = true;
-        
-        // Stop movement local
+
         if(playerRigidbody != null) playerRigidbody.linearVelocity = Vector3.zero;
 
         selectedPrefab.Initialize(difficulty, 100f);
@@ -132,9 +146,7 @@ public class SuperGlasses : ASkills
             onWin: () => {
                 isHackingGameActive = false;
                 isSkillLocked = false;
-                
-                // IMPORTANT : On dit au serveur qu'on a gagné !
-                // On envoie l'ID de l'objet hacké (via NetworkObject)
+
                 if(currentSelectedElement != null)
                 {
                     var netObj = currentSelectedElement.GetComponent<NetworkObject>();
@@ -193,6 +205,8 @@ public class SuperGlasses : ASkills
             superGlassesLight.enabled = isGlassesOn;
         }
 
+        UpdateLightRegistration();
+
         return this;
     }
 
@@ -201,6 +215,8 @@ public class SuperGlasses : ASkills
         base.DeactivateSkill();
         superGlassesObject.SetActive(false);
         superGlassesLight.enabled = false;
+        Reveal.UnregisterLight(superGlassesLight);
+
         if (isGlassesOn)
             ToggleGlassesServerRpc();
 

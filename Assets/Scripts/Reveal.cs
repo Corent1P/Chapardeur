@@ -1,82 +1,86 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class Reveal : MonoBehaviour
 {
     [SerializeField] private Material revealMaterial;
-    [SerializeField] private Light revealLight;
     
     [Header("Reveal Settings")]
     [SerializeField] private float revealPower = 5f;
     [SerializeField] private float revealSoftness = 0.2f;
     [SerializeField] private float distanceAttenuation = 0f;
 
-    private void OnEnable()
+    private static List<Light> activeRevealLights = new List<Light>();
+
+    public static void RegisterLight(Light light)
     {
-        if (revealMaterial == null || revealLight == null)
-        {
-            Debug.LogWarning("Reveal: Assignez le Material et le Light (Spot) dans l'inspecteur!");
-        }
+        if (!activeRevealLights.Contains(light))
+            activeRevealLights.Add(light);
+    }
+
+    public static void UnregisterLight(Light light)
+    {
+        if (activeRevealLights.Contains(light))
+            activeRevealLights.Remove(light);
     }
 
     private void Update()
     {
-        if (revealMaterial == null || revealLight == null)
-            return;
+        if (revealMaterial == null) return;
 
-        // Vérifier que c'est un Spot Light
-        if (revealLight.type != LightType.Spot)
+        Light bestLight = GetBestLight();
+
+        if (bestLight != null)
         {
-            Debug.LogWarning("La lumière doit être un Spot Light !");
-            return;
+            revealMaterial.SetFloat("_LightEnabled", 1f);
+            revealMaterial.SetVector("_LightPos", bestLight.transform.position);
+            revealMaterial.SetVector("_LightDir", -bestLight.transform.forward);
+            revealMaterial.SetFloat("_LightAngle", bestLight.spotAngle);
+            revealMaterial.SetFloat("_RevealPower", revealPower);
+            revealMaterial.SetFloat("_RevealSoftness", revealSoftness);
+            revealMaterial.SetFloat("_DistanceAttenuation", distanceAttenuation);
         }
-
-        // Vérifier que la lumière est activée
-        if (!revealLight.enabled)
+        else
         {
             revealMaterial.SetFloat("_LightEnabled", 0f);
-            return;
         }
-
-        revealMaterial.SetFloat("_LightEnabled", 1f);
-        
-        // // Calculer si l'objet est éclairé
-        // Vector3 toLight = (revealLight.transform.position - transform.position).normalized;
-        // Vector3 lightDir = -revealLight.transform.forward;
-        // float dotProduct = Vector3.Dot(toLight, lightDir);
-        // float coneAngle = Mathf.Cos(Mathf.Deg2Rad * revealLight.spotAngle * 0.5f);
-        
-        // // Calculer la distance
-        // float dist = Vector3.Distance(revealLight.transform.position, transform.position);
-        // float distFalloff = 1f / (1f + dist * dist * distanceAttenuation);
-        
-        // // Déterminer si éclairé
-        // float revealFactor = Mathf.Pow(Mathf.Clamp01((dotProduct - coneAngle) * revealPower), revealPower) * distFalloff;
-        // isIlluminated = revealFactor > 0.01f; // Seuil de 1% pour éviter les artefacts
-        // lastRevealFactor = revealFactor;
-        
-        // Mettre à jour les propriétés du shader
-        revealMaterial.SetVector("_LightPos", revealLight.transform.position);
-        revealMaterial.SetVector("_LightDir", -revealLight.transform.forward);
-        revealMaterial.SetFloat("_LightAngle", revealLight.spotAngle);
-        revealMaterial.SetFloat("_RevealPower", revealPower);
-        revealMaterial.SetFloat("_RevealSoftness", revealSoftness);
-        revealMaterial.SetFloat("_DistanceAttenuation", distanceAttenuation);
     }
 
     public bool GetIsIlluminated()
     {
-        Vector3 toLight = (revealLight.transform.position - transform.position).normalized;
-        Vector3 lightDir = -revealLight.transform.forward;
-        float dotProduct = Vector3.Dot(toLight, lightDir);
-        float coneAngle = Mathf.Cos(Mathf.Deg2Rad * revealLight.spotAngle * 0.5f);
-        
-        // Calculer la distance
-        float dist = Vector3.Distance(revealLight.transform.position, transform.position);
-        float distFalloff = 1f / (1f + dist * dist * distanceAttenuation);
-        
-        // Déterminer si éclairé
-        float revealFactor = Mathf.Pow(Mathf.Clamp01((dotProduct - coneAngle) * revealPower), revealPower) * distFalloff;
-        return revealFactor > 0.01f; // Seuil de 1% pour éviter les artefacts
+        return GetBestLight() != null;
+    }
+
+    private Light GetBestLight()
+    {
+        Light bestCandidate = null;
+        float minDistSq = float.MaxValue;
+
+        foreach (var light in activeRevealLights)
+        {
+            if (light == null || !light.enabled) continue;
+
+            float distSq = (transform.position - light.transform.position).sqrMagnitude;
+            if (distSq > (light.range * light.range)) continue;
+
+            Vector3 toObject = (transform.position - light.transform.position).normalized;
+            Vector3 lightDir = light.transform.forward;
+            float dotProduct = Vector3.Dot(toObject, lightDir);
+            
+            float spotHalfAngle = light.spotAngle * 0.5f;
+            float threshold = Mathf.Cos(spotHalfAngle * Mathf.Deg2Rad);
+
+            if (dotProduct > threshold)
+            {
+                if (distSq < minDistSq)
+                {
+                    minDistSq = distSq;
+                    bestCandidate = light;
+                }
+            }
+        }
+
+        return bestCandidate;
     }
 }
