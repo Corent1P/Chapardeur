@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
+using Unity.Netcode; 
 
 public class SkyWalker : ASkills
 {
@@ -13,54 +14,49 @@ public class SkyWalker : ASkills
     private bool isAgainstGlass = false;
     private bool isHopping = false;
     private bool isDetaching = false;
+    
     private PlayerController playerController;
     private Rigidbody playerRigidbody;
-    private PlayerInput inputActions;
+    private PlayerInput playerInput;
     private Vector2 moveInput;
-
-    private void OnEnable()
-    {
-        if (inputActions == null)
-            inputActions = GetComponentInParent<PlayerInput>();
-        // inputActions.PlayerControls.Enable();
-        InputAction moveAction = inputActions.actions["Move"];
-
-        moveAction.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        moveAction.canceled += ctx => moveInput = Vector2.zero;
-    }
-
-    private void OnDisable()
-    {
-        // inputActions.PlayerControls.Disable();
-        isHopping = false;
-        InputAction moveAction = inputActions.actions["Move"];
-        moveAction.performed -= ctx => moveInput = ctx.ReadValue<Vector2>();
-        moveAction.canceled -= ctx => moveInput = Vector2.zero;
-    }
-
+    
     private void Start()
     {
-        if (inputActions == null)
-            inputActions = GetComponentInParent<PlayerInput>();
         playerController = GetComponentInParent<PlayerController>();
-        if (playerController == null)
-        {
-            Debug.LogWarning("PlayerController not found in parent objects.");
-        }
+        playerRigidbody = GetComponentInParent<Rigidbody>();
+        playerInput = GetComponentInParent<PlayerInput>();
+    }
 
-        playerRigidbody = playerController.GetComponent<Rigidbody>();
-        if (playerRigidbody == null)
+    private void SubscribeInputs()
+    {
+        if (playerInput == null) return;
+        var moveAction = playerInput.actions["Move"];
+        if (moveAction != null)
         {
-            Debug.LogWarning("Rigidbody component not found on PlayerController.");
+            moveAction.performed += OnMove;
+            moveAction.canceled += OnMove;
         }
     }
+
+    private void UnsubscribeInputs()
+    {
+        if (playerInput == null) return;
+        var moveAction = playerInput.actions["Move"];
+        if (moveAction != null)
+        {
+            moveAction.performed -= OnMove;
+            moveAction.canceled -= OnMove;
+        }
+    }
+
+    private void OnMove(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
 
     private void LateUpdate()
     {
-        if (!isActive) return;
-        if (!isAgainstGlass) return;
+        // SÉCURITÉ RÉSEAU
+        if (!IsOwner || !isActive) return;
 
-        if (isHopping) return;
+        if (!isAgainstGlass || isHopping) return;
 
         if (moveInput.sqrMagnitude > 0.01f)
         {
@@ -68,33 +64,28 @@ public class SkyWalker : ASkills
         }
         else
         {
+            // On force la vélocité à 0 pour coller à la vitre
+            // C'est de la physique locale, le NetworkTransform sync le résultat
             playerRigidbody.linearVelocity = Vector3.zero;
         }
     }
 
+    // ... (HopRoutine reste identique car physique locale) ...
     private IEnumerator HopRoutine()
     {
         isHopping = true;
-
         Vector3 moveDirection = (transform.up * moveInput.y + transform.right * moveInput.x).normalized;
         moveDirection.z = 0;
-
         playerRigidbody.AddForce(moveDirection * hopForce, ForceMode.Impulse);
-
         yield return new WaitForSeconds(hopDuration);
-
-        if (isAgainstGlass)
-        {
-            playerRigidbody.linearVelocity = Vector3.zero;
-        }
-
+        if (isAgainstGlass) playerRigidbody.linearVelocity = Vector3.zero;
         yield return new WaitForSeconds(hopCooldown);
-
         isHopping = false;
     }
 
     public override void MainAction()
     {
+        if (!IsOwner) return; // Sécurité
         if (!isAgainstGlass || isDetaching) return;
         StartCoroutine(DetachFromGlassRoutine());
     }
@@ -125,8 +116,9 @@ public class SkyWalker : ASkills
 
     public void SetAgainstGlass(bool status)
     {
-        if (!isActive) return;
+        if (!IsOwner || !isActive) return;
 
+        // Logique de Raycast locale
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1f) && status)
         {
             if (hit.collider.CompareTag("Glass"))
@@ -137,7 +129,9 @@ public class SkyWalker : ASkills
                     OnAgainstGlassChanged();
                 }
             }
-        } else if (!status) {
+        } 
+        else if (!status) 
+        {
             if (isAgainstGlass != status)
             {
                 isAgainstGlass = status;
@@ -148,28 +142,28 @@ public class SkyWalker : ASkills
 
     private void OnAgainstGlassChanged()
     {
+        // Ces changements (Gravité, Enabled) doivent rester LOCAUX.
+        // On ne veut pas désactiver le NetworkTransform, juste la physique locale.
         if (isAgainstGlass)
         {
-            // playerController.SetCanJumpOnGlass(true);
             playerRigidbody.useGravity = false;
-            playerController.enabled = false;
+            playerController.enabled = false; // Désactive le mouvement standard
         }
         else
         {
-            // playerController.SetCanJumpOnGlass(false);
             playerRigidbody.useGravity = true;
-            if (!isDetaching)
-            {
-                playerController.enabled = true;
-            }
+            if (!isDetaching) playerController.enabled = true;
         }
     }
 
     public override ISkills ActivateSkill()
     {
         base.ActivateSkill();
-        transform.localScale = Vector3.one * 3.0f;
-
+        // Le changement de taille ici est purement visuel/local temporaire ?
+        // Si c'est important, voir SizeShifter.
+        transform.localScale = Vector3.one * 3.0f; 
+        
+        if (IsOwner) SubscribeInputs();
         return this;
     }
 
@@ -177,7 +171,9 @@ public class SkyWalker : ASkills
     {
         base.DeactivateSkill();
         transform.localScale = Vector3.one;
-
+        
+        if (IsOwner) UnsubscribeInputs();
         return this;
     }
+    
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using Unity.Netcode;
 
 public class SuperGlasses : ASkills
 {
@@ -13,7 +14,6 @@ public class SuperGlasses : ASkills
     [SerializeField] [Range(0f, 30f)] private float selectionRange = 10f;
     [SerializeField][Range(0f, 180f)] private float maxAngle = 20f;
     private Transform playerTransform;
-    // [SerializeField] private Reveal tmpObject;
     private Reveal currentSelectedElement = null;
 
 
@@ -21,8 +21,192 @@ public class SuperGlasses : ASkills
     private bool isHackingGameActive = false;
     private Rigidbody playerRigidbody;
 
+    private NetworkVariable<bool> netIsGlassesOn = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server
+    );
 
-    // ---------------------------------------------------
+    public override void OnNetworkSpawn()
+    {
+        // On s'abonne pour voir les autres mettre leurs lunettes
+        netIsGlassesOn.OnValueChanged += OnGlassesStateChanged;
+        
+        // Initialisation visuelle
+        UpdateGlassesVisual(netIsGlassesOn.Value);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        netIsGlassesOn.OnValueChanged -= OnGlassesStateChanged;
+    }
+
+    // Callback appelé sur TOUS les clients quand la variable change
+    private void OnGlassesStateChanged(bool previous, bool current)
+    {
+        UpdateGlassesVisual(current);
+    }
+
+    private void UpdateGlassesVisual(bool isOn)
+    {
+        // Lance l'animation locale
+        StartCoroutine(MoveGlasses(isOn ? 0f : -90f));
+        if (superGlassesLight != null) superGlassesLight.enabled = isOn;
+        isGlassesOn = isOn; // Met à jour la variable locale pour la logique
+    }
+
+    IEnumerator MoveGlasses(float degree)
+    {
+        float time = 0f;
+        float duration = 0.3f;
+        Quaternion initialRotation = superGlassesObject.transform.localRotation;
+        Quaternion targetRotation = Quaternion.Euler(degree, 0f, 0f);
+
+        while (time < duration)
+        {
+            superGlassesObject.transform.localRotation = Quaternion.Slerp(initialRotation, targetRotation, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        superGlassesObject.transform.localRotation = targetRotation;
+        if (superGlassesLight != null)
+        {
+            superGlassesLight.enabled = isGlassesOn;
+        }
+    }
+
+    private void Update()
+    {
+        // Seul le propriétaire fait les Raycast de détection
+        if (!IsOwner || !isActive) return;
+
+        if (lastGlassesTime > 0) lastGlassesTime -= Time.deltaTime;
+
+        if (isGlassesOn) // isGlassesOn est sync via le callback
+        {
+            FindBestHiddenElement();
+        }
+    }
+
+    public override void MainAction()
+    {
+        if (!IsOwner) return;
+        if (lastGlassesTime > 0) return;
+        lastGlassesTime = glassesCooldown;
+        
+        // On demande au serveur de changer l'état
+        ToggleGlassesServerRpc();
+    }
+
+    [ServerRpc]
+    private void ToggleGlassesServerRpc()
+    {
+        // Le serveur inverse la valeur, ce qui déclenche OnValueChanged partout
+        netIsGlassesOn.Value = !netIsGlassesOn.Value;
+    }
+
+    public override void SecondaryAction()
+    {
+        if (!IsOwner) return;
+        
+        // Vérification locale
+        if (!isGlassesOn || currentSelectedElement == null) return;
+
+        if (currentSelectedElement.GetIsIlluminated())
+        {
+            // Lance le mini-jeu LOCALEMENT (UI)
+            StartLockpicking(2); 
+        }
+    }
+
+    public void StartLockpicking(int difficulty)
+    {
+        // ... (Initialisation du jeu UI local) ...
+        AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
+        isHackingGameActive = true;
+        isSkillLocked = true;
+        
+        // Stop movement local
+        if(playerRigidbody != null) playerRigidbody.linearVelocity = Vector3.zero;
+
+        selectedPrefab.Initialize(difficulty, 100f);
+        selectedPrefab.BeginGame(
+            onWin: () => {
+                isHackingGameActive = false;
+                isSkillLocked = false;
+                
+                // IMPORTANT : On dit au serveur qu'on a gagné !
+                // On envoie l'ID de l'objet hacké (via NetworkObject)
+                if(currentSelectedElement != null)
+                {
+                    var netObj = currentSelectedElement.GetComponent<NetworkObject>();
+                    if(netObj != null)
+                    {
+                        UnlockObjectServerRpc(netObj.NetworkObjectId);
+                    }
+                }
+            },
+            onLose: () => {
+                isHackingGameActive = false;
+                isSkillLocked = false;
+                // Alerter les gardes (ServerRpc eventuel)
+            }
+        );
+    }
+
+    [ServerRpc]
+    private void UnlockObjectServerRpc(ulong targetObjectId)
+    {
+        // Le serveur valide l'ouverture
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetObjectId, out NetworkObject netObj))
+        {
+            // Logique d'ouverture (ex: appeler une fonction sur le coffre)
+            var revealScript = netObj.GetComponent<Reveal>();
+            // revealScript.Unlock(); 
+            Debug.Log($"Objet {targetObjectId} déverrouillé par le serveur !");
+        }
+    }
+
+    private void Start()
+    {
+        if (superGlassesObject != null)
+        {
+            superGlassesObject.SetActive(false);
+        }
+        if (superGlassesLight != null)
+        {
+            superGlassesLight.enabled = false;
+        }
+        playerRigidbody = GetComponentInParent<Rigidbody>();
+        if (playerRigidbody == null)
+        {
+            Debug.LogWarning("Rigidbody component not found on PlayerController.");
+        }
+        playerTransform = transform;
+    }
+
+    public override ISkills ActivateSkill()
+    {
+        Debug.Log("SuperGlasses Activated");
+        base.ActivateSkill();
+        superGlassesObject.SetActive(true);
+        if (superGlassesLight != null)
+        {
+            superGlassesLight.enabled = isGlassesOn;
+        }
+
+        return this;
+    }
+
+    public override ISkills DeactivateSkill()
+    {
+        base.DeactivateSkill();
+        superGlassesObject.SetActive(false);
+        superGlassesLight.enabled = false;
+        if (isGlassesOn)
+            ToggleGlassesServerRpc();
+
+        return this;
+    }
+
     private void FindBestHiddenElement()
     {
         if (playerTransform == null) return;
@@ -122,137 +306,5 @@ public class SuperGlasses : ASkills
             Gizmos.DrawLine(playerTransform.position, currentSelectedElement.transform.position);
             Gizmos.DrawWireSphere(currentSelectedElement.transform.position, 0.5f);
         }
-    }
-    // ---------------------------------------------------
-
-    private void Start()
-    {
-        if (superGlassesObject != null)
-        {
-            superGlassesObject.SetActive(false);
-        }
-        if (superGlassesLight != null)
-        {
-            superGlassesLight.enabled = false;
-        }
-        playerRigidbody = GetComponentInParent<Rigidbody>();
-        if (playerRigidbody == null)
-        {
-            Debug.LogWarning("Rigidbody component not found on PlayerController.");
-        }
-        playerTransform = transform;
-    }
-
-    private void Update()
-    {
-        if (!isActive) return;
-
-        if(lastGlassesTime > 0)
-            lastGlassesTime -= Time.deltaTime;
-
-        if (isGlassesOn)
-        {
-            FindBestHiddenElement();
-        }
-    }
-
-    public override void MainAction()
-    {
-        if (lastGlassesTime > 0) return;
-        lastGlassesTime = glassesCooldown;
-        // Implementation for SuperGlasses main action
-        ToggleGlasses();
-    }
-
-    public override void SecondaryAction()
-    {
-        if (isGlassesOn == false) return;
-        if (currentSelectedElement == null) return;
-        // Implementation for SuperGlasses secondary action
-        Debug.Log("Is element revealed: " + currentSelectedElement.GetIsIlluminated());
-        if (currentSelectedElement.GetIsIlluminated())
-        {
-            Debug.Log("Element is not revealed, starting lockpicking mini-game.");
-            StartLockpicking(2); // Exemple de difficulté
-        }
-        else
-        {
-            Debug.Log("Element is already revealed, no need to hack.");
-        }
-    }
-
-    public void StartLockpicking(int difficulty)
-    {
-        AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
-
-        isHackingGameActive = true;
-        isSkillLocked = true;
-        playerRigidbody.linearVelocity = Vector3.zero;
-        selectedPrefab.Initialize(difficulty, 100f); // Exemple de timeLimit de 10 secondes
-        selectedPrefab.BeginGame(
-            onWin: () => {
-                Debug.Log("Coffre ouvert !");
-                isHackingGameActive = false;
-                isSkillLocked = false;
-                // Donner le loot au joueur
-            },
-            onLose: () => {
-                Debug.Log("Échec, le garde a entendu !");
-                isHackingGameActive = false;
-                isSkillLocked = false;
-                // Alerter les gardes
-            }
-        );
-    }
-
-    private void ToggleGlasses()
-    {
-        if (isHackingGameActive) return;
-        isGlassesOn = !isGlassesOn;
-        StartCoroutine(MoveGlasses(isGlassesOn ? 0f : -90f));
-    }
-
-    IEnumerator MoveGlasses(float degree)
-    {
-        float time = 0f;
-        float duration = 0.3f;
-        Quaternion initialRotation = superGlassesObject.transform.localRotation;
-        Quaternion targetRotation = Quaternion.Euler(degree, 0f, 0f);
-
-        while (time < duration)
-        {
-            superGlassesObject.transform.localRotation = Quaternion.Slerp(initialRotation, targetRotation, time / duration);
-            time += Time.deltaTime;
-            yield return null;
-        }
-        superGlassesObject.transform.localRotation = targetRotation;
-        if (superGlassesLight != null)
-        {
-            superGlassesLight.enabled = isGlassesOn;
-        }
-    }
-
-    public override ISkills ActivateSkill()
-    {
-        Debug.Log("SuperGlasses Activated");
-        base.ActivateSkill();
-        superGlassesObject.SetActive(true);
-        if (superGlassesLight != null)
-        {
-            superGlassesLight.enabled = isGlassesOn;
-        }
-
-        return this;
-    }
-
-    public override ISkills DeactivateSkill()
-    {
-        base.DeactivateSkill();
-        superGlassesObject.SetActive(false);
-        superGlassesLight.enabled = false;
-        if (isGlassesOn)
-            ToggleGlasses();
-
-        return this;
     }
 }

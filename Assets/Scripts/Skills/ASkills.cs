@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class ASkills : MonoBehaviour, ISkills
+public class ASkills : NetworkBehaviour, ISkills
 {
     [SerializeField] private Mesh AppearanceMesh;
     [SerializeField] private Material AppearanceMaterial;
