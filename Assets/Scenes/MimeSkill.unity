@@ -211,15 +211,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf2803190eef6364f882aa81f111d09d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MimeSkill
+  ShowTopMostFoldoutHeaderGroup: 1
   AppearanceMesh: {fileID: 4300034, guid: 680bc07baa32f604485ed600695b8afc, type: 3}
   AppearanceMaterial: {fileID: 2100000, guid: 835ea6cfdb4924ef5977de514af3b314, type: 2}
   MimeObjectMaterial: {fileID: 2100000, guid: 520120e81bbf071449149f6a15066981, type: 2}
   mimeRange: 4
   maxAngle: 60
-  morphVFX: {fileID: 8926484042661614526, guid: d5c24206362fcb44cbeaf6b2732899ca, type: 3}
+  morphVFX: {fileID: 1193425748}
   MimeObjects:
   - {fileID: 2514267368294221660, guid: 8309838481d4b7f4cafa47dc6e918b65, type: 3}
   - {fileID: 6368758339070869532, guid: ce276c0a4fc418241961d4914e222db7, type: 3}
+  scaleAnimationDuration: 0.3
+  scaleCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &79715756 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7330300561806807777, guid: f189c1a90fd4540bd85a8087b7ee326a, type: 3}
