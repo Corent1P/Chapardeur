@@ -207,7 +207,7 @@ public class GrapplingHook : ASkills
     private void FindBestGrapplingPoint()
     {
         if (playerTransform == null) return;
-        GameObject[] grapplingPoints = GameObject.FindGameObjectsWithTag("MimeObject");
+        GameObject[] grapplingPoints = GameObject.FindGameObjectsWithTag("Grappling Point");
         GameObject bestPoint = null;
         float minDistance = float.MaxValue;
 
