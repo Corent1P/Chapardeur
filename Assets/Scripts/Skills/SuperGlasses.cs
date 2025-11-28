@@ -27,10 +27,7 @@ public class SuperGlasses : ASkills
 
     public override void OnNetworkSpawn()
     {
-        // On s'abonne pour voir les autres mettre leurs lunettes
         netIsGlassesOn.OnValueChanged += OnGlassesStateChanged;
-        
-        // Initialisation visuelle
         UpdateGlassesVisual(netIsGlassesOn.Value);
     }
 
@@ -39,18 +36,29 @@ public class SuperGlasses : ASkills
         netIsGlassesOn.OnValueChanged -= OnGlassesStateChanged;
     }
 
-    // Callback appelé sur TOUS les clients quand la variable change
     private void OnGlassesStateChanged(bool previous, bool current)
     {
         UpdateGlassesVisual(current);
     }
 
+    // Cette fonction gère maintenant TOUT l'aspect local (Visuel + Logique Reveal)
     private void UpdateGlassesVisual(bool isOn)
     {
-        // Lance l'animation locale
+        StopAllCoroutines(); // Sécurité pour éviter conflit d'anim
         StartCoroutine(MoveGlasses(isOn ? 0f : -90f));
-        if (superGlassesLight != null) superGlassesLight.enabled = isOn;
-        isGlassesOn = isOn; // Met à jour la variable locale pour la logique
+        
+        isGlassesOn = isOn;
+
+        if (superGlassesLight != null) 
+        {
+            superGlassesLight.enabled = isOn;
+
+            // C'est ici que chaque client met à jour sa propre liste Reveal
+            if (isOn)
+                Reveal.RegisterLight(superGlassesLight);
+            else
+                Reveal.UnregisterLight(superGlassesLight);
+        }
     }
 
     IEnumerator MoveGlasses(float degree)
@@ -67,20 +75,15 @@ public class SuperGlasses : ASkills
             yield return null;
         }
         superGlassesObject.transform.localRotation = targetRotation;
-        if (superGlassesLight != null)
-        {
-            superGlassesLight.enabled = isGlassesOn;
-        }
     }
 
     private void Update()
     {
-        // Seul le propriétaire fait les Raycast de détection
         if (!IsOwner || !isActive) return;
 
         if (lastGlassesTime > 0) lastGlassesTime -= Time.deltaTime;
 
-        if (isGlassesOn) // isGlassesOn est sync via le callback
+        if (isGlassesOn)
         {
             FindBestHiddenElement();
         }
@@ -99,26 +102,9 @@ public class SuperGlasses : ASkills
     [ServerRpc]
     private void ToggleGlassesServerRpc()
     {
+        // Le serveur change juste la variable.
+        // Le callback OnValueChanged fera le travail visuel sur tous les clients.
         netIsGlassesOn.Value = !netIsGlassesOn.Value;
-
-        if (superGlassesLight != null)
-        {
-             if (isGlassesOn) 
-                 Reveal.RegisterLight(superGlassesLight);
-             else 
-                 Reveal.UnregisterLight(superGlassesLight);
-        }
-    }
-
-    private void UpdateLightRegistration()
-    {
-        if (superGlassesLight != null)
-        {
-            if (isGlassesOn && superGlassesLight.enabled)
-                Reveal.RegisterLight(superGlassesLight);
-            else
-                Reveal.UnregisterLight(superGlassesLight);
-        }
     }
 
     public override void SecondaryAction()
@@ -135,6 +121,7 @@ public class SuperGlasses : ASkills
 
     public void StartLockpicking(int difficulty)
     {
+        // ... (Code identique à votre version) ...
         AHackingGame selectedPrefab = hackingGameList[Random.Range(0, hackingGameList.Length)];
         isHackingGameActive = true;
         isSkillLocked = true;
@@ -159,7 +146,6 @@ public class SuperGlasses : ASkills
             onLose: () => {
                 isHackingGameActive = false;
                 isSkillLocked = false;
-                // Alerter les gardes (ServerRpc eventuel)
             }
         );
     }
@@ -167,11 +153,9 @@ public class SuperGlasses : ASkills
     [ServerRpc]
     private void UnlockObjectServerRpc(ulong targetObjectId)
     {
-        // Le serveur valide l'ouverture
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetObjectId, out NetworkObject netObj))
         {
-            // Logique d'ouverture (ex: appeler une fonction sur le coffre)
-            var revealScript = netObj.GetComponent<Reveal>();
+            // var revealScript = netObj.GetComponent<Reveal>();
             // revealScript.Unlock(); 
             Debug.Log($"Objet {targetObjectId} déverrouillé par le serveur !");
         }
@@ -179,19 +163,10 @@ public class SuperGlasses : ASkills
 
     private void Start()
     {
-        if (superGlassesObject != null)
-        {
-            superGlassesObject.SetActive(false);
-        }
-        if (superGlassesLight != null)
-        {
-            superGlassesLight.enabled = false;
-        }
+        if (superGlassesObject != null) superGlassesObject.SetActive(false);
+        if (superGlassesLight != null) superGlassesLight.enabled = false;
+        
         playerRigidbody = GetComponentInParent<Rigidbody>();
-        if (playerRigidbody == null)
-        {
-            Debug.LogWarning("Rigidbody component not found on PlayerController.");
-        }
         playerTransform = transform;
     }
 
@@ -200,12 +175,9 @@ public class SuperGlasses : ASkills
         Debug.Log("SuperGlasses Activated");
         base.ActivateSkill();
         superGlassesObject.SetActive(true);
-        if (superGlassesLight != null)
-        {
-            superGlassesLight.enabled = isGlassesOn;
-        }
-
-        UpdateLightRegistration();
+        
+        // On synchronise l'état visuel avec l'état réseau actuel
+        UpdateGlassesVisual(netIsGlassesOn.Value);
 
         return this;
     }
@@ -214,15 +186,25 @@ public class SuperGlasses : ASkills
     {
         base.DeactivateSkill();
         superGlassesObject.SetActive(false);
-        superGlassesLight.enabled = false;
-        Reveal.UnregisterLight(superGlassesLight);
+        
+        // On force l'extinction locale en quittant le skill
+        if (superGlassesLight != null)
+        {
+            superGlassesLight.enabled = false;
+            Reveal.UnregisterLight(superGlassesLight);
+        }
 
-        if (isGlassesOn)
+        // Si on est le propriétaire et que les lunettes étaient allumées, on demande au serveur de les éteindre
+        // pour que l'état reste cohérent si on reprend le skill plus tard
+        if (IsOwner && netIsGlassesOn.Value)
+        {
             ToggleGlassesServerRpc();
+        }
 
         return this;
     }
 
+    // ... (Reste des fonctions FindBestHiddenElement, OnDrawGizmos identiques) ...
     private void FindBestHiddenElement()
     {
         if (playerTransform == null) return;

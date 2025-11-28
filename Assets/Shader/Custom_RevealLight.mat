@@ -35,7 +35,7 @@ Material:
     m_Floats:
     - _DistanceAttenuation: 0
     - _LightAngle: 82.96939
-    - _LightEnabled: 1
+    - _LightEnabled: 0
     - _Metallic: 0
     - _RevealPower: 5
     - _RevealSoftness: 0.2
@@ -43,7 +43,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.44705883, g: 0.40392157, b: 0.69411767, a: 1}
     - _Color: {r: 0.8396226, g: 0.1544589, b: 0.1544589, a: 1}
-    - _LightDir: {r: -0, g: -0, b: -1, a: 0}
-    - _LightPos: {r: 5.72, g: 2.21, b: 1.37, a: 0}
+    - _LightDir: {r: -0.9738297, g: -1.0550438e-10, b: 0.22727942, a: 0}
+    - _LightPos: {r: -3.2372992, g: 1.6699997, b: 11.468076, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
