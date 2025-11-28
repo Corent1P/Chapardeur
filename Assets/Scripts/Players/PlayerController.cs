@@ -109,7 +109,7 @@ public class PlayerController : NetworkBehaviour
         HandleLook();
     }
 
-    private void HandleMovement()
+private void HandleMovement()
     {
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
 
@@ -120,6 +120,33 @@ public class PlayerController : NetworkBehaviour
 
             Vector3 targetVelocity = moveDirection * moveSpeed * speedFactor;
 
+            // --- Check Camera Limits ---
+            Vector3 futurePosition = rb.position + (targetVelocity * Time.fixedDeltaTime);
+
+            if (Camera.main != null)
+            {
+                Vector3 viewportPos = Camera.main.WorldToViewportPoint(futurePosition);
+
+                float margin = 0.02f;
+
+                if (viewportPos.x < margin && targetVelocity.x < 0)
+                {
+                    targetVelocity.x = 0;
+                }
+                else if (viewportPos.x > 1 - margin && targetVelocity.x > 0)
+                {
+                    targetVelocity.x = 0;
+                }
+                if (viewportPos.y < margin && targetVelocity.z < 0)
+                {
+                    targetVelocity.z = 0;
+                }
+                else if (viewportPos.y > 1 - margin && targetVelocity.z > 0)
+                {
+                    targetVelocity.z = 0;
+                }
+            }
+            // --------------------------
             targetVelocity.y = rb.linearVelocity.y;
             rb.linearVelocity = targetVelocity;
         }
