@@ -454,9 +454,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoopCamera
   smoothTime: 0.5
-  minZoom: 40
-  maxZoom: 60
-  zoomLimiter: 50
+  minZoom: 30
+  maxZoom: 35
+  zoomLimiter: 500
   targets: []
 --- !u!1001 &1049916037
 PrefabInstance:
