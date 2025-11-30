@@ -92,7 +92,7 @@ public class UnityPlayerAuth : MonoBehaviour
             var name = await AuthenticationService.Instance.GetPlayerNameAsync();
             
             OnSignedIn?.Invoke(playerInfo, name);
-            menuManager?.ShowPlayOnlineMenu();
+            menuManager?.ShowUsernameMenu();
         }
         catch (Exception ex)
         {
@@ -140,7 +140,7 @@ public class UnityPlayerAuth : MonoBehaviour
 
             OnSignedIn?.Invoke(playerInfo, name);
             Debug.Log("Sign In Successful (Unity Account)");
-            menuManager?.ShowPlayOnlineMenu();
+            menuManager?.ShowUsernameMenu();
         }
         catch (AuthenticationException ex)
         {   
@@ -172,7 +172,7 @@ public class UnityPlayerAuth : MonoBehaviour
             var name = await AuthenticationService.Instance.GetPlayerNameAsync();
 
             OnSignedIn?.Invoke(playerInfo, name);
-            menuManager?.ShowPlayOnlineMenu();
+            menuManager?.ShowUsernameMenu();
         }
         catch (AuthenticationException ex)
         {

@@ -566,7 +566,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIPlayerProfileCard
   playerNameText: {fileID: 7159476980854851071}
   playerAvatarImage: {fileID: 8988417906146669941}
-  availableAvatars: []
+  availableAvatars:
+  - {fileID: 2800000, guid: 25c6503e937554b70a719be27e0d2ae5, type: 3}
+  - {fileID: 2800000, guid: 58034278ac3e740538c39f25d28c0375, type: 3}
+  - {fileID: 2800000, guid: 61affc66047034097ab2489ed638a8fc, type: 3}
+  - {fileID: 2800000, guid: 9ba1f2a10e70d40bf8500496da4952e2, type: 3}
+  - {fileID: 2800000, guid: c03fe9851b145468e91f1eb2fedd8926, type: 3}
+  - {fileID: 2800000, guid: b391161ec59a242ed9d1f1b6766ca173, type: 3}
   readyToggle: {fileID: 3606029052858967463}
   statusText: {fileID: 4972106357883161156}
   backgroundPanel: {fileID: 2532522081312953607}

@@ -347,6 +347,9 @@ public class LobbyManager : MonoBehaviour
             {
                 { "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.PlayerName) },
                 { "AvatarId", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.AvatarId.ToString()) },
+                { "BirthDay", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.BirthDay) },
+                { "BirthMonth", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.BirthMonth) },
+                { "BirthYear", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.BirthYear) },
                 { "IsReady", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "false") } // Par défaut pas prêt
             }
         };
