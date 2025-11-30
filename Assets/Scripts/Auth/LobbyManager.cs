@@ -26,6 +26,8 @@ public class LobbyManager : MonoBehaviour
     private int minMaxPlayers = 2;
     private int maxMaxPlayers = 4;
     private bool isLeaving = false;
+    private ILobbyEvents lobbyEvents; // Pour garder la connexion aux événements
+    private List<string> bannedPlayerIds = new List<string>();
 
     private async void Start()
     {
@@ -76,6 +78,37 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    private async void SubscribeToLobbyEvents()
+    {
+        var callbacks = new LobbyEventCallbacks();
+
+        callbacks.LobbyChanged += OnLobbyChanged;
+        callbacks.PlayerJoined += OnPlayerJoined;
+
+        try
+        {
+            lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(hostLobby.Id, callbacks);
+            Debug.Log("Subscribed to Lobby Events successfully.");
+        }
+        catch (LobbyServiceException ex)
+        {
+            Debug.LogError($"Failed to subscribe to lobby events: {ex.Message}");
+        }
+    }
+
+    public void OnDestroy()
+    {
+        UnsubscribeToLobbyEvents();
+    }
+
+    private void UnsubscribeToLobbyEvents()
+    {
+        if (lobbyEvents != null && hostLobby != null)
+        {
+            lobbyEvents = null; 
+        }
+    }
+
     public async void CreateLobby(string lobbyName, int maxPlayers = 4, string map = "Arena", bool IsPrivate = false, string gameMode = "Deathmatch")
     {
         try
@@ -97,6 +130,8 @@ public class LobbyManager : MonoBehaviour
 
             hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
             joinLobby = hostLobby;
+
+            SubscribeToLobbyEvents();
 
             if (lobbyCodeText != null)
             {
@@ -418,14 +453,49 @@ public class LobbyManager : MonoBehaviour
         {
             if (hostLobby != null)
             {
-                // Todo : ban the player (currently just kicks them)
+                // 1. Ajouter à la liste noire
+                if (!bannedPlayerIds.Contains(playerId))
+                {
+                    bannedPlayerIds.Add(playerId);
+                    Debug.Log($"Player {playerId} added to BAN LIST.");
+                }
+
+                // 2. Kicker le joueur (Lobby Service s'occupe du reste)
                 await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
-                Debug.Log("Banned player: " + playerId);
             }
         }
         catch (LobbyServiceException e)
         {
             Debug.LogException(e);
         }
+    }
+
+    // Cet événement se déclenche uniquement quand un joueur rejoint
+    private void OnPlayerJoined(List<LobbyPlayerJoined> playersJoined)
+    {
+        foreach (var player in playersJoined)
+        {
+            // On récupère l'ID du joueur qui vient d'arriver
+            string newPlayerId = player.Player.Id;
+
+            Debug.Log($"Player joined: {newPlayerId}");
+
+            // VÉRIFICATION BAN
+            if (bannedPlayerIds.Contains(newPlayerId))
+            {
+                Debug.Log($"BANNED PLAYER DETECTED ({newPlayerId}) - KICKING IMMEDIATELY!");
+                KickPlayer(newPlayerId); // On réutilise ta fonction Kick existante
+            }
+        }
+    }
+
+    // On garde aussi celui-ci au cas où (pour les mises à jour de data), mais le travail principal est fait au-dessus
+    private void OnLobbyChanged(ILobbyChanges changes)
+    {
+        // Si le lobby n'existe plus ou qu'on n'est plus host, on arrête
+        if (hostLobby == null) return;
+        
+        // Mise à jour de l'objet local hostLobby si nécessaire
+        changes.ApplyToLobby(hostLobby);
     }
 }
