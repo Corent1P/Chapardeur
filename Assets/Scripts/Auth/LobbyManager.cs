@@ -24,7 +24,8 @@ public class LobbyManager : MonoBehaviour
     public TextMeshProUGUI maxPlayersText;
     public int maxPlayers = 4;
     private int minMaxPlayers = 2;
-    private int maxMaxPlayers = 6;
+    private int maxMaxPlayers = 4;
+    private bool isLeaving = false;
 
     private async void Start()
     {
@@ -367,6 +368,8 @@ public class LobbyManager : MonoBehaviour
     // Méthode pour quitter proprement un lobby
     public async void LeaveLobby()
     {
+        if (isLeaving) return;
+        isLeaving = true;
         try
         {
             if (joinLobby != null)
@@ -381,6 +384,43 @@ public class LobbyManager : MonoBehaviour
                 }
                 
                 Debug.Log("Left lobby successfully");
+            }
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+        finally
+        {
+            isLeaving = false;
+        }
+    }
+
+    public async void KickPlayer(string playerId)
+    {
+        try
+        {
+            if (hostLobby != null)
+            {
+                await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
+                Debug.Log("Kicked player: " + playerId);
+            }
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    public async void BanPlayer(string playerId)
+    {
+        try
+        {
+            if (hostLobby != null)
+            {
+                // Todo : ban the player (currently just kicks them)
+                await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
+                Debug.Log("Banned player: " + playerId);
             }
         }
         catch (LobbyServiceException e)

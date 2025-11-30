@@ -1262,7 +1262,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4438695459268179611, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.5000038
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4997597617092442316, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1.699997
       objectReference: {fileID: 0}
     - target: {fileID: 6098688763559598731, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_Name
@@ -1272,6 +1276,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7944691888337640504, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_TargetGraphic
+      value: 
+      objectReference: {fileID: 80572418}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1293,6 +1301,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f22e317b23ab4b07bc1a3300c13d8f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPlayerProfileCard
+--- !u!114 &80572418 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2955509462233193519, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 80572415}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
 --- !u!1 &117102497
 GameObject:
   m_ObjectHideFlags: 0
@@ -7991,6 +8010,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyUIController
   lobbyManager: {fileID: 1279185765}
+  menuManager: {fileID: 647804345}
   cardsContainer: {fileID: 3200022876613280683}
   playerCards:
   - {fileID: 3200022876613280684}
@@ -10680,7 +10700,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4438695459268179611, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.5000038
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4997597617092442316, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1.699997
       objectReference: {fileID: 0}
     - target: {fileID: 6098688763559598731, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_Name
@@ -10690,6 +10714,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7944691888337640504, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_TargetGraphic
+      value: 
+      objectReference: {fileID: 1453836651}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10711,6 +10739,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f22e317b23ab4b07bc1a3300c13d8f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPlayerProfileCard
+--- !u!114 &1453836651 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2955509462233193519, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 1453836648}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
 --- !u!1 &1467155092
 GameObject:
   m_ObjectHideFlags: 0
@@ -16810,7 +16849,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4438695459268179611, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.5000038
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4997597617092442316, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1.699997
       objectReference: {fileID: 0}
     - target: {fileID: 6098688763559598731, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_Name
@@ -16820,6 +16863,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7944691888337640504, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_TargetGraphic
+      value: 
+      objectReference: {fileID: 2130121865}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -16841,6 +16888,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f22e317b23ab4b07bc1a3300c13d8f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPlayerProfileCard
+--- !u!114 &2130121865 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2955509462233193519, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 2130121862}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
 --- !u!1 &2141435609
 GameObject:
   m_ObjectHideFlags: 0
@@ -17075,9 +17133,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
       objectReference: {fileID: 0}
-    - target: {fileID: 4438695459268179611, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+    - target: {fileID: 4997597617092442316, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.5000038
+      value: -1.699997
       objectReference: {fileID: 0}
     - target: {fileID: 6098688763559598731, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_Name
@@ -17086,6 +17144,10 @@ PrefabInstance:
     - target: {fileID: 6098688763559598731, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7944691888337640504, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_TargetGraphic
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

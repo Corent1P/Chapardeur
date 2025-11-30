@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using Unity.Services.Authentication;
 
 public class UIPlayerProfileCard : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class UIPlayerProfileCard : MonoBehaviour
     [SerializeField] private Toggle readyToggle;
     [SerializeField] private TextMeshProUGUI statusText;
     [SerializeField] private Image backgroundPanel;
+    [SerializeField] private Button kickButton;
+    [SerializeField] private Button banButton;
 
     [Header("Colors")]
     [SerializeField] private Color notReadyColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
@@ -40,6 +43,22 @@ public class UIPlayerProfileCard : MonoBehaviour
         if (isLocalPlayer)
         {
             readyToggle.onValueChanged.AddListener(OnReadyToggled);
+        }
+
+        if (lobbyManager != null)
+        {
+            bool isHost = lobbyManager.joinLobby.HostId == AuthenticationService.Instance.PlayerId;
+            kickButton.gameObject.SetActive(isHost && !isLocalPlayer);
+            banButton.gameObject.SetActive(isHost && !isLocalPlayer);
+
+            kickButton.onClick.RemoveAllListeners();
+            banButton.onClick.RemoveAllListeners();
+
+            if (isHost && !isLocalPlayer)
+            {
+                kickButton.onClick.AddListener(() => lobbyManager.KickPlayer(playerId));
+                banButton.onClick.AddListener(() => lobbyManager.BanPlayer(playerId));
+            }
         }
     }
 

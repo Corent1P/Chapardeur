@@ -8,6 +8,7 @@ public class LobbyUIController : MonoBehaviour
 {
     [Header("References")]
     public LobbyManager lobbyManager;
+    public MenuManager menuManager;
     public Transform cardsContainer; // Le parent (Grid Layout Group)
     public UIPlayerProfileCard[] playerCards; // Tableau fixe de tes 4 cartes UI dans la scène
     public Button startGameButton;
@@ -37,6 +38,12 @@ public class LobbyUIController : MonoBehaviour
                 Player p = players[i];
                 playerCards[i].gameObject.SetActive(true);
 
+                if (p.Data == null)
+                {
+                    lobbyManager.LeaveLobby();
+                    menuManager.ShowPlayOnlineMenu();
+                    return;
+                }
                 string pName = p.Data.ContainsKey("PlayerName") ? p.Data["PlayerName"].Value : "Unknown";
                 int avatarId = 0;
                 if (p.Data.ContainsKey("AvatarId")) int.TryParse(p.Data["AvatarId"].Value, out avatarId);
