@@ -447,8 +447,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIPlayerProfileCard
   playerNameText: {fileID: 7159476980854851071}
   playerAvatarImage: {fileID: 8988417906146669941}
-  defaultAvatarTexture: {fileID: 2800000, guid: 61affc66047034097ab2489ed638a8fc, type: 3}
-  defaultPlayerName: Player
+  availableAvatars: []
+  readyToggle: {fileID: 3606029052858967463}
+  statusText: {fileID: 4972106357883161156}
+  backgroundPanel: {fileID: 2532522081312953607}
+  notReadyColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.8}
+  readyColor: {r: 0.2, g: 0.8, b: 0.2, a: 0.8}
 --- !u!1 &6453554370992477972
 GameObject:
   m_ObjectHideFlags: 0

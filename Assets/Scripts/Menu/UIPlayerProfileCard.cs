@@ -4,45 +4,59 @@ using UnityEngine.UI;
 
 public class UIPlayerProfileCard : MonoBehaviour
 {
+    [Header("UI Elements")]
     [SerializeField] private TextMeshProUGUI playerNameText;
     [SerializeField] private RawImage playerAvatarImage;
-    [SerializeField] private Texture defaultAvatarTexture;
-    [SerializeField] private string defaultPlayerName = "Player";
+    [SerializeField] private Texture[] availableAvatars;
+    [SerializeField] private Toggle readyToggle;
+    [SerializeField] private TextMeshProUGUI statusText;
+    [SerializeField] private Image backgroundPanel;
 
-    private void Awake()
-    {
-        ResetProfileCard();
-    }
+    [Header("Colors")]
+    [SerializeField] private Color notReadyColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+    [SerializeField] private Color readyColor = new Color(0.2f, 0.8f, 0.2f, 0.8f);
 
-    private void SetPlayerName(string playerName)
+    private string playerId;
+    private LobbyManager lobbyManager;
+    private bool isLocalPlayer;
+
+    public void Setup(string id, string name, int avatarIndex, bool isReady, bool isMyCard, LobbyManager manager)
     {
-        if (!string.IsNullOrEmpty(playerName))
+        playerId = id;
+        lobbyManager = manager;
+        isLocalPlayer = isMyCard;
+
+        playerNameText.text = name;
+        
+        if(avatarIndex >= 0 && avatarIndex < availableAvatars.Length)
+            playerAvatarImage.texture = availableAvatars[avatarIndex];
+        
+        readyToggle.SetIsOnWithoutNotify(isReady);
+        readyToggle.interactable = isLocalPlayer;
+        
+        UpdateStatusVisuals(isReady);
+
+        readyToggle.onValueChanged.RemoveAllListeners();
+        if (isLocalPlayer)
         {
-            playerNameText.text = playerName;
+            readyToggle.onValueChanged.AddListener(OnReadyToggled);
         }
     }
 
-    private void SetPlayerAvatar(Texture avatarTexture)
+    private void OnReadyToggled(bool isReady)
     {
-        if (avatarTexture != null)
-        {
-            playerAvatarImage.texture = avatarTexture;
-        }
+        UpdateStatusVisuals(isReady);
+        lobbyManager.UpdatePlayerReadyState(isReady);
     }
 
-    public void ResetProfileCard()
+    private void UpdateStatusVisuals(bool isReady)
     {
-        UpdateProfileCard(defaultPlayerName, defaultAvatarTexture);
+        statusText.text = isReady ? "READY" : "NOT READY";
+        statusText.color = isReady ? Color.green : Color.yellow;
     }
 
-    public void UpdateProfileCard(string playerName = null, Texture avatarTexture = null)
+    public void ResetCard()
     {
-        SetPlayerName(playerName);
-        SetPlayerAvatar(avatarTexture);
-    }
-
-    public void PlayerIsReady()
-    {
-        Debug.Log("Player is ready! Sending to server...");
+        gameObject.SetActive(false);
     }
 }

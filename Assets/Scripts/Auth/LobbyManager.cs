@@ -302,27 +302,66 @@ public class LobbyManager : MonoBehaviour
 
     public async Task<Player> GetPlayer()
     {
-        string nickname = "Player";
-        
-        try
-        {
-            if (AuthenticationService.Instance.IsSignedIn)
-            {
-                nickname = await AuthenticationService.Instance.GetPlayerNameAsync();
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning("Could not get player name: " + e.Message);
-        }
+        if (PlayerDataManager.Instance.PlayerName == "New Player")
+            await PlayerDataManager.Instance.LoadProfile();
 
         return new Player
         {
             Data = new Dictionary<string, PlayerDataObject>
             {
-                { "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, nickname) }
+                { "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.PlayerName) },
+                { "AvatarId", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.AvatarId.ToString()) },
+                { "IsReady", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "false") } // Par défaut pas prêt
             }
         };
+    }
+
+    public async void UpdatePlayerReadyState(bool isReady)
+    {
+        if (joinLobby == null) return;
+
+        try
+        {
+            string playerId = AuthenticationService.Instance.PlayerId;
+            
+            UpdatePlayerOptions options = new UpdatePlayerOptions
+            {
+                Data = new Dictionary<string, PlayerDataObject>
+                {
+                    { "IsReady", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, isReady ? "true" : "false") }
+                }
+            };
+
+            await LobbyService.Instance.UpdatePlayerAsync(joinLobby.Id, playerId, options);
+            Debug.Log("Statut Ready mis à jour : " + isReady);
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError("Erreur mise à jour ready : " + e);
+        }
+    }
+
+    public bool CheckAllPlayersReady()
+    {
+        if (joinLobby == null) return false;
+        
+        // On ne démarre pas une game tout seul (sauf pour debug)
+        // TODO
+        // if (joinLobby.Players.Count < 2) return false; 
+
+        foreach (var player in joinLobby.Players)
+        {
+            if (player.Data != null && player.Data.ContainsKey("IsReady"))
+            {
+                if (player.Data["IsReady"].Value != "true")
+                    return false; // Un joueur n'est pas prêt
+            }
+            else
+            {
+                return false; // Donnée manquante = pas prêt
+            }
+        }
+        return true;
     }
 
     // Méthode pour quitter proprement un lobby
