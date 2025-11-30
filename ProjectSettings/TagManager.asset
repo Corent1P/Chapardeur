@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Grappling Point
+  - MimeObject
+  - Glass
+  - Hiding Element
   layers:
   - Default
   - TransparentFX

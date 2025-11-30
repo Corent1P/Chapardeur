@@ -1,92 +1,186 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
+    private float speedFactor = 1f;
     public float jumpForce = 5f;
-
-    [Header("Mouse")]
-    public float mouseSensitivity = 2f;
-    public Transform cameraTransform;
+    private float jumpFactor = 1f;
 
     private Rigidbody rb;
-    private PlayerInputs inputActions;
+    private PlayerInput playerInput;
     private Vector2 moveInput;
     private Vector2 lookInput;
-    private float xRotation = 0f;
     private bool isGrounded = true;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        inputActions = new PlayerInputs();
+        playerInput = GetComponentInParent<PlayerInput>();
     }
 
-    private void OnEnable()
+    public override void OnNetworkSpawn()
     {
-        inputActions.PlayerControls.Enable();
-        inputActions.PlayerControls.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerControls.Move.canceled += ctx => moveInput = Vector2.zero;
+        base.OnNetworkSpawn();
 
-        inputActions.PlayerControls.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
-        inputActions.PlayerControls.Look.canceled += ctx => lookInput = Vector2.zero;
+        if (!IsOwner)
+        {
+            this.enabled = false; 
+            return;
+        }
 
-        inputActions.PlayerControls.Jump.performed += ctx => Jump();
+        SubscribeToInputs();
     }
 
-    private void OnDisable()
+    public override void OnNetworkDespawn()
     {
-        inputActions.PlayerControls.Disable();
+        base.OnNetworkDespawn();
+        if (IsOwner)
+        {
+            UnsubscribeFromInputs();
+        }
     }
 
-    private void Update()
+    private void SubscribeToInputs()
     {
-        HandleLook();
+        if (playerInput == null) return;
+
+        var moveAction = playerInput.actions["Move"];
+        var lookAction = playerInput.actions["Look"];
+        var jumpAction = playerInput.actions["Jump"];
+
+        if (moveAction != null)
+        {
+            moveAction.performed += OnMove;
+            moveAction.canceled += OnMove;
+        }
+
+        if (lookAction != null)
+        {
+            lookAction.performed += OnLook;
+            lookAction.canceled += OnLook;
+        }
+
+        if (jumpAction != null)
+        {
+            jumpAction.performed += OnJump;
+        }
     }
+
+    private void UnsubscribeFromInputs()
+    {
+        if (playerInput == null) return;
+
+        var moveAction = playerInput.actions["Move"];
+        var lookAction = playerInput.actions["Look"];
+        var jumpAction = playerInput.actions["Jump"];
+
+        if (moveAction != null)
+        {
+            moveAction.performed -= OnMove;
+            moveAction.canceled -= OnMove;
+        }
+
+        if (lookAction != null)
+        {
+            lookAction.performed -= OnLook;
+            lookAction.canceled -= OnLook;
+        }
+
+        if (jumpAction != null)
+        {
+            jumpAction.performed -= OnJump;
+        }
+    }
+
+    private void OnMove(InputAction.CallbackContext ctx) => moveInput = ctx.ReadValue<Vector2>();
+    private void OnLook(InputAction.CallbackContext ctx) => lookInput = ctx.ReadValue<Vector2>();
+    private void OnJump(InputAction.CallbackContext ctx) => Jump();
 
     private void FixedUpdate()
     {
+        if (!IsOwner) return;
+
         HandleMovement();
+        HandleLook();
     }
 
-    private void HandleMovement()
+private void HandleMovement()
     {
-        Vector3 moveDirection = (transform.forward * moveInput.y + transform.right * moveInput.x).normalized;
-        Vector3 targetVelocity = moveDirection * moveSpeed;
-        Vector3 currentVelocity = rb.linearVelocity;
+        Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
 
-        // Conserve la vitesse verticale (gravité / saut)
-        targetVelocity.y = currentVelocity.y;
-        rb.linearVelocity = targetVelocity;
+        if (moveDirection.sqrMagnitude > 0.01f)
+        {
+            moveDirection.Normalize();
+            transform.rotation = Quaternion.LookRotation(moveDirection);
+
+            Vector3 targetVelocity = moveDirection * moveSpeed * speedFactor;
+
+            // --- Check Camera Limits ---
+            Vector3 futurePosition = rb.position + (targetVelocity * Time.fixedDeltaTime);
+
+            if (Camera.main != null)
+            {
+                Vector3 viewportPos = Camera.main.WorldToViewportPoint(futurePosition);
+
+                float margin = 0.02f;
+
+                if (viewportPos.x < margin && targetVelocity.x < 0)
+                {
+                    targetVelocity.x = 0;
+                }
+                else if (viewportPos.x > 1 - margin && targetVelocity.x > 0)
+                {
+                    targetVelocity.x = 0;
+                }
+                if (viewportPos.y < margin && targetVelocity.z < 0)
+                {
+                    targetVelocity.z = 0;
+                }
+                else if (viewportPos.y > 1 - margin && targetVelocity.z > 0)
+                {
+                    targetVelocity.z = 0;
+                }
+            }
+            // --------------------------
+            targetVelocity.y = rb.linearVelocity.y;
+            rb.linearVelocity = targetVelocity;
+        }
+        else
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        }
+    }
+
+    private void HandleLook()
+    {
+        if (lookInput == Vector2.zero) return;
+
+        Vector3 moveDirection = new Vector3(lookInput.x, 0f, lookInput.y);
+
+        if (moveDirection.sqrMagnitude > 0.01f)
+        {
+            transform.rotation = Quaternion.LookRotation(moveDirection);
+        }
     }
 
     private void Jump()
     {
         if (isGrounded)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            rb.AddForce(Vector3.up * jumpForce * jumpFactor, ForceMode.Impulse);
             isGrounded = false;
         }
     }
 
-    private void HandleLook()
-    {
-        float mouseX = lookInput.x * mouseSensitivity;
-        float mouseY = lookInput.y * mouseSensitivity;
-
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        // cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        transform.Rotate(Vector3.up * mouseX);
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
-        // Détection sol simplifiée (par contact)
+        if (!IsOwner) return; 
+
         if (collision.contacts.Length > 0)
         {
             ContactPoint contact = collision.contacts[0];
@@ -95,5 +189,15 @@ public class PlayerController : MonoBehaviour
                 isGrounded = true;
             }
         }
+    }
+
+    public void SetSpeedFactor(float newSpeedFactor)
+    {
+        speedFactor = newSpeedFactor;
+    }
+
+    public void SetJumpFactor(float newJumpFactor)
+    {
+        jumpFactor = newJumpFactor;
     }
 }

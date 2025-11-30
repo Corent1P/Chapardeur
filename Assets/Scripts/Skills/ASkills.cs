@@ -1,13 +1,15 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class ASkills : MonoBehaviour, ISkills
+public class ASkills : NetworkBehaviour, ISkills
 {
     [SerializeField] private Mesh AppearanceMesh;
     [SerializeField] private Material AppearanceMaterial;
     protected bool isActive = false;
+    protected bool isSkillLocked = false;
 
     private MeshFilter meshFilter;
-    private MeshRenderer meshRenderer;
+    protected MeshRenderer meshRenderer;
     private MeshCollider meshCollider;
 
     private void Awake()
@@ -31,7 +33,13 @@ public class ASkills : MonoBehaviour, ISkills
                 meshCollider.sharedMesh = AppearanceMesh;
         }
     }
-    public ISkills ActivateSkill()
+
+    public bool IsSkillLocked()
+    {
+        return isSkillLocked;
+    }
+
+    public virtual ISkills ActivateSkill()
     {
         ChangeAppearance();
         isActive = true;
@@ -39,7 +47,7 @@ public class ASkills : MonoBehaviour, ISkills
         return this;
     }
 
-    public ISkills DeactivateSkill()
+    public virtual ISkills DeactivateSkill()
     {
         isActive = false;
         return this;

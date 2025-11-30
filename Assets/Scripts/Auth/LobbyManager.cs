@@ -24,10 +24,19 @@ public class LobbyManager : MonoBehaviour
     public TextMeshProUGUI maxPlayersText;
     public int maxPlayers = 4;
     private int minMaxPlayers = 2;
-    private int maxMaxPlayers = 6;
+    private int maxMaxPlayers = 4;
+    private bool isLeaving = false;
+    private ILobbyEvents lobbyEvents; // Pour garder la connexion aux événements
+    private List<string> bannedPlayerIds = new List<string>();
 
     private async void Start()
     {
+        #if (!DISABLE_ONLINE)
+            // Sur Xbox, on désactive ce composant immédiatement
+            // car on n'a pas le droit d'utiliser l'Auth Unity.
+            this.enabled = false; 
+            return;
+        #endif
         Debug.Log("Starting LobbyManager...");
         // S'assurer que les services sont initialisés
         if (UnityServices.State != ServicesInitializationState.Initialized)
@@ -69,6 +78,37 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    private async void SubscribeToLobbyEvents()
+    {
+        var callbacks = new LobbyEventCallbacks();
+
+        callbacks.LobbyChanged += OnLobbyChanged;
+        callbacks.PlayerJoined += OnPlayerJoined;
+
+        try
+        {
+            lobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(hostLobby.Id, callbacks);
+            Debug.Log("Subscribed to Lobby Events successfully.");
+        }
+        catch (LobbyServiceException ex)
+        {
+            Debug.LogError($"Failed to subscribe to lobby events: {ex.Message}");
+        }
+    }
+
+    public void OnDestroy()
+    {
+        UnsubscribeToLobbyEvents();
+    }
+
+    private void UnsubscribeToLobbyEvents()
+    {
+        if (lobbyEvents != null && hostLobby != null)
+        {
+            lobbyEvents = null; 
+        }
+    }
+
     public async void CreateLobby(string lobbyName, int maxPlayers = 4, string map = "Arena", bool IsPrivate = false, string gameMode = "Deathmatch")
     {
         try
@@ -91,6 +131,8 @@ public class LobbyManager : MonoBehaviour
             hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
             joinLobby = hostLobby;
 
+            SubscribeToLobbyEvents();
+
             if (lobbyCodeText != null)
             {
                 lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
@@ -110,7 +152,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void CreateLobby()
+    public void CreateLobby()
     {
         if (string.IsNullOrEmpty(inputFieldName.text))
             CreateLobby("Default Lobby", maxPlayers, relayManager.GetCurrentMapName());
@@ -134,6 +176,12 @@ public class LobbyManager : MonoBehaviour
             maxPlayers--;
             maxPlayersText.text = (char)('0' + maxPlayers) + "";
         }
+    }
+
+    public void SetMaxPlayer(int value)
+    {
+        maxPlayers = value;
+        Debug.Log("Max players set to: " + maxPlayers);
     }
 
     private List<Lobby> cachedLobbies = new List<Lobby>();
@@ -195,7 +243,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void JoinLobby(Lobby lobby)
+    public void JoinLobby(Lobby lobby)
     {
         JoinLobbyById(lobby.Id);
     }
@@ -290,32 +338,76 @@ public class LobbyManager : MonoBehaviour
 
     public async Task<Player> GetPlayer()
     {
-        string nickname = "Player";
-        
-        try
-        {
-            if (AuthenticationService.Instance.IsSignedIn)
-            {
-                nickname = await AuthenticationService.Instance.GetPlayerNameAsync();
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning("Could not get player name: " + e.Message);
-        }
+        if (PlayerDataManager.Instance.PlayerName == "New Player")
+            await PlayerDataManager.Instance.LoadProfile();
 
         return new Player
         {
             Data = new Dictionary<string, PlayerDataObject>
             {
-                { "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, nickname) }
+                { "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.PlayerName) },
+                { "AvatarId", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.AvatarId.ToString()) },
+                { "BirthDay", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.BirthDay) },
+                { "BirthMonth", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.BirthMonth) },
+                { "BirthYear", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, PlayerDataManager.Instance.BirthYear) },
+                { "IsReady", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "false") } // Par défaut pas prêt
             }
         };
+    }
+
+    public async void UpdatePlayerReadyState(bool isReady)
+    {
+        if (joinLobby == null) return;
+
+        try
+        {
+            string playerId = AuthenticationService.Instance.PlayerId;
+            
+            UpdatePlayerOptions options = new UpdatePlayerOptions
+            {
+                Data = new Dictionary<string, PlayerDataObject>
+                {
+                    { "IsReady", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, isReady ? "true" : "false") }
+                }
+            };
+
+            await LobbyService.Instance.UpdatePlayerAsync(joinLobby.Id, playerId, options);
+            Debug.Log("Statut Ready mis à jour : " + isReady);
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError("Erreur mise à jour ready : " + e);
+        }
+    }
+
+    public bool CheckAllPlayersReady()
+    {
+        if (joinLobby == null) return false;
+        
+        // On ne démarre pas une game tout seul (sauf pour debug)
+        // TODO
+        // if (joinLobby.Players.Count < 2) return false; 
+
+        foreach (var player in joinLobby.Players)
+        {
+            if (player.Data != null && player.Data.ContainsKey("IsReady"))
+            {
+                if (player.Data["IsReady"].Value != "true")
+                    return false; // Un joueur n'est pas prêt
+            }
+            else
+            {
+                return false; // Donnée manquante = pas prêt
+            }
+        }
+        return true;
     }
 
     // Méthode pour quitter proprement un lobby
     public async void LeaveLobby()
     {
+        if (isLeaving) return;
+        isLeaving = true;
         try
         {
             if (joinLobby != null)
@@ -336,5 +428,77 @@ public class LobbyManager : MonoBehaviour
         {
             Debug.LogException(e);
         }
+        finally
+        {
+            isLeaving = false;
+        }
+    }
+
+    public async void KickPlayer(string playerId)
+    {
+        try
+        {
+            if (hostLobby != null)
+            {
+                await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
+                Debug.Log("Kicked player: " + playerId);
+            }
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    public async void BanPlayer(string playerId)
+    {
+        try
+        {
+            if (hostLobby != null)
+            {
+                // 1. Ajouter à la liste noire
+                if (!bannedPlayerIds.Contains(playerId))
+                {
+                    bannedPlayerIds.Add(playerId);
+                    Debug.Log($"Player {playerId} added to BAN LIST.");
+                }
+
+                // 2. Kicker le joueur (Lobby Service s'occupe du reste)
+                await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
+            }
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    // Cet événement se déclenche uniquement quand un joueur rejoint
+    private void OnPlayerJoined(List<LobbyPlayerJoined> playersJoined)
+    {
+        foreach (var player in playersJoined)
+        {
+            // On récupère l'ID du joueur qui vient d'arriver
+            string newPlayerId = player.Player.Id;
+
+            Debug.Log($"Player joined: {newPlayerId}");
+
+            // VÉRIFICATION BAN
+            if (bannedPlayerIds.Contains(newPlayerId))
+            {
+                Debug.Log($"BANNED PLAYER DETECTED ({newPlayerId}) - KICKING IMMEDIATELY!");
+                KickPlayer(newPlayerId); // On réutilise ta fonction Kick existante
+            }
+        }
+    }
+
+    // On garde aussi celui-ci au cas où (pour les mises à jour de data), mais le travail principal est fait au-dessus
+    private void OnLobbyChanged(ILobbyChanges changes)
+    {
+        // Si le lobby n'existe plus ou qu'on n'est plus host, on arrête
+        if (hostLobby == null) return;
+        
+        // Mise à jour de l'objet local hostLobby si nécessaire
+        changes.ApplyToLobby(hostLobby);
     }
 }
