@@ -2,14 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Script de test simple pour le chat vocal Vivox
-/// Permet de tester rapidement les fonctionnalités sans UI complète
-/// </summary>
-public class VoiceChatTester : MonoBehaviour
+public class VoiceChatLobby : MonoBehaviour
 {
-    [Header("Test Settings")]
-    [SerializeField] private string testChannelName = "TestChannel";
+    [Header("Settings")]
     [SerializeField] private bool autoConnect = true;
     
     [Header("UI Buttons")]
@@ -21,11 +16,20 @@ public class VoiceChatTester : MonoBehaviour
     [SerializeField] private Button decreaseVolumeButton;
     
     [Header("UI Text")]
-    [SerializeField] private TextMeshProUGUI statusText;
+    // [SerializeField] private TextMeshProUGUI statusText;
     [SerializeField] private TextMeshProUGUI volumeText;
-    [SerializeField] private TextMeshProUGUI muteSelfButtonText;
-    [SerializeField] private TextMeshProUGUI muteAllButtonText;
+    // [SerializeField] private TextMeshProUGUI muteSelfButtonText;
+    // [SerializeField] private TextMeshProUGUI muteAllButtonText;
+
+    [Header("Assets")]
+    [SerializeField] private Texture mutedeSelfIcon;
+    [SerializeField] private Texture unmutedSelfIcon;
+    [SerializeField] private Texture mutedAllIcon;
+    [SerializeField] private Texture unmutedAllIcon;
+    private RawImage muteSelfButtonImage;
+    private RawImage muteAllButtonImage;
     
+    private string channelName;
     private VivoxManager vivoxManager;
     private bool isInitialized = false;
 
@@ -40,6 +44,9 @@ public class VoiceChatTester : MonoBehaviour
         }
         
         isInitialized = true;
+
+        muteSelfButtonImage = muteSelfButton.GetComponent<RawImage>();
+        muteAllButtonImage = muteAllButton.GetComponent<RawImage>();
         
         // S'abonner aux événements
         vivoxManager.OnLoginStatusChanged += OnLoginStatusChanged;
@@ -48,11 +55,10 @@ public class VoiceChatTester : MonoBehaviour
         vivoxManager.OnParticipantAdded += OnParticipantAdded;
         vivoxManager.OnParticipantRemoved += OnParticipantRemoved;
         
-        Debug.Log("=== VoiceChat Tester Initialized ===");
-        
-        // Configurer les boutons
         SetupButtons();
         
+        vivoxManager.Login();
+
         if (autoConnect)
         {
             Invoke(nameof(AutoConnectToVoiceChat), 2f);
@@ -74,14 +80,12 @@ public class VoiceChatTester : MonoBehaviour
     private void Update()
     {
         if (!isInitialized) return;
-        
-        // Mettre à jour l'UI
+
         UpdateUI();
     }
     
     private void SetupButtons()
     {
-        // Configurer les listeners des boutons
         if (connectButton != null)
             connectButton.onClick.AddListener(ConnectToVoiceChat);
         
@@ -102,33 +106,12 @@ public class VoiceChatTester : MonoBehaviour
     }
     
     private void UpdateUI()
-    {
-        // Mettre à jour le texte de statut
-        if (statusText != null)
-        {
-            statusText.text = $"Logged In: {(vivoxManager.IsLoggedIn ? "✓" : "✗")}\n" +
-                             $"In Channel: {(vivoxManager.IsInChannel ? "✓" : "✗")}";
-        }
-        
-        // Mettre à jour le texte de volume
+    {   
         if (volumeText != null)
         {
-            volumeText.text = $"Speaker: {vivoxManager.GetSpeakerVolume()}%\n" +
-                             $"Mic: {vivoxManager.GetMicrophoneVolume()}%";
+            volumeText.text = (vivoxManager.GetSpeakerVolume() + 50).ToString()  + '%';
         }
-        
-        // Mettre à jour les textes des boutons mute
-        if (muteSelfButtonText != null && vivoxManager.IsInChannel)
-        {
-            muteSelfButtonText.text = vivoxManager.IsSelfMuted() ? "Unmute Self" : "Mute Self";
-        }
-        
-        if (muteAllButtonText != null && vivoxManager.IsInChannel)
-        {
-            muteAllButtonText.text = vivoxManager.IsAllMuted() ? "Unmute All" : "Mute All";
-        }
-        
-        // Activer/désactiver les boutons selon l'état
+
         bool inChannel = vivoxManager.IsInChannel;
         if (muteSelfButton != null)
             muteSelfButton.interactable = inChannel;
@@ -142,7 +125,6 @@ public class VoiceChatTester : MonoBehaviour
 
 
 
-    // Méthodes de test
     [ContextMenu("Connect to Voice Chat")]
     public void ConnectToVoiceChat()
     {
@@ -150,7 +132,7 @@ public class VoiceChatTester : MonoBehaviour
         
         Debug.Log("Connecting to voice chat...");
         vivoxManager.Login();
-        Invoke(nameof(JoinTestChannel), 1.5f);
+        Invoke(nameof(JoinChannel), 1.5f);
     }
 
     [ContextMenu("Disconnect from Voice Chat")]
@@ -169,7 +151,7 @@ public class VoiceChatTester : MonoBehaviour
         if (vivoxManager == null || !vivoxManager.IsInChannel) return;
         
         vivoxManager.ToggleMuteSelf();
-        Debug.Log($"Mute Self: {vivoxManager.IsSelfMuted()}");
+        muteSelfButtonImage.texture = vivoxManager.IsSelfMuted() ? mutedeSelfIcon : unmutedSelfIcon;
     }
 
     [ContextMenu("Toggle Mute All")]
@@ -178,7 +160,7 @@ public class VoiceChatTester : MonoBehaviour
         if (vivoxManager == null || !vivoxManager.IsInChannel) return;
         
         vivoxManager.ToggleMuteAll();
-        Debug.Log($"Mute All: {vivoxManager.IsAllMuted()}");
+        muteAllButtonImage.texture = vivoxManager.IsAllMuted() ? mutedAllIcon : unmutedAllIcon;
     }
 
     public void AdjustVolume(int delta)
@@ -186,9 +168,8 @@ public class VoiceChatTester : MonoBehaviour
         if (vivoxManager == null || !vivoxManager.IsInChannel) return;
         
         int currentVolume = vivoxManager.GetSpeakerVolume();
-        int newVolume = Mathf.Clamp(currentVolume + delta, 0, 100);
+        int newVolume = Mathf.Clamp(currentVolume + delta, -50, 50);
         vivoxManager.SetSpeakerVolume(newVolume);
-        Debug.Log($"Speaker Volume: {newVolume}%");
     }
 
     private void AutoConnectToVoiceChat()
@@ -197,11 +178,16 @@ public class VoiceChatTester : MonoBehaviour
         ConnectToVoiceChat();
     }
 
-    private void JoinTestChannel()
+    public void UpdateChannelName(string name)
+    {
+        channelName = name;
+    }
+
+    private void JoinChannel()
     {
         if (vivoxManager != null && vivoxManager.IsLoggedIn)
         {
-            vivoxManager.JoinChannel(testChannelName);
+            vivoxManager.JoinChannel(channelName);
         }
     }
 

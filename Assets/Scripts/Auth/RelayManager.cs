@@ -17,6 +17,7 @@ public class RelayManager : MonoBehaviour
 
     [Header("UI References")]
     public GameObject lobbyWaitingUI; // Panel d'attente du lobby
+    public GameObject voiceChatLobby;
     // public Transform playerListContainer; // Container pour la liste des joueurs
     // public GameObject playerListItemPrefab; // Prefab pour afficher un joueur
     public GameObject startGameButton; // Bouton Start (visible uniquement pour l'hôte)
@@ -113,6 +114,9 @@ public class RelayManager : MonoBehaviour
         if (lobbyWaitingUI != null)
             lobbyWaitingUI.SetActive(true);
 
+        if (voiceChatLobby != null)
+            voiceChatLobby.SetActive(true);
+
         if (startGameButton != null)
             startGameButton.SetActive(isHost);
 
@@ -123,6 +127,9 @@ public class RelayManager : MonoBehaviour
     {
         if (lobbyWaitingUI != null)
             lobbyWaitingUI.SetActive(false);
+
+        if (voiceChatLobby != null)
+            voiceChatLobby.SetActive(false);
         
         isHost = false;
         hasJoinedRelay = false;

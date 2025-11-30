@@ -74,7 +74,6 @@ public class VivoxManager : MonoBehaviour
             _vivoxService.ParticipantAddedToChannel += OnVivoxParticipantAdded;
             _vivoxService.ParticipantRemovedFromChannel += OnVivoxParticipantRemoved;
             
-            Debug.Log("Vivox initialisé avec succès");
         }
         catch (Exception e)
         {
@@ -104,8 +103,6 @@ public class VivoxManager : MonoBehaviour
             };
 
             await _vivoxService.LoginAsync(loginOptions);
-            
-            Debug.Log($"Connecté à Vivox en tant que {displayName}");
         }
         catch (Exception e)
         {
@@ -121,7 +118,6 @@ public class VivoxManager : MonoBehaviour
     {
         if (!IsLoggedIn)
         {
-            Debug.LogWarning("Vous devez être connecté avant de rejoindre un canal");
             Login();
             await Task.Delay(2000); // Attendre la connexion
         }
@@ -217,12 +213,10 @@ public class VivoxManager : MonoBehaviour
             if (currentMuteState)
             {
                 _vivoxService.UnmuteInputDevice();
-                Debug.Log("Microphone activé");
             }
             else
             {
                 _vivoxService.MuteInputDevice();
-                Debug.Log("Microphone coupé");
             }
         }
         catch (Exception e)
@@ -265,12 +259,10 @@ public class VivoxManager : MonoBehaviour
             if (currentState)
             {
                 _vivoxService.UnmuteOutputDevice();
-                Debug.Log("Tous les joueurs unmute");
             }
             else
             {
                 _vivoxService.MuteOutputDevice();
-                Debug.Log("Tous les joueurs mute");
             }
         }
         catch (Exception e)
@@ -312,12 +304,10 @@ public class VivoxManager : MonoBehaviour
             if (muted)
             {
                 await _vivoxService.BlockPlayerAsync(participantId);
-                Debug.Log($"Participant {participantId} mute");
             }
             else
             {
                 await _vivoxService.UnblockPlayerAsync(participantId);
-                Debug.Log($"Participant {participantId} unmute");
             }
         }
         catch (Exception e)
@@ -333,7 +323,7 @@ public class VivoxManager : MonoBehaviour
     {
         volume = Mathf.Clamp(volume, -50, 50);
         _vivoxService.SetOutputDeviceVolume(volume);
-        Debug.Log($"Volume des haut-parleurs: {volume}");
+        _vivoxService.SetChannelVolumeAsync(_currentChannelName, volume);
     }
 
     /// <summary>

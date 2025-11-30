@@ -23,6 +23,7 @@ public class LobbyManager : MonoBehaviour
     public RelayManager relayManager;
     public TextMeshProUGUI maxPlayersText;
     public int maxPlayers = 4;
+    public VoiceChatLobby voiceChatLobby;
     private int minMaxPlayers = 2;
     private int maxMaxPlayers = 4;
     private bool isLeaving = false;
@@ -134,9 +135,9 @@ public class LobbyManager : MonoBehaviour
             SubscribeToLobbyEvents();
 
             if (lobbyCodeText != null)
-            {
                 lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
-            }
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
 
             Debug.Log("Party created: " + hostLobby.Name + " | Players: " + hostLobby.Players.Count + "/" + hostLobby.MaxPlayers + " | Lobby Code: " + hostLobby.LobbyCode);
 
@@ -234,6 +235,10 @@ public class LobbyManager : MonoBehaviour
                 relayManager.ShowLobbyWaitingUI(false); // false = n'est pas l'hôte
             if (menuManager != null)
                 menuManager.HideAllMenus();
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
+            if (lobbyCodeText != null)
+                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
         }
         catch (LobbyServiceException e)
         {
@@ -270,6 +275,10 @@ public class LobbyManager : MonoBehaviour
                 relayManager.ShowLobbyWaitingUI(false); // false = n'est pas l'hôte
             if (menuManager != null)
                 menuManager.HideAllMenus();
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
+            if (lobbyCodeText != null)
+                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
         }
         catch (LobbyServiceException e)
         {
@@ -301,6 +310,10 @@ public class LobbyManager : MonoBehaviour
                 relayManager.ShowLobbyWaitingUI(false); // false = n'est pas l'hôte
             if (menuManager != null)
                 menuManager.HideAllMenus();
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
+            if (lobbyCodeText != null)
+                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
         }
         catch (LobbyServiceException e)
         {
