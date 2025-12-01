@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using TMPro;
 using UnityEngine.UI;
+using UnityEditor.PackageManager;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -225,6 +226,13 @@ public class LobbyManager : MonoBehaviour
             };
 
             joinLobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
+            if (joinLobby == null)
+            {
+                Debug.Log("No available lobbies to join.");
+                joinErrorText.gameObject.SetActive(true);
+                joinSuccessText.gameObject.SetActive(false);
+                return;
+            }
             Debug.Log("Quick joined lobby: " + joinLobby.Name);
             PrintPlayers(joinLobby);
             joinErrorText.gameObject.SetActive(false);
@@ -244,7 +252,7 @@ public class LobbyManager : MonoBehaviour
         {
             joinSuccessText.gameObject.SetActive(false);
             joinErrorText.gameObject.SetActive(true);
-            Debug.LogException(e);
+            Debug.Log(e);
         }
     }
 
