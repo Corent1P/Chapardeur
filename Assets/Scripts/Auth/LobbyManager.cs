@@ -77,6 +77,41 @@ public class LobbyManager : MonoBehaviour
             Debug.LogException(e);
         }
     }
+    public string GetPlayerNameById(string playerId)
+    {
+        if (joinLobby == null || string.IsNullOrEmpty(playerId)) return "Unknown";
+
+        Player player = joinLobby.Players.Find(p => p.Id == playerId);
+        if (player != null && player.Data != null && player.Data.ContainsKey("PlayerName"))
+        {
+            return player.Data["PlayerName"].Value;
+        }
+
+        return "Unknown";
+    }
+    public string GetPlayerIdByName(string playerName)
+    {
+        if (joinLobby == null) return null;
+
+        foreach (var player in joinLobby.Players)
+        {
+            if (player.Data != null && player.Data.ContainsKey("PlayerName"))
+            {
+                if (player.Data["PlayerName"].Value == playerName)
+                {
+                    return player.Id;
+                }
+            }
+        }
+        return null;
+    }
+    public void ClearChatOnLeave()
+    {
+        if (ChatManager.Instance != null)
+        {
+            ChatManager.Instance.ClearChat();
+        }
+    }
 
     private async void SubscribeToLobbyEvents()
     {
@@ -119,32 +154,26 @@ public class LobbyManager : MonoBehaviour
             {
                 IsPrivate = IsPrivate,
                 Player = player,
-
                 Data = new Dictionary<string, DataObject>
                 {
                     { "GameMode", new DataObject(DataObject.VisibilityOptions.Public, gameMode) },
                     { "Map", new DataObject(DataObject.VisibilityOptions.Public, map) },
-                    { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Member, "0") }
+                    { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Member, "0") },
+                    // 🔥 INICIALIZAR CHAT VACÍO
+                    { "ChatMessages", new DataObject(DataObject.VisibilityOptions.Member, "") }
                 }
             };
 
             hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
             joinLobby = hostLobby;
 
-            SubscribeToLobbyEvents();
-
-            if (lobbyCodeText != null)
+            // 🔥 INICIALIZAR CHAT PARA EL LOBBY
+            if (ChatManager.Instance != null)
             {
-                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
+                ChatManager.Instance.InitializeChatForLobby(joinLobby);
             }
 
-            Debug.Log("Party created: " + hostLobby.Name + " | Players: " + hostLobby.Players.Count + "/" + hostLobby.MaxPlayers + " | Lobby Code: " + hostLobby.LobbyCode);
-
-            // Afficher l'UI d'attente pour l'hôte
-            if (relayManager != null)
-                relayManager.ShowLobbyWaitingUI(true);
-            if (menuManager != null)
-                menuManager.HideAllMenus();
+            // ... resto del código ...
         }
         catch (LobbyServiceException e)
         {
@@ -154,10 +183,12 @@ public class LobbyManager : MonoBehaviour
 
     public void CreateLobby()
     {
+
         if (string.IsNullOrEmpty(inputFieldName.text))
             CreateLobby("Default Lobby", maxPlayers, relayManager.GetCurrentMapName());
         else
             CreateLobby(inputFieldName.text, maxPlayers, relayManager.GetCurrentMapName());
+
     }
 
     public void increaseMaxPlayers()
@@ -253,29 +284,26 @@ public class LobbyManager : MonoBehaviour
         try
         {
             Player player = await GetPlayer();
-            
+
             JoinLobbyByIdOptions options = new JoinLobbyByIdOptions
             {
                 Player = player
             };
-            
+
             joinLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, options);
             Debug.Log("Joined lobby: " + joinLobby.Name);
-            PrintPlayers(joinLobby);
-            joinErrorText.gameObject.SetActive(false);
-            joinSuccessText.gameObject.SetActive(true);
-            
-            // 🔥 AJOUT CRITIQUE : Afficher l'UI d'attente pour le client
-            if (relayManager != null)
-                relayManager.ShowLobbyWaitingUI(false); // false = n'est pas l'hôte
-            if (menuManager != null)
-                menuManager.HideAllMenus();
+
+            // 🔥 INICIALIZAR CHAT PARA EL LOBBY
+            if (ChatManager.Instance != null)
+            {
+                ChatManager.Instance.InitializeChatForLobby(joinLobby);
+            }
+
+            // ... resto del código ...
         }
         catch (LobbyServiceException e)
         {
-            joinSuccessText.gameObject.SetActive(false);
-            joinErrorText.gameObject.SetActive(true);
-            Debug.LogException(e);
+            // ... manejo de errores ...
         }
     }
 
@@ -415,12 +443,18 @@ public class LobbyManager : MonoBehaviour
                 await LobbyService.Instance.RemovePlayerAsync(joinLobby.Id, AuthenticationService.Instance.PlayerId);
                 joinLobby = null;
                 hostLobby = null;
-                
+
+                // 🔥 LIMPIAR CHAT AL SALIR
+                if (ChatManager.Instance != null)
+                {
+                    ChatManager.Instance.ClearChat();
+                }
+
                 if (relayManager != null)
                 {
                     relayManager.HideLobbyWaitingUI();
                 }
-                
+
                 Debug.Log("Left lobby successfully");
             }
         }
