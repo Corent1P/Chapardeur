@@ -8,10 +8,9 @@ public class MobileControlsManager : MonoBehaviour
     {
         bool showMobileControls = false;
 
-        if (Application.isMobilePlatform)
-        {
+        #if UNITY_ANDROID || UNITY_IOS
             showMobileControls = true;
-        }
+        #endif
 
         #if UNITY_EDITOR
             // showMobileControls = true; 

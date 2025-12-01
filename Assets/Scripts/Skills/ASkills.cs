@@ -10,13 +10,11 @@ public class ASkills : NetworkBehaviour, ISkills
 
     private MeshFilter meshFilter;
     protected MeshRenderer meshRenderer;
-    private MeshCollider meshCollider;
 
     private void Awake()
     {
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
-        meshCollider = GetComponent<MeshCollider>();
     }
 
     public virtual void ChangeAppearance()
@@ -28,9 +26,6 @@ public class ASkills : NetworkBehaviour, ISkills
 
             if (meshRenderer != null)
                 meshRenderer.material = AppearanceMaterial;
-
-            if (meshCollider != null)
-                meshCollider.sharedMesh = AppearanceMesh;
         }
     }
 
