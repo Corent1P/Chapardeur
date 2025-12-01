@@ -1615,6 +1615,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MobileControlsCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 1358679706897206309, guid: 8536276b3f55e467ba63b310abc7ccc5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6348457185894575954, guid: 8536276b3f55e467ba63b310abc7ccc5, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -0.5
