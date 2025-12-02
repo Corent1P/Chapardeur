@@ -1,11 +1,13 @@
-using UnityEngine;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using TMPro;
+using Unity.Netcode;
+using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Unity.Services.Authentication;
-using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
@@ -28,7 +30,10 @@ public class LobbyManager : MonoBehaviour
     private bool isLeaving = false;
     private ILobbyEvents lobbyEvents; // Pour garder la connexion aux événements
     private List<string> bannedPlayerIds = new List<string>();
-
+    public static event Action<Player> OnPlayerJoinedLobby;
+    public static event Action<Player> OnPlayerLeftLobby;
+    public static event Action OnLobbyJoinedOrLeft;
+    public static LobbyManager Instance { get; private set; }
     private async void Start()
     {
         #if (!DISABLE_ONLINE)
@@ -46,7 +51,15 @@ public class LobbyManager : MonoBehaviour
         }
         maxPlayersText.text = (char)('0' + maxPlayers) + "";
     }
-
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
     private void Update()
     {
         HandleLobbyHeartbeat();
@@ -77,41 +90,6 @@ public class LobbyManager : MonoBehaviour
             Debug.LogException(e);
         }
     }
-    public string GetPlayerNameById(string playerId)
-    {
-        if (joinLobby == null || string.IsNullOrEmpty(playerId)) return "Unknown";
-
-        Player player = joinLobby.Players.Find(p => p.Id == playerId);
-        if (player != null && player.Data != null && player.Data.ContainsKey("PlayerName"))
-        {
-            return player.Data["PlayerName"].Value;
-        }
-
-        return "Unknown";
-    }
-    public string GetPlayerIdByName(string playerName)
-    {
-        if (joinLobby == null) return null;
-
-        foreach (var player in joinLobby.Players)
-        {
-            if (player.Data != null && player.Data.ContainsKey("PlayerName"))
-            {
-                if (player.Data["PlayerName"].Value == playerName)
-                {
-                    return player.Id;
-                }
-            }
-        }
-        return null;
-    }
-    public void ClearChatOnLeave()
-    {
-        if (ChatManager.Instance != null)
-        {
-            ChatManager.Instance.ClearChat();
-        }
-    }
 
     private async void SubscribeToLobbyEvents()
     {
@@ -119,6 +97,7 @@ public class LobbyManager : MonoBehaviour
 
         callbacks.LobbyChanged += OnLobbyChanged;
         callbacks.PlayerJoined += OnPlayerJoined;
+        
 
         try
         {
@@ -130,7 +109,6 @@ public class LobbyManager : MonoBehaviour
             Debug.LogError($"Failed to subscribe to lobby events: {ex.Message}");
         }
     }
-
     public void OnDestroy()
     {
         UnsubscribeToLobbyEvents();
@@ -154,26 +132,35 @@ public class LobbyManager : MonoBehaviour
             {
                 IsPrivate = IsPrivate,
                 Player = player,
+
                 Data = new Dictionary<string, DataObject>
-                {
-                    { "GameMode", new DataObject(DataObject.VisibilityOptions.Public, gameMode) },
-                    { "Map", new DataObject(DataObject.VisibilityOptions.Public, map) },
-                    { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Member, "0") },
-                    // 🔥 INICIALIZAR CHAT VACÍO
-                    { "ChatMessages", new DataObject(DataObject.VisibilityOptions.Member, "") }
-                }
+            {
+                { "GameMode", new DataObject(DataObject.VisibilityOptions.Public, gameMode) },
+                { "Map", new DataObject(DataObject.VisibilityOptions.Public, map) },
+                { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Member, "0") }
+            }
             };
 
             hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
             joinLobby = hostLobby;
 
-            // 🔥 INICIALIZAR CHAT PARA EL LOBBY
-            if (ChatManager.Instance != null)
+            SubscribeToLobbyEvents();
+
+            if (lobbyCodeText != null)
             {
-                ChatManager.Instance.InitializeChatForLobby(joinLobby);
+                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
             }
 
-            // ... resto del código ...
+            Debug.Log("Party created: " + hostLobby.Name + " | Players: " + hostLobby.Players.Count + "/" + hostLobby.MaxPlayers + " | Lobby Code: " + hostLobby.LobbyCode);
+
+            // ✅ AÑADE ESTA LÍNEA:
+            OnLobbyJoinedOrLeft?.Invoke();
+
+            // Afficher l'UI d'attente pour l'hôte
+            if (relayManager != null)
+                relayManager.ShowLobbyWaitingUI(true);
+            if (menuManager != null)
+                menuManager.HideAllMenus();
         }
         catch (LobbyServiceException e)
         {
@@ -183,11 +170,15 @@ public class LobbyManager : MonoBehaviour
 
     public void CreateLobby()
     {
-
         if (string.IsNullOrEmpty(inputFieldName.text))
             CreateLobby("Default Lobby", maxPlayers, relayManager.GetCurrentMapName());
         else
             CreateLobby(inputFieldName.text, maxPlayers, relayManager.GetCurrentMapName());
+
+        if (NetworkManager.Singleton != null && NetworkChatManager.Instance != null)
+        {
+            NetworkChatManager.Instance.GetComponent<NetworkObject>().Spawn();
+        }
 
     }
 
@@ -256,13 +247,16 @@ public class LobbyManager : MonoBehaviour
 
             joinLobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
             Debug.Log("Quick joined lobby: " + joinLobby.Name);
+
+            // ✅ AÑADE ESTA LÍNEA:
+            OnLobbyJoinedOrLeft?.Invoke();
+
             PrintPlayers(joinLobby);
             joinErrorText.gameObject.SetActive(false);
             joinSuccessText.gameObject.SetActive(true);
 
-            // 🔥 AJOUT CRITIQUE : Afficher l'UI d'attente pour le client
             if (relayManager != null)
-                relayManager.ShowLobbyWaitingUI(false); // false = n'est pas l'hôte
+                relayManager.ShowLobbyWaitingUI(false);
             if (menuManager != null)
                 menuManager.HideAllMenus();
         }
@@ -273,7 +267,6 @@ public class LobbyManager : MonoBehaviour
             Debug.LogException(e);
         }
     }
-
     public void JoinLobby(Lobby lobby)
     {
         JoinLobbyById(lobby.Id);
@@ -293,17 +286,23 @@ public class LobbyManager : MonoBehaviour
             joinLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, options);
             Debug.Log("Joined lobby: " + joinLobby.Name);
 
-            // 🔥 INICIALIZAR CHAT PARA EL LOBBY
-            if (ChatManager.Instance != null)
-            {
-                ChatManager.Instance.InitializeChatForLobby(joinLobby);
-            }
+            // ✅ AÑADE ESTA LÍNEA:
+            OnLobbyJoinedOrLeft?.Invoke();
 
-            // ... resto del código ...
+            PrintPlayers(joinLobby);
+            joinErrorText.gameObject.SetActive(false);
+            joinSuccessText.gameObject.SetActive(true);
+
+            if (relayManager != null)
+                relayManager.ShowLobbyWaitingUI(false);
+            if (menuManager != null)
+                menuManager.HideAllMenus();
         }
         catch (LobbyServiceException e)
         {
-            // ... manejo de errores ...
+            joinSuccessText.gameObject.SetActive(false);
+            joinErrorText.gameObject.SetActive(true);
+            Debug.LogException(e);
         }
     }
 
@@ -320,13 +319,16 @@ public class LobbyManager : MonoBehaviour
 
             joinLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, options);
             Debug.Log("Joined lobby with code: " + lobbyCode);
+
+            // ✅ AÑADE ESTA LÍNEA:
+            OnLobbyJoinedOrLeft?.Invoke();
+
             PrintPlayers(joinLobby);
             joinErrorText.gameObject.SetActive(false);
             joinSuccessText.gameObject.SetActive(true);
 
-            // 🔥 AJOUT CRITIQUE : Afficher l'UI d'attente pour le client
             if (relayManager != null)
-                relayManager.ShowLobbyWaitingUI(false); // false = n'est pas l'hôte
+                relayManager.ShowLobbyWaitingUI(false);
             if (menuManager != null)
                 menuManager.HideAllMenus();
         }
@@ -350,7 +352,15 @@ public class LobbyManager : MonoBehaviour
     {
         PrintPlayers(hostLobby);
     }
+    private void InvokePlayerJoined(Player player)
+    {
+        OnPlayerJoinedLobby?.Invoke(player);
+    }
 
+    private void InvokePlayerLeft(Player player)
+    {
+        OnPlayerLeftLobby?.Invoke(player);
+    }
     public void PrintPlayers(Lobby lobby)
     {
         if (lobby == null) return;
@@ -441,14 +451,12 @@ public class LobbyManager : MonoBehaviour
             if (joinLobby != null)
             {
                 await LobbyService.Instance.RemovePlayerAsync(joinLobby.Id, AuthenticationService.Instance.PlayerId);
+
+                // ✅ AÑADE ESTA LÍNEA:
+                OnLobbyJoinedOrLeft?.Invoke();
+
                 joinLobby = null;
                 hostLobby = null;
-
-                // 🔥 LIMPIAR CHAT AL SALIR
-                if (ChatManager.Instance != null)
-                {
-                    ChatManager.Instance.ClearChat();
-                }
 
                 if (relayManager != null)
                 {
@@ -512,16 +520,19 @@ public class LobbyManager : MonoBehaviour
     {
         foreach (var player in playersJoined)
         {
-            // On récupère l'ID du joueur qui vient d'arriver
             string newPlayerId = player.Player.Id;
-
             Debug.Log($"Player joined: {newPlayerId}");
 
             // VÉRIFICATION BAN
             if (bannedPlayerIds.Contains(newPlayerId))
             {
                 Debug.Log($"BANNED PLAYER DETECTED ({newPlayerId}) - KICKING IMMEDIATELY!");
-                KickPlayer(newPlayerId); // On réutilise ta fonction Kick existante
+                KickPlayer(newPlayerId);
+            }
+            else
+            {
+                // Invoca el evento para el chat
+                InvokePlayerJoined(player.Player);
             }
         }
     }
@@ -535,4 +546,5 @@ public class LobbyManager : MonoBehaviour
         // Mise à jour de l'objet local hostLobby si nécessaire
         changes.ApplyToLobby(hostLobby);
     }
+
 }
