@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using TMPro;
-using UnityEngine.UI;
-using UnityEditor.PackageManager;
 
 public class LobbyManager : MonoBehaviour
 {
