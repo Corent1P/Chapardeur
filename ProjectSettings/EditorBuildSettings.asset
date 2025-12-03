@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MuseumGameScene.unity
     guid: cbfadaf15262b44128dc38854a3fcca9
+  - enabled: 1
+    path: Assets/Scenes/SciFiGameScene.unity
+    guid: 5e5bf03650df349aeb4214ed6d980051
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: f9d2c27d533a34dfe96bdb4fcbae0503, type: 3}
   m_UseUCBPForAssetBundles: 0

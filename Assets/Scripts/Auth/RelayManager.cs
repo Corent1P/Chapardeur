@@ -47,7 +47,8 @@ public class RelayManager : MonoBehaviour
         listMaps = new Tuple<string, string>[]
         {
             new Tuple<string, string>("MuseumGameScene", "Museum"),
-            new Tuple<string, string>("BankGameScene", "Bank")
+            new Tuple<string, string>("BankGameScene", "Bank"),
+            new Tuple<string, string>("SciFiGameScene", "Base Sci-Fi")
         };
 
         mapNameText.text = listMaps[0].Item2;
