@@ -33,7 +33,7 @@ public class ChatBehaviour : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner) return;
+      /*  if (!IsOwner) return;
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
@@ -41,7 +41,7 @@ public class ChatBehaviour : NetworkBehaviour
 
             SendMessageServerRpc(inputField.text);
             inputField.text = string.Empty;
-        }
+        }*/
     }
 
     [ServerRpc]
