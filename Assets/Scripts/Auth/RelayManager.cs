@@ -37,17 +37,12 @@ public class RelayManager : MonoBehaviour
 
     private void Start()
     {
-        if (NetworkManager.Singleton != null && NetworkChatManager.Instance != null)
-        {
-            NetworkChatManager.Instance.GetComponent<NetworkObject>().Spawn();
-        }
-
-#if (!DISABLE_ONLINE)
+        #if (!DISABLE_ONLINE)
             // Sur Xbox, on désactive ce composant immédiatement
             // car on n'a pas le droit d'utiliser l'Auth Unity.
             this.enabled = false; 
             return;
-#endif
+        #endif
         listMaps = new Tuple<string, string>[]
         {
             new Tuple<string, string>("MuseumGameScene", "Museum"),
@@ -218,13 +213,7 @@ public class RelayManager : MonoBehaviour
             );
 
             NetworkManager.Singleton.StartHost();
-            if (NetworkManager.Singleton.IsServer)
-            {
-                // Spawnear chat manager
-                GameObject chatPrefab = Resources.Load<GameObject>("Prefabs/Network/NetworkChatManager");
-                GameObject chatObj = Instantiate(chatPrefab);
-                chatObj.GetComponent<NetworkObject>().Spawn();
-            }
+
             hasJoinedRelay = true;
             PlayerPrefs.SetInt("MaxPlayers", lobbyManager.joinLobby.MaxPlayers);
 
@@ -267,13 +256,6 @@ public class RelayManager : MonoBehaviour
             );
 
             NetworkManager.Singleton.StartClient();
-            if (NetworkManager.Singleton.IsServer)
-            {
-                // Spawnear chat manager
-                GameObject chatPrefab = Resources.Load<GameObject>("Prefabs/Network/NetworkChatManager");
-                GameObject chatObj = Instantiate(chatPrefab);
-                chatObj.GetComponent<NetworkObject>().Spawn();
-            }
             hasJoinedRelay = true;
             Debug.Log("Successfully joined Relay!");
         }
