@@ -4,8 +4,8 @@ using UnityEngine.Events;
 public class LaserBeam : MonoBehaviour
 {
     [Header("Laser Settings")]
-    [SerializeField] private Vector3 laserDirection = Vector3.forward;
-    [SerializeField] private float maxLaserDistance = 50f;
+    [SerializeField] public Vector3 laserDirection = Vector3.forward;
+    [SerializeField] public float maxLaserDistance = 50f;
     [SerializeField] private LayerMask detectionLayer;
     [SerializeField] private LayerMask obstructionLayer;
 

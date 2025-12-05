@@ -25,7 +25,7 @@ public class LaserEmitter : MonoBehaviour
     {
         // Crear un rayo esférico a lo largo del láser para detectar cortes
         Vector3 laserEnd = laserBeam.transform.position +
-                          laserBeam.transform.TransformDirection(laserBeam.LaserDirection) *
+                          laserBeam.transform.TransformDirection(laserBeam.laserDirection) *
                           laserBeam.maxLaserDistance;
 
         Vector3 laserMidpoint = (laserBeam.transform.position + laserEnd) * 0.5f;
