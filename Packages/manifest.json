@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.unity.2d.tilemap.extras": "5.0.2",
     "com.unity.ai.navigation": "2.0.9",
     "com.unity.collab-proxy": "2.10.0",
     "com.unity.formats.fbx": "5.1.5",
