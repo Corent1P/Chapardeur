@@ -6,7 +6,6 @@ public class SizeShifter : ASkills
 {
     [Header("Size Settings")]
     [SerializeField] private Vector3 smallSize = new Vector3(1f, 1f, 1f);
-    [SerializeField] private Vector3 normalSize = new Vector3(1f, 1f, 1f);
     [SerializeField] private Vector3 largeSize = new Vector3(1f, 1f, 1f);
     
     [Header("Cooldown")]
