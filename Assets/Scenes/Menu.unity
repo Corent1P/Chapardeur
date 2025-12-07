@@ -749,7 +749,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.022500003, y: 0.872309}
   m_AnchorMax: {x: 0.19125001, y: 0.95100003}
-  m_AnchoredPosition: {x: -0.9246826, y: -1.0256042}
+  m_AnchoredPosition: {x: -0.9246826, y: -1.0256348}
   m_SizeDelta: {x: -2.0495987, y: -2.7489014}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &56641570
@@ -1000,6 +1000,7 @@ GameObject:
   - component: {fileID: 73362918}
   - component: {fileID: 73362917}
   - component: {fileID: 73362916}
+  - component: {fileID: 73362919}
   m_Layer: 5
   m_Name: 3-Player
   m_TagString: Untagged
@@ -1134,6 +1135,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 73362914}
   m_CullTransparentMesh: 1
+--- !u!114 &73362919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 73362914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &74944735
 GameObject:
   m_ObjectHideFlags: 0
@@ -1321,7 +1337,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1041784033}
+    - targetCorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1327318609}
   m_SourcePrefab: {fileID: 100100000, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
 --- !u!224 &80572416 stripped
 RectTransform:
@@ -1344,7 +1366,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2955509462233193519, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
   m_PrefabInstance: {fileID: 80572415}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1041784029}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
@@ -1534,6 +1556,7 @@ GameObject:
   - component: {fileID: 117102501}
   - component: {fileID: 117102500}
   - component: {fileID: 117102499}
+  - component: {fileID: 117102502}
   m_Layer: 5
   m_Name: GoBack
   m_TagString: Untagged
@@ -1668,6 +1691,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 117102497}
   m_CullTransparentMesh: 1
+--- !u!114 &117102502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117102497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &121409676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1720,6 +1758,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
   m_Padding: {x: -8, y: -5, z: -8, w: -5}
   m_Softness: {x: 0, y: 0}
+--- !u!1 &144233851 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 3200022876613280682}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &146039103
 GameObject:
   m_ObjectHideFlags: 0
@@ -1882,6 +1925,7 @@ GameObject:
   - component: {fileID: 181475933}
   - component: {fileID: 181475932}
   - component: {fileID: 181475931}
+  - component: {fileID: 181475934}
   m_Layer: 5
   m_Name: Add
   m_TagString: Untagged
@@ -2015,6 +2059,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 181475929}
   m_CullTransparentMesh: 1
+--- !u!114 &181475934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181475929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &186343119
 GameObject:
   m_ObjectHideFlags: 0
@@ -2737,6 +2796,7 @@ GameObject:
   - component: {fileID: 285037090}
   - component: {fileID: 285037089}
   - component: {fileID: 285037088}
+  - component: {fileID: 285037091}
   m_Layer: 5
   m_Name: AuthToUnity
   m_TagString: Untagged
@@ -2871,6 +2931,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 285037086}
   m_CullTransparentMesh: 1
+--- !u!114 &285037091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 285037086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &286995745
 GameObject:
   m_ObjectHideFlags: 0
@@ -3179,6 +3254,7 @@ GameObject:
   - component: {fileID: 294476137}
   - component: {fileID: 294476136}
   - component: {fileID: 294476135}
+  - component: {fileID: 294476138}
   m_Layer: 5
   m_Name: Volume Decrease
   m_TagString: Untagged
@@ -3285,6 +3361,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 294476133}
   m_CullTransparentMesh: 1
+--- !u!114 &294476138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 294476133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &298115136
 GameObject:
   m_ObjectHideFlags: 0
@@ -3349,6 +3440,7 @@ GameObject:
   - component: {fileID: 327700583}
   - component: {fileID: 327700582}
   - component: {fileID: 327700581}
+  - component: {fileID: 327700584}
   m_Layer: 5
   m_Name: Month Picker
   m_TagString: Untagged
@@ -3504,6 +3596,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 327700579}
   m_CullTransparentMesh: 1
+--- !u!114 &327700584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 327700579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &369447470
 GameObject:
   m_ObjectHideFlags: 0
@@ -3516,6 +3623,7 @@ GameObject:
   - component: {fileID: 369447474}
   - component: {fileID: 369447473}
   - component: {fileID: 369447472}
+  - component: {fileID: 369447475}
   m_Layer: 5
   m_Name: GoBack
   m_TagString: Untagged
@@ -3650,6 +3758,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 369447470}
   m_CullTransparentMesh: 1
+--- !u!114 &369447475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 369447470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &374529385
 GameObject:
   m_ObjectHideFlags: 0
@@ -4258,6 +4381,7 @@ GameObject:
   - component: {fileID: 441289777}
   - component: {fileID: 441289776}
   - component: {fileID: 441289775}
+  - component: {fileID: 441289778}
   m_Layer: 5
   m_Name: Quit
   m_TagString: Untagged
@@ -4392,6 +4516,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 441289773}
   m_CullTransparentMesh: 1
+--- !u!114 &441289778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 441289773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &444167859
 GameObject:
   m_ObjectHideFlags: 0
@@ -4427,43 +4566,6 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &444828650
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 444828651}
-  m_Layer: 5
-  m_Name: Buttons
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &444828651
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 444828650}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1006609817}
-  - {fileID: 1119967027}
-  m_Father: {fileID: 1738375789}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 215.9, y: -155.6}
-  m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &447962569
 GameObject:
@@ -4750,6 +4852,7 @@ GameObject:
   - component: {fileID: 484091169}
   - component: {fileID: 484091168}
   - component: {fileID: 484091167}
+  - component: {fileID: 484091170}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -4867,6 +4970,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 484091165}
   m_CullTransparentMesh: 1
+--- !u!114 &484091170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 484091165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
+--- !u!1 &555429577 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 2130121862}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &555429582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555429577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &561953145
 GameObject:
   m_ObjectHideFlags: 0
@@ -4879,6 +5017,7 @@ GameObject:
   - component: {fileID: 561953149}
   - component: {fileID: 561953148}
   - component: {fileID: 561953147}
+  - component: {fileID: 561953150}
   m_Layer: 5
   m_Name: Button_1
   m_TagString: Untagged
@@ -4996,6 +5135,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 561953145}
   m_CullTransparentMesh: 1
+--- !u!114 &561953150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 561953145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &565186964
 GameObject:
   m_ObjectHideFlags: 0
@@ -5008,6 +5162,7 @@ GameObject:
   - component: {fileID: 565186968}
   - component: {fileID: 565186967}
   - component: {fileID: 565186966}
+  - component: {fileID: 565186969}
   m_Layer: 5
   m_Name: Button_2
   m_TagString: Untagged
@@ -5125,6 +5280,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 565186964}
   m_CullTransparentMesh: 1
+--- !u!114 &565186969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565186964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &570673235
 GameObject:
   m_ObjectHideFlags: 0
@@ -5319,6 +5489,7 @@ GameObject:
   - component: {fileID: 573746292}
   - component: {fileID: 573746291}
   - component: {fileID: 573746290}
+  - component: {fileID: 573746293}
   m_Layer: 5
   m_Name: Button_3
   m_TagString: Untagged
@@ -5436,6 +5607,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 573746288}
   m_CullTransparentMesh: 1
+--- !u!114 &573746293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 573746288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &610034296
 GameObject:
   m_ObjectHideFlags: 0
@@ -5448,6 +5634,7 @@ GameObject:
   - component: {fileID: 610034300}
   - component: {fileID: 610034299}
   - component: {fileID: 610034298}
+  - component: {fileID: 610034301}
   m_Layer: 5
   m_Name: Quick Join
   m_TagString: Untagged
@@ -5581,6 +5768,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 610034296}
   m_CullTransparentMesh: 1
+--- !u!114 &610034301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 610034296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &613160852
 GameObject:
   m_ObjectHideFlags: 0
@@ -5850,6 +6052,14 @@ MonoBehaviour:
   hostMenu: {fileID: 980369216}
   usernameMenu: {fileID: 1738375788}
   authMenu: {fileID: 1838879823}
+  mainMenuFirstButton: {fileID: 1634050370}
+  optionsMenuFirstButton: {fileID: 241560355}
+  playOnlineMenuFirstButton: {fileID: 918297489}
+  playLocalMenuFirstButton: {fileID: 816940012}
+  joinMenuFirstButton: {fileID: 1559655668}
+  hostMenuFirstButton: {fileID: 1980891731}
+  usernameMenuFirstButton: {fileID: 484091165}
+  authMenuFirstButton: {fileID: 285037086}
 --- !u!1 &648310051
 GameObject:
   m_ObjectHideFlags: 0
@@ -5862,6 +6072,7 @@ GameObject:
   - component: {fileID: 648310055}
   - component: {fileID: 648310054}
   - component: {fileID: 648310053}
+  - component: {fileID: 648310056}
   m_Layer: 5
   m_Name: Previous
   m_TagString: Untagged
@@ -5995,6 +6206,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 648310051}
   m_CullTransparentMesh: 1
+--- !u!114 &648310056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 648310051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &663966026
 GameObject:
   m_ObjectHideFlags: 0
@@ -6007,6 +6233,7 @@ GameObject:
   - component: {fileID: 663966030}
   - component: {fileID: 663966029}
   - component: {fileID: 663966028}
+  - component: {fileID: 663966031}
   m_Layer: 5
   m_Name: Button_4
   m_TagString: Untagged
@@ -6124,6 +6351,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 663966026}
   m_CullTransparentMesh: 1
+--- !u!114 &663966031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 663966026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &670944962
 GameObject:
   m_ObjectHideFlags: 0
@@ -6381,6 +6623,7 @@ GameObject:
   - component: {fileID: 692271723}
   - component: {fileID: 692271722}
   - component: {fileID: 692271721}
+  - component: {fileID: 692271724}
   m_Layer: 5
   m_Name: Mic Button
   m_TagString: Untagged
@@ -6486,6 +6729,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 692271719}
   m_CullTransparentMesh: 1
+--- !u!114 &692271724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692271719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &733793242
 GameObject:
   m_ObjectHideFlags: 0
@@ -6540,6 +6798,7 @@ GameObject:
   - component: {fileID: 737860477}
   - component: {fileID: 737860476}
   - component: {fileID: 737860475}
+  - component: {fileID: 737860478}
   m_Layer: 5
   m_Name: Refresh
   m_TagString: Untagged
@@ -6673,6 +6932,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 737860473}
   m_CullTransparentMesh: 1
+--- !u!114 &737860478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 737860473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &745904827
 GameObject:
   m_ObjectHideFlags: 0
@@ -7048,6 +7322,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lobbyManager: {fileID: 1279185765}
   lobbyWaitingUI: {fileID: 146039103}
+  lobbyWaitingFirstButton: {fileID: 888928773}
   voiceChatLobby: {fileID: 6644884652953056973}
   startGameButton: {fileID: 2141435609}
   lobbyInfoText: {fileID: 1479298102}
@@ -7080,6 +7355,7 @@ GameObject:
   - component: {fileID: 794702120}
   - component: {fileID: 794702119}
   - component: {fileID: 794702118}
+  - component: {fileID: 794702121}
   m_Layer: 5
   m_Name: Continue
   m_TagString: Untagged
@@ -7214,6 +7490,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 794702116}
   m_CullTransparentMesh: 1
+--- !u!114 &794702121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 794702116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &796295437
 GameObject:
   m_ObjectHideFlags: 0
@@ -7373,6 +7664,7 @@ GameObject:
   - component: {fileID: 816940016}
   - component: {fileID: 816940015}
   - component: {fileID: 816940014}
+  - component: {fileID: 816940017}
   m_Layer: 5
   m_Name: 2-Player
   m_TagString: Untagged
@@ -7507,6 +7799,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 816940012}
   m_CullTransparentMesh: 1
+--- !u!114 &816940017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816940012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &824194108
 GameObject:
   m_ObjectHideFlags: 0
@@ -8165,6 +8472,7 @@ GameObject:
   - component: {fileID: 888928777}
   - component: {fileID: 888928776}
   - component: {fileID: 888928775}
+  - component: {fileID: 888928778}
   m_Layer: 5
   m_Name: Leave Button
   m_TagString: Untagged
@@ -8311,6 +8619,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 888928773}
   m_CullTransparentMesh: 1
+--- !u!114 &888928778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 888928773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &894958957
 GameObject:
   m_ObjectHideFlags: 0
@@ -8579,6 +8902,7 @@ GameObject:
   - component: {fileID: 918297493}
   - component: {fileID: 918297492}
   - component: {fileID: 918297491}
+  - component: {fileID: 918297494}
   m_Layer: 5
   m_Name: Host
   m_TagString: Untagged
@@ -8713,6 +9037,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 918297489}
   m_CullTransparentMesh: 1
+--- !u!114 &918297494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918297489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &932675723
 GameObject:
   m_ObjectHideFlags: 0
@@ -9789,6 +10128,7 @@ GameObject:
   - component: {fileID: 1006609820}
   - component: {fileID: 1006609819}
   - component: {fileID: 1006609818}
+  - component: {fileID: 1006609821}
   m_Layer: 5
   m_Name: Validate
   m_TagString: Untagged
@@ -9810,11 +10150,11 @@ RectTransform:
   m_Children:
   - {fileID: 898504674}
   - {fileID: 1571350211}
-  m_Father: {fileID: 444828651}
+  m_Father: {fileID: 1738375789}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0.000015258789}
+  m_AnchoredPosition: {x: 215.90002, y: -155.60002}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1006609818
@@ -9935,6 +10275,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1006609816}
   m_CullTransparentMesh: 1
+--- !u!114 &1006609821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1006609816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1023088116
 GameObject:
   m_ObjectHideFlags: 0
@@ -10062,6 +10417,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1028957191}
   m_CullTransparentMesh: 1
+--- !u!1 &1041784029 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 80572415}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1041784033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1041784029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1043780350
 GameObject:
   m_ObjectHideFlags: 0
@@ -10074,6 +10449,7 @@ GameObject:
   - component: {fileID: 1043780354}
   - component: {fileID: 1043780353}
   - component: {fileID: 1043780352}
+  - component: {fileID: 1043780355}
   m_Layer: 5
   m_Name: GoBack (1)
   m_TagString: Untagged
@@ -10208,6 +10584,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1043780350}
   m_CullTransparentMesh: 1
+--- !u!114 &1043780355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043780350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1043943844
 GameObject:
   m_ObjectHideFlags: 0
@@ -10678,6 +11069,7 @@ GameObject:
   - component: {fileID: 1086127814}
   - component: {fileID: 1086127813}
   - component: {fileID: 1086127812}
+  - component: {fileID: 1086127815}
   m_Layer: 5
   m_Name: GoBack
   m_TagString: Untagged
@@ -10812,6 +11204,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1086127810}
   m_CullTransparentMesh: 1
+--- !u!114 &1086127815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1086127810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1093731057
 GameObject:
   m_ObjectHideFlags: 0
@@ -10960,6 +11367,7 @@ GameObject:
   - component: {fileID: 1094858370}
   - component: {fileID: 1094858369}
   - component: {fileID: 1094858368}
+  - component: {fileID: 1094858371}
   m_Layer: 5
   m_Name: Disconnect
   m_TagString: Untagged
@@ -11066,6 +11474,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1094858366}
   m_CullTransparentMesh: 1
+--- !u!114 &1094858371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1094858366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1097550482
 GameObject:
   m_ObjectHideFlags: 0
@@ -11139,6 +11562,26 @@ MonoBehaviour:
   - {fileID: 80572417}
   - {fileID: 2130121864}
   startGameButton: {fileID: 2141435610}
+--- !u!1 &1100856696 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 3200022876613280682}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1100856701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100856696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1109543014
 GameObject:
   m_ObjectHideFlags: 0
@@ -11445,6 +11888,7 @@ GameObject:
   - component: {fileID: 1119967030}
   - component: {fileID: 1119967029}
   - component: {fileID: 1119967028}
+  - component: {fileID: 1119967031}
   m_Layer: 5
   m_Name: Continue
   m_TagString: Untagged
@@ -11466,11 +11910,11 @@ RectTransform:
   m_Children:
   - {fileID: 1450790361}
   - {fileID: 194661566}
-  m_Father: {fileID: 444828651}
+  m_Father: {fileID: 1738375789}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -171.60004, y: 0.000015258789}
+  m_AnchoredPosition: {x: 44.299957, y: -155.60002}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1119967028
@@ -11579,6 +12023,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1119967026}
   m_CullTransparentMesh: 1
+--- !u!114 &1119967031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119967026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1126552483
 GameObject:
   m_ObjectHideFlags: 0
@@ -11863,6 +12322,7 @@ GameObject:
   - component: {fileID: 1147402531}
   - component: {fileID: 1147402530}
   - component: {fileID: 1147402529}
+  - component: {fileID: 1147402532}
   m_Layer: 5
   m_Name: Validate
   m_TagString: Untagged
@@ -12009,6 +12469,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1147402527}
   m_CullTransparentMesh: 1
+--- !u!114 &1147402532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1147402527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1168051011
 GameObject:
   m_ObjectHideFlags: 0
@@ -12021,6 +12496,7 @@ GameObject:
   - component: {fileID: 1168051015}
   - component: {fileID: 1168051014}
   - component: {fileID: 1168051013}
+  - component: {fileID: 1168051016}
   m_Layer: 5
   m_Name: Connect
   m_TagString: Untagged
@@ -12127,6 +12603,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1168051011}
   m_CullTransparentMesh: 1
+--- !u!114 &1168051016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168051011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1198844797
 GameObject:
   m_ObjectHideFlags: 0
@@ -12547,6 +13038,7 @@ GameObject:
   - component: {fileID: 1219569998}
   - component: {fileID: 1219569997}
   - component: {fileID: 1219569996}
+  - component: {fileID: 1219569999}
   m_Layer: 5
   m_Name: Volume Increase
   m_TagString: Untagged
@@ -12653,6 +13145,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1219569994}
   m_CullTransparentMesh: 1
+--- !u!114 &1219569999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219569994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1220161876
 GameObject:
   m_ObjectHideFlags: 0
@@ -12800,6 +13307,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1233047313}
   - component: {fileID: 1233047314}
+  - component: {fileID: 1233047315}
   m_Layer: 5
   m_Name: Item
   m_TagString: Untagged
@@ -12877,6 +13385,21 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!114 &1233047315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1233047312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1234466424
 GameObject:
   m_ObjectHideFlags: 0
@@ -13162,6 +13685,7 @@ GameObject:
   - component: {fileID: 1248207762}
   - component: {fileID: 1248207761}
   - component: {fileID: 1248207760}
+  - component: {fileID: 1248207763}
   m_Layer: 5
   m_Name: Substract
   m_TagString: Untagged
@@ -13295,6 +13819,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1248207758}
   m_CullTransparentMesh: 1
+--- !u!114 &1248207763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248207758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1275659190
 GameObject:
   m_ObjectHideFlags: 0
@@ -13839,6 +14378,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1321003306}
   m_CullTransparentMesh: 1
+--- !u!1 &1327318604 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 80572415}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1327318609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1327318604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1330934157
 GameObject:
   m_ObjectHideFlags: 0
@@ -13851,6 +14410,7 @@ GameObject:
   - component: {fileID: 1330934161}
   - component: {fileID: 1330934160}
   - component: {fileID: 1330934159}
+  - component: {fileID: 1330934162}
   m_Layer: 5
   m_Name: GoBack
   m_TagString: Untagged
@@ -13985,6 +14545,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1330934157}
   m_CullTransparentMesh: 1
+--- !u!114 &1330934162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1330934157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1339261675
 GameObject:
   m_ObjectHideFlags: 0
@@ -14121,6 +14696,7 @@ GameObject:
   - component: {fileID: 1358820447}
   - component: {fileID: 1358820446}
   - component: {fileID: 1358820445}
+  - component: {fileID: 1358820448}
   m_Layer: 5
   m_Name: Join
   m_TagString: Untagged
@@ -14255,6 +14831,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1358820443}
   m_CullTransparentMesh: 1
+--- !u!114 &1358820448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1358820443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1359156020
 GameObject:
   m_ObjectHideFlags: 0
@@ -14466,6 +15057,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1360981457}
   m_CullTransparentMesh: 1
+--- !u!1 &1383105551 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 1453836648}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1385155422
 GameObject:
   m_ObjectHideFlags: 0
@@ -14962,7 +15558,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3008043045772776568, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -2.999939
+      value: -3
       objectReference: {fileID: 0}
     - target: {fileID: 3008043045772776568, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -15000,10 +15596,20 @@ PrefabInstance:
       propertyPath: m_TargetGraphic
       value: 
       objectReference: {fileID: 1453836651}
+    - target: {fileID: 8052285014354250235, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.2999878
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1453836655}
+    - targetCorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1987277707}
   m_SourcePrefab: {fileID: 100100000, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
 --- !u!224 &1453836649 stripped
 RectTransform:
@@ -15026,12 +15632,27 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2955509462233193519, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
   m_PrefabInstance: {fileID: 1453836648}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1383105551}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
+--- !u!114 &1453836655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1383105551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1467155092
 GameObject:
   m_ObjectHideFlags: 0
@@ -15507,6 +16128,7 @@ GameObject:
   - component: {fileID: 1496150741}
   - component: {fileID: 1496150740}
   - component: {fileID: 1496150739}
+  - component: {fileID: 1496150742}
   m_Layer: 5
   m_Name: Username
   m_TagString: Untagged
@@ -15686,6 +16308,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1496150737}
   m_CullTransparentMesh: 1
+--- !u!114 &1496150742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1496150737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1505937515
 GameObject:
   m_ObjectHideFlags: 0
@@ -16180,6 +16817,7 @@ GameObject:
   - component: {fileID: 1559655672}
   - component: {fileID: 1559655671}
   - component: {fileID: 1559655670}
+  - component: {fileID: 1559655673}
   m_Layer: 5
   m_Name: Game Code
   m_TagString: Untagged
@@ -16346,6 +16984,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1559655668}
   m_CullTransparentMesh: 1
+--- !u!114 &1559655673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1559655668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1563593406
 GameObject:
   m_ObjectHideFlags: 0
@@ -16422,6 +17075,7 @@ GameObject:
   - component: {fileID: 1570482877}
   - component: {fileID: 1570482876}
   - component: {fileID: 1570482875}
+  - component: {fileID: 1570482878}
   m_Layer: 5
   m_Name: Button_5
   m_TagString: Untagged
@@ -16539,6 +17193,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1570482873}
   m_CullTransparentMesh: 1
+--- !u!114 &1570482878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1570482873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1571212003
 GameObject:
   m_ObjectHideFlags: 0
@@ -17159,6 +17828,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1616753953}
   m_CullTransparentMesh: 1
+--- !u!1 &1619126823 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 2130121862}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1634050370
 GameObject:
   m_ObjectHideFlags: 0
@@ -17171,6 +17845,7 @@ GameObject:
   - component: {fileID: 1634050374}
   - component: {fileID: 1634050373}
   - component: {fileID: 1634050372}
+  - component: {fileID: 1634050375}
   m_Layer: 5
   m_Name: Play
   m_TagString: Untagged
@@ -17293,6 +17968,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1634050370}
   m_CullTransparentMesh: 1
+--- !u!114 &1634050375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1634050370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1641308541
 GameObject:
   m_ObjectHideFlags: 0
@@ -17594,6 +18284,7 @@ GameObject:
   - component: {fileID: 1678004879}
   - component: {fileID: 1678004878}
   - component: {fileID: 1678004877}
+  - component: {fileID: 1678004880}
   m_Layer: 5
   m_Name: Play
   m_TagString: Untagged
@@ -17728,6 +18419,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1678004875}
   m_CullTransparentMesh: 1
+--- !u!114 &1678004880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1678004875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1712178576
 GameObject:
   m_ObjectHideFlags: 0
@@ -18251,7 +18957,8 @@ RectTransform:
   - {fileID: 733793243}
   - {fileID: 1496150738}
   - {fileID: 2128642643}
-  - {fileID: 444828651}
+  - {fileID: 1006609817}
+  - {fileID: 1119967027}
   m_Father: {fileID: 647804344}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -18304,6 +19011,7 @@ GameObject:
   - component: {fileID: 1746653161}
   - component: {fileID: 1746653160}
   - component: {fileID: 1746653159}
+  - component: {fileID: 1746653162}
   m_Layer: 5
   m_Name: Validate
   m_TagString: Untagged
@@ -18438,6 +19146,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1746653157}
   m_CullTransparentMesh: 1
+--- !u!114 &1746653162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1746653157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1798007692
 GameObject:
   m_ObjectHideFlags: 0
@@ -18594,6 +19317,7 @@ GameObject:
   - component: {fileID: 1833685216}
   - component: {fileID: 1833685215}
   - component: {fileID: 1833685214}
+  - component: {fileID: 1833685217}
   m_Layer: 5
   m_Name: AuthAno
   m_TagString: Untagged
@@ -18728,6 +19452,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1833685212}
   m_CullTransparentMesh: 1
+--- !u!114 &1833685217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833685212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1836786040
 GameObject:
   m_ObjectHideFlags: 0
@@ -18740,6 +19479,7 @@ GameObject:
   - component: {fileID: 1836786044}
   - component: {fileID: 1836786043}
   - component: {fileID: 1836786042}
+  - component: {fileID: 1836786045}
   m_Layer: 5
   m_Name: Next
   m_TagString: Untagged
@@ -18873,6 +19613,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1836786040}
   m_CullTransparentMesh: 1
+--- !u!114 &1836786045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1836786040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1838879823
 GameObject:
   m_ObjectHideFlags: 0
@@ -20086,6 +20841,7 @@ GameObject:
   - component: {fileID: 1967539066}
   - component: {fileID: 1967539065}
   - component: {fileID: 1967539064}
+  - component: {fileID: 1967539067}
   m_Layer: 5
   m_Name: Options
   m_TagString: Untagged
@@ -20220,6 +20976,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1967539062}
   m_CullTransparentMesh: 1
+--- !u!114 &1967539067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967539062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &1967652155
 GameObject:
   m_ObjectHideFlags: 0
@@ -20378,6 +21149,7 @@ GameObject:
   - component: {fileID: 1980891735}
   - component: {fileID: 1980891734}
   - component: {fileID: 1980891733}
+  - component: {fileID: 1980891736}
   m_Layer: 5
   m_Name: ServerName
   m_TagString: Untagged
@@ -20544,6 +21316,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1980891731}
   m_CullTransparentMesh: 1
+--- !u!114 &1980891736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980891731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
+--- !u!1 &1987277702 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+  m_PrefabInstance: {fileID: 1453836648}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1987277707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987277702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &2002065514
 GameObject:
   m_ObjectHideFlags: 0
@@ -20556,6 +21363,7 @@ GameObject:
   - component: {fileID: 2002065518}
   - component: {fileID: 2002065517}
   - component: {fileID: 2002065516}
+  - component: {fileID: 2002065519}
   m_Layer: 5
   m_Name: Day Field
   m_TagString: Untagged
@@ -20719,6 +21527,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2002065514}
   m_CullTransparentMesh: 1
+--- !u!114 &2002065519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2002065514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &2006993659
 GameObject:
   m_ObjectHideFlags: 0
@@ -21078,6 +21901,7 @@ GameObject:
   - component: {fileID: 2036466423}
   - component: {fileID: 2036466422}
   - component: {fileID: 2036466421}
+  - component: {fileID: 2036466424}
   m_Layer: 5
   m_Name: Sound Button
   m_TagString: Untagged
@@ -21183,6 +22007,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2036466419}
   m_CullTransparentMesh: 1
+--- !u!114 &2036466424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2036466419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &2059241155
 GameObject:
   m_ObjectHideFlags: 0
@@ -21332,6 +22171,7 @@ GameObject:
   - component: {fileID: 2061898661}
   - component: {fileID: 2061898660}
   - component: {fileID: 2061898659}
+  - component: {fileID: 2061898662}
   m_Layer: 5
   m_Name: 4-Player
   m_TagString: Untagged
@@ -21466,6 +22306,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2061898657}
   m_CullTransparentMesh: 1
+--- !u!114 &2061898662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2061898657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &2070388614
 GameObject:
   m_ObjectHideFlags: 0
@@ -21527,6 +22382,7 @@ GameObject:
   - component: {fileID: 2081526036}
   - component: {fileID: 2081526035}
   - component: {fileID: 2081526034}
+  - component: {fileID: 2081526037}
   m_Layer: 5
   m_Name: Year Field
   m_TagString: Untagged
@@ -21690,6 +22546,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2081526032}
   m_CullTransparentMesh: 1
+--- !u!114 &2081526037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081526032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &2101249612
 GameObject:
   m_ObjectHideFlags: 0
@@ -22082,6 +22953,7 @@ GameObject:
   - component: {fileID: 2116480516}
   - component: {fileID: 2116480515}
   - component: {fileID: 2116480514}
+  - component: {fileID: 2116480517}
   m_Layer: 5
   m_Name: GoBack (1)
   m_TagString: Untagged
@@ -22216,6 +23088,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2116480512}
   m_CullTransparentMesh: 1
+--- !u!114 &2116480517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2116480512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &2124594627
 GameObject:
   m_ObjectHideFlags: 0
@@ -22502,7 +23389,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2130121869}
+    - targetCorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 555429582}
   m_SourcePrefab: {fileID: 100100000, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
 --- !u!224 &2130121863 stripped
 RectTransform:
@@ -22525,12 +23418,27 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2955509462233193519, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
   m_PrefabInstance: {fileID: 2130121862}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1619126823}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
+--- !u!114 &2130121869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619126823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &2141435609
 GameObject:
   m_ObjectHideFlags: 0
@@ -22543,6 +23451,7 @@ GameObject:
   - component: {fileID: 2141435612}
   - component: {fileID: 2141435611}
   - component: {fileID: 2141435610}
+  - component: {fileID: 2141435614}
   m_Layer: 5
   m_Name: Start Button
   m_TagString: Untagged
@@ -22677,6 +23586,21 @@ RectTransform:
   m_AnchoredPosition: {x: 87.1, y: -163}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2141435614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141435609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!222 &1413147839481639578
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -22819,7 +23743,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1820546831168450148, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3200022876613280689}
+    - targetCorrespondingSourceObject: {fileID: 8639841730354663152, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1100856701}
   m_SourcePrefab: {fileID: 100100000, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
 --- !u!224 &3200022876613280683 stripped
 RectTransform:
@@ -22842,12 +23772,27 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2955509462233193519, guid: 69c50959f908d4b65aa2ba4cfc26d235, type: 3}
   m_PrefabInstance: {fileID: 3200022876613280682}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 144233851}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
+--- !u!114 &3200022876613280689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144233851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!224 &3402928783136851285
 RectTransform:
   m_ObjectHideFlags: 0
@@ -22866,7 +23811,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 0.112500004, y: 0.21023302}
   m_AnchorMax: {x: 0.2775, y: 0.69267476}
-  m_AnchoredPosition: {x: -0.7000122, y: 0.000030517578}
+  m_AnchoredPosition: {x: -0.6999512, y: 0.000030517578}
   m_SizeDelta: {x: 68, y: -65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3488227990042936568
