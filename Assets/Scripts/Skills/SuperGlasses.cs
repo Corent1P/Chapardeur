@@ -21,6 +21,14 @@ public class SuperGlasses : ASkills
     private bool isHackingGameActive = false;
     private Rigidbody playerRigidbody;
 
+    // Position et rotation initiales des lunettes (définies dans le prefab)
+    private Vector3 initialGlassesPosition;
+    private Quaternion initialGlassesRotation; // Rotation d'origine = lunettes relevées (désactivées)
+    
+    // Offsets pour ajuster la position des lunettes quand elles sont actives (sur les yeux)
+    [Header("Position Active Offsets")]
+    [SerializeField] private Vector3 activePositionOffset = new Vector3(0f, -0.05f, -0.02f); // (x, y=hauteur, z=avancée)
+
     private NetworkVariable<bool> netIsGlassesOn = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server
     );
@@ -45,7 +53,7 @@ public class SuperGlasses : ASkills
     private void UpdateGlassesVisual(bool isOn)
     {
         StopAllCoroutines(); // Sécurité pour éviter conflit d'anim
-        StartCoroutine(MoveGlasses(isOn ? 0f : -90f));
+        StartCoroutine(MoveGlasses(isOn)); // true = position active (sur les yeux), false = position inactive (relevées)
         
         isGlassesOn = isOn;
 
@@ -61,20 +69,32 @@ public class SuperGlasses : ASkills
         }
     }
 
-    IEnumerator MoveGlasses(float degree)
+    IEnumerator MoveGlasses(bool toActivePosition)
     {
         float time = 0f;
         float duration = 0.3f;
-        Quaternion initialRotation = superGlassesObject.transform.localRotation;
-        Quaternion targetRotation = Quaternion.Euler(degree, 0f, 0f);
+        Quaternion startRotation = superGlassesObject.transform.localRotation;
+        Vector3 startPosition = superGlassesObject.transform.localPosition;
+        
+        // Position active = lunettes droites sur les yeux (rotation 0) + offset de position
+        // Position inactive = rotation et position d'origine du prefab (lunettes relevées sur le front)
+        Quaternion targetRotation = toActivePosition 
+            ? Quaternion.identity 
+            : initialGlassesRotation;
+        Vector3 targetPosition = toActivePosition 
+            ? initialGlassesPosition + activePositionOffset 
+            : initialGlassesPosition;
 
         while (time < duration)
         {
-            superGlassesObject.transform.localRotation = Quaternion.Slerp(initialRotation, targetRotation, time / duration);
+            float t = time / duration;
+            superGlassesObject.transform.localRotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            superGlassesObject.transform.localPosition = Vector3.Lerp(startPosition, targetPosition, t);
             time += Time.deltaTime;
             yield return null;
         }
         superGlassesObject.transform.localRotation = targetRotation;
+        superGlassesObject.transform.localPosition = targetPosition;
     }
 
     private void Update()
@@ -161,6 +181,16 @@ public class SuperGlasses : ASkills
         }
     }
 
+    private void Awake()
+    {
+        // Sauvegarder la position et rotation initiales des lunettes (celles du prefab)
+        if (superGlassesObject != null)
+        {
+            initialGlassesPosition = superGlassesObject.transform.localPosition;
+            initialGlassesRotation = superGlassesObject.transform.localRotation;
+        }
+    }
+
     private void Start()
     {
         if (superGlassesObject != null) superGlassesObject.SetActive(false);
@@ -174,6 +204,19 @@ public class SuperGlasses : ASkills
     {
         Debug.Log("SuperGlasses Activated");
         base.ActivateSkill();
+        
+        // Remettre les lunettes à leur position et rotation correcte avant de les afficher
+        if (superGlassesObject != null)
+        {
+            // Activé = position avec offset + rotation droite, Désactivé = position et rotation d'origine
+            superGlassesObject.transform.localPosition = netIsGlassesOn.Value 
+                ? initialGlassesPosition + activePositionOffset 
+                : initialGlassesPosition;
+            superGlassesObject.transform.localRotation = netIsGlassesOn.Value 
+                ? Quaternion.identity 
+                : initialGlassesRotation;
+        }
+        
         superGlassesObject.SetActive(true);
         
         // On synchronise l'état visuel avec l'état réseau actuel

@@ -9,8 +9,8 @@ public class SkillManager : NetworkBehaviour
     [SerializeField] private ASkills[] skillsList;
 
     private NetworkVariable<int> netCurrentSkillIndex = new NetworkVariable<int>(
-        0, 
-        NetworkVariableReadPermission.Everyone, 
+        0,
+        NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
 
@@ -20,6 +20,14 @@ public class SkillManager : NetworkBehaviour
     private void Awake()
     {
         inputActions = GetComponentInParent<PlayerInput>();
+    }
+
+    public void UpdateActiveSkillAnimation(float speed, bool isJumpTrigger)
+    {
+        if (currentSkillInstance != null)
+        {
+            currentSkillInstance.UpdateAnimationState(speed, isJumpTrigger);
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -155,7 +163,7 @@ public class SkillManager : NetworkBehaviour
 
         currentSkillInstance = skillsList[skillIndex];
         
-        GetComponent<NetworkTransform>().transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+        GetComponent<NetworkTransform>().transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z);
 
         currentSkillInstance.ActivateSkill();
     }
