@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using TMPro;
-using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -32,7 +31,7 @@ public class LobbyManager : MonoBehaviour
 
     private async void Start()
     {
-        #if (!DISABLE_ONLINE)
+        #if DISABLE_ONLINE
             // Sur Xbox, on désactive ce composant immédiatement
             // car on n'a pas le droit d'utiliser l'Auth Unity.
             this.enabled = false; 
@@ -225,6 +224,13 @@ public class LobbyManager : MonoBehaviour
             };
 
             joinLobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
+            if (joinLobby == null)
+            {
+                Debug.Log("No available lobbies to join.");
+                joinErrorText.gameObject.SetActive(true);
+                joinSuccessText.gameObject.SetActive(false);
+                return;
+            }
             Debug.Log("Quick joined lobby: " + joinLobby.Name);
             PrintPlayers(joinLobby);
             joinErrorText.gameObject.SetActive(false);
@@ -244,7 +250,7 @@ public class LobbyManager : MonoBehaviour
         {
             joinSuccessText.gameObject.SetActive(false);
             joinErrorText.gameObject.SetActive(true);
-            Debug.LogException(e);
+            Debug.Log(e);
         }
     }
 

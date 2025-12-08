@@ -79,10 +79,10 @@ public class ASkills : NetworkBehaviour, ISkills
     public virtual ISkills DeactivateSkill()
     {
         isActive = false;
-        
+
         // Désactiver le visuel
         if (characterModel != null) characterModel.SetActive(false);
-        
+
         return this;
     }
 
