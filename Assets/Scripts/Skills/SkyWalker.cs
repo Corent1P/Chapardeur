@@ -159,10 +159,6 @@ public class SkyWalker : ASkills
     public override ISkills ActivateSkill()
     {
         base.ActivateSkill();
-        // Le changement de taille ici est purement visuel/local temporaire ?
-        // Si c'est important, voir SizeShifter.
-        transform.localScale = Vector3.one * 3.0f;
-        
         if (IsOwner) SubscribeInputs();
         return this;
     }
@@ -170,7 +166,6 @@ public class SkyWalker : ASkills
     public override ISkills DeactivateSkill()
     {
         base.DeactivateSkill();
-        transform.localScale = Vector3.one;
         
         if (IsOwner) UnsubscribeInputs();
         return this;
