@@ -84,13 +84,13 @@ public class SkillManager : NetworkBehaviour
 
     private void OnMainAction(InputAction.CallbackContext ctx)
     {
-        if (currentSkillInstance != null && !currentSkillInstance.IsSkillLocked())
+        if (currentSkillInstance != null)
             currentSkillInstance.MainAction();
     }
 
     private void OnSecondaryAction(InputAction.CallbackContext ctx)
     {
-        if (currentSkillInstance != null && !currentSkillInstance.IsSkillLocked())
+        if (currentSkillInstance != null)
             currentSkillInstance.SecondaryAction();
     }
 
