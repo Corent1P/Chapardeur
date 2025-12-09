@@ -166,6 +166,10 @@ private void HandleMovement()
             // --------------------------
             targetVelocity.y = rb.linearVelocity.y;
             rb.linearVelocity = targetVelocity;
+
+            Vector3 lookDirection = new Vector3(moveDirection.x, 0f, moveDirection.z);
+            Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
         }
         else
         {
