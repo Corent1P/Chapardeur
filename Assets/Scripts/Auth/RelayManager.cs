@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using System;
+using UnityEngine.EventSystems;
 
 public class RelayManager : MonoBehaviour
 {
@@ -16,7 +17,9 @@ public class RelayManager : MonoBehaviour
     public LobbyManager lobbyManager;
 
     [Header("UI References")]
-    public GameObject lobbyWaitingUI; // Panel d'attente du lobby
+    public GameObject lobbyWaitingUI;
+    public GameObject lobbyWaitingFirstButton;
+    public GameObject voiceChatLobby;
     // public Transform playerListContainer; // Container pour la liste des joueurs
     // public GameObject playerListItemPrefab; // Prefab pour afficher un joueur
     public GameObject startGameButton; // Bouton Start (visible uniquement pour l'hôte)
@@ -37,7 +40,7 @@ public class RelayManager : MonoBehaviour
 
     private void Start()
     {
-        #if (!DISABLE_ONLINE)
+        #if DISABLE_ONLINE
             // Sur Xbox, on désactive ce composant immédiatement
             // car on n'a pas le droit d'utiliser l'Auth Unity.
             this.enabled = false; 
@@ -113,6 +116,11 @@ public class RelayManager : MonoBehaviour
         if (lobbyWaitingUI != null)
             lobbyWaitingUI.SetActive(true);
 
+        EventSystem.current.SetSelectedGameObject(lobbyWaitingFirstButton);
+
+        if (voiceChatLobby != null)
+            voiceChatLobby.SetActive(true);
+
         if (startGameButton != null)
             startGameButton.SetActive(isHost);
 
@@ -123,6 +131,11 @@ public class RelayManager : MonoBehaviour
     {
         if (lobbyWaitingUI != null)
             lobbyWaitingUI.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(null);
+
+        if (voiceChatLobby != null)
+            voiceChatLobby.SetActive(false);
         
         isHost = false;
         hasJoinedRelay = false;

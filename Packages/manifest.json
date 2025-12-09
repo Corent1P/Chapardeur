@@ -14,7 +14,12 @@
     "com.unity.render-pipelines.universal": "17.2.0",
     "com.unity.services.cloudsave": "3.2.2",
     "com.unity.services.multiplayer": "1.1.8",
+<<<<<<< HEAD
     "com.unity.services.vivox": "16.8.0",
+=======
+    "com.unity.services.vivox": "16.7.0",
+    "com.unity.test-framework": "1.6.0",
+>>>>>>> 31d45c9632b949d6fdc925ac3c5632ee611b992d
     "com.unity.timeline": "1.8.9",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualeffectgraph": "17.2.0",

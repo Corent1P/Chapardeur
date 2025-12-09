@@ -43,9 +43,17 @@ public class LaserEmitter : MonoBehaviour
             if (col.CompareTag("Player") || col.CompareTag("Cuttable"))
             {
                 CutLaser();
+
+               
+                if (col.CompareTag("Player") && GameStateManager.Instance != null && GameStateManager.Instance.IsGameActive())
+                {
+                    GameStateManager.Instance.PlayerDetectedServerRpc();
+                }
+
                 break;
             }
         }
+
     }
 
     private void CutLaser()

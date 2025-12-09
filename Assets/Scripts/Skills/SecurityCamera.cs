@@ -85,6 +85,17 @@ public class SecurityCamera : MonoBehaviour
                     }
                 }
             }
+            if (detectedThisFrame && !playerDetected)
+            {
+                OnPlayerDetected.Invoke();
+                SetAlertState(true);
+
+               
+                if (GameStateManager.Instance != null && GameStateManager.Instance.IsGameActive())
+                {
+                    GameStateManager.Instance.PlayerDetectedServerRpc();
+                }
+            }
         }
 
         if (!detectedThisFrame && playerDetected)

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using TMPro;
-using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -23,6 +22,7 @@ public class LobbyManager : MonoBehaviour
     public RelayManager relayManager;
     public TextMeshProUGUI maxPlayersText;
     public int maxPlayers = 4;
+    public VoiceChatLobby voiceChatLobby;
     private int minMaxPlayers = 2;
     private int maxMaxPlayers = 4;
     private bool isLeaving = false;
@@ -32,7 +32,7 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] private VivoxManager vivoxManager;
     private async void Start()
     {
-        #if (!DISABLE_ONLINE)
+        #if DISABLE_ONLINE
             // Sur Xbox, on désactive ce composant immédiatement
             // car on n'a pas le droit d'utiliser l'Auth Unity.
             this.enabled = false; 
@@ -205,9 +205,9 @@ public class LobbyManager : MonoBehaviour
             InitializeChatForLobby();  // Cambiado de await InitializeChatForLobby();
 
             if (lobbyCodeText != null)
-            {
                 lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
-            }
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
 
             Debug.Log("Party created: " + hostLobby.Name + " | Players: " + hostLobby.Players.Count + "/" + hostLobby.MaxPlayers + " | Lobby Code: " + hostLobby.LobbyCode);
 
@@ -294,6 +294,13 @@ public class LobbyManager : MonoBehaviour
             };
 
             joinLobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
+            if (joinLobby == null)
+            {
+                Debug.Log("No available lobbies to join.");
+                joinErrorText.gameObject.SetActive(true);
+                joinSuccessText.gameObject.SetActive(false);
+                return;
+            }
             Debug.Log("Quick joined lobby: " + joinLobby.Name);
 
             // 🔥 INICIALIZAR CHAT - SIN AWAIT
@@ -307,12 +314,16 @@ public class LobbyManager : MonoBehaviour
                 relayManager.ShowLobbyWaitingUI(false);
             if (menuManager != null)
                 menuManager.HideAllMenus();
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
+            if (lobbyCodeText != null)
+                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
         }
         catch (LobbyServiceException e)
         {
             joinSuccessText.gameObject.SetActive(false);
             joinErrorText.gameObject.SetActive(true);
-            Debug.LogException(e);
+            Debug.Log(e);
         }
     }
 
@@ -346,6 +357,10 @@ public class LobbyManager : MonoBehaviour
                 relayManager.ShowLobbyWaitingUI(false);
             if (menuManager != null)
                 menuManager.HideAllMenus();
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
+            if (lobbyCodeText != null)
+                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
         }
         catch (LobbyServiceException e)
         {
@@ -380,6 +395,10 @@ public class LobbyManager : MonoBehaviour
                 relayManager.ShowLobbyWaitingUI(false);
             if (menuManager != null)
                 menuManager.HideAllMenus();
+            if (voiceChatLobby != null)
+                voiceChatLobby.UpdateChannelName(joinLobby.Id);
+            if (lobbyCodeText != null)
+                lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
         }
         catch (LobbyServiceException e)
         {
