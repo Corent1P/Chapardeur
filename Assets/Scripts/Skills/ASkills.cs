@@ -37,6 +37,16 @@ public class ASkills : NetworkBehaviour, ISkills
         if(isJumping) characterAnimator.SetTrigger("Jump");
     }
 
+    // Forcer la rotation locale du characterModel à rester à zéro
+    // (évite que le Root Motion de l'Animator ne fasse tourner le visuel)
+    private void LateUpdate()
+    {
+        if (isActive && characterModel != null)
+        {
+            characterModel.transform.localRotation = Quaternion.identity;
+        }
+    }
+
     public virtual void ChangeAppearance()
     {
         // if (AppearanceMesh != null && AppearanceMaterial != null)

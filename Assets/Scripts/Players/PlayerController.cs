@@ -25,6 +25,11 @@ public class PlayerController : NetworkBehaviour
     private Vector2 lookInput;
     private bool isGrounded = true;
     private SkillManager skillManager;
+    
+    // Pour détecter si on utilise la manette ou la souris
+    private Vector2 lastMousePosition;
+    private bool usingGamepad = false;
+    
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -176,27 +181,61 @@ private void HandleMovement()
             if (mainCamera == null) return;
         }
 
-        // Obtenir la position de la souris à l'écran
-        Vector2 mousePosition = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
-        
-        // Créer un rayon de la caméra vers la souris
-        Ray ray = mainCamera.ScreenPointToRay(mousePosition);
-        
-        // Mettre à jour le plan au niveau du joueur
-        groundPlane.SetNormalAndPosition(Vector3.up, new Vector3(0, transform.position.y, 0));
-        
-        // Trouver le point d'intersection avec le plan
-        if (groundPlane.Raycast(ray, out float distance))
+        // Détecter si on utilise le joystick (manette)
+        if (lookInput.sqrMagnitude > 0.1f)
         {
-            Vector3 targetPoint = ray.GetPoint(distance);
-            Vector3 direction = targetPoint - transform.position;
-            direction.y = 0; // S'assurer qu'on ne regarde pas vers le haut/bas
-            
-            if (direction.sqrMagnitude > 0.01f)
+            usingGamepad = true;
+        }
+        
+        // Détecter si la souris a bougé pour switcher en mode souris
+        if (Mouse.current != null)
+        {
+            Vector2 currentMousePosition = Mouse.current.position.ReadValue();
+            if ((currentMousePosition - lastMousePosition).sqrMagnitude > 1f)
             {
-                // Rotation fluide vers la cible
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                usingGamepad = false;
+            }
+            lastMousePosition = currentMousePosition;
+        }
+        
+        if (usingGamepad)
+        {
+            // Mode manette : rotation basée sur le joystick droit
+            // On ne tourne QUE si le joystick est actif, sinon on garde la rotation
+            if (lookInput.sqrMagnitude > 0.1f)
+            {
+                Vector3 lookDirection = new Vector3(lookInput.x, 0f, lookInput.y);
+                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+            }
+            // Si joystick lâché, on ne fait rien = on garde la rotation actuelle
+        }
+        else
+        {
+            // Mode souris : rotation vers le curseur
+            if (Mouse.current == null) return;
+            
+            Vector2 mousePosition = Mouse.current.position.ReadValue();
+            
+            // Créer un rayon de la caméra vers la souris
+            Ray ray = mainCamera.ScreenPointToRay(mousePosition);
+            
+            // Mettre à jour le plan au niveau du joueur
+            groundPlane.SetNormalAndPosition(Vector3.up, new Vector3(0, transform.position.y, 0));
+            
+            // Trouver le point d'intersection avec le plan
+            if (groundPlane.Raycast(ray, out float distance))
+            {
+                Vector3 targetPoint = ray.GetPoint(distance);
+                Vector3 direction = targetPoint - transform.position;
+                direction.y = 0; // S'assurer qu'on ne regarde pas vers le haut/bas
+                
+                if (direction.sqrMagnitude > 0.01f)
+                {
+                    // Rotation fluide vers la cible
+                    Quaternion targetRotation = Quaternion.LookRotation(direction);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+                }
             }
         }
     }
