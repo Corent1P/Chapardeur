@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
-using Unity.Netcode; 
+using Unity.Netcode;
 
 public class SkyWalker : ASkills
 {
@@ -14,12 +14,12 @@ public class SkyWalker : ASkills
     private bool isAgainstGlass = false;
     private bool isHopping = false;
     private bool isDetaching = false;
-    
+
     private PlayerController playerController;
     private Rigidbody playerRigidbody;
     private PlayerInput playerInput;
     private Vector2 moveInput;
-    
+
     private void Start()
     {
         playerController = GetComponentInParent<PlayerController>();
@@ -129,8 +129,8 @@ public class SkyWalker : ASkills
                     OnAgainstGlassChanged();
                 }
             }
-        } 
-        else if (!status) 
+        }
+        else if (!status)
         {
             if (isAgainstGlass != status)
             {
@@ -166,9 +166,9 @@ public class SkyWalker : ASkills
     public override ISkills DeactivateSkill()
     {
         base.DeactivateSkill();
-        
+
         if (IsOwner) UnsubscribeInputs();
         return this;
     }
-    
+
 }

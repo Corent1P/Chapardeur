@@ -458,6 +458,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5091727458538675484}
   - component: {fileID: 9142214152014353286}
+  - component: {fileID: 8145517199545022636}
   m_Layer: 0
   m_Name: SizeShifterCat
   m_TagString: Untagged
@@ -504,6 +505,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8145517199545022636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5612227898254329766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 9142214152014353286}
 --- !u!1 &5631411330416993533
 GameObject:
   m_ObjectHideFlags: 0
