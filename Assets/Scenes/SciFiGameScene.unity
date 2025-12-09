@@ -22639,6 +22639,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 709248906}
+  - component: {fileID: 709248907}
   m_Layer: 0
   m_Name: Small Reactor Column_2
   m_TagString: Untagged
@@ -22668,6 +22669,21 @@ Transform:
   - {fileID: 1187809167}
   m_Father: {fileID: 104771450}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &709248907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 709248905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6097448cc31e243ef838d54f72226aea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReactorColumnRiser
+  reactorColumn: {fileID: 0}
+  targetHeight: -10.5
+  riseSpeed: 1
 --- !u!1001 &709763258
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48794,6 +48810,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1515624912}
+  - component: {fileID: 1515624913}
   m_Layer: 0
   m_Name: Small Reactor Column_1
   m_TagString: Untagged
@@ -48823,6 +48840,21 @@ Transform:
   - {fileID: 1444820940}
   m_Father: {fileID: 104771450}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1515624913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515624911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6097448cc31e243ef838d54f72226aea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReactorColumnRiser
+  reactorColumn: {fileID: 0}
+  targetHeight: -9.9
+  riseSpeed: 1
 --- !u!1 &1519629325
 GameObject:
   m_ObjectHideFlags: 0
@@ -62662,6 +62694,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1888517853}
+  - component: {fileID: 1888517854}
   m_Layer: 0
   m_Name: Small Reactor Column_3
   m_TagString: Untagged
@@ -62691,6 +62724,21 @@ Transform:
   - {fileID: 1678717729}
   m_Father: {fileID: 104771450}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1888517854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888517852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6097448cc31e243ef838d54f72226aea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReactorColumnRiser
+  reactorColumn: {fileID: 0}
+  targetHeight: -9.9
+  riseSpeed: 1
 --- !u!1001 &1890382600
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69237,6 +69285,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2093081385}
+  - component: {fileID: 2093081386}
   m_Layer: 0
   m_Name: Small Reactor Column
   m_TagString: Untagged
@@ -69266,6 +69315,21 @@ Transform:
   - {fileID: 1687026551}
   m_Father: {fileID: 104771450}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2093081386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093081384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6097448cc31e243ef838d54f72226aea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReactorColumnRiser
+  reactorColumn: {fileID: 0}
+  targetHeight: -10.5
+  riseSpeed: 1
 --- !u!1001 &2094562566
 PrefabInstance:
   m_ObjectHideFlags: 0
