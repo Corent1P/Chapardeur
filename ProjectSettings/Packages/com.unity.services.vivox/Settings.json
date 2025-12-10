@@ -4,17 +4,17 @@
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "tokenKey",
-                "value": "{\"m_Value\":\"kki7nDaTcObyr433YNsDVlDPIK8zdK2H\"}"
+                "value": "{\"m_Value\":\"1PUJJ8s2iwMAkPmUAZUYn1fNklDf7gHV\"}"
             },
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "tokenIssuer",
-                "value": "{\"m_Value\":\"46737-chapa-48515-udash\"}"
+                "value": "{\"m_Value\":\"90719-chapa-13426-udash\"}"
             },
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "server",
-                "value": "{\"m_Value\":\"https://unity.vivox.com/appconfig/46737-chapa-48515-udash\"}"
+                "value": "{\"m_Value\":\"https://unity.vivox.com/appconfig/90719-chapa-13426-udash\"}"
             },
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",

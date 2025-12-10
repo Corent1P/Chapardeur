@@ -264,7 +264,6 @@ public class VoiceChatLobby : MonoBehaviour
     public void UpdateChannelName(string name)
     {
         channelName = name;
-        Debug.Log($"Voice chat channel updated to: {name}");
     }
 
     // Simplified local state tracking (since Vivox v16+ API changed)
