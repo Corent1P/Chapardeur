@@ -7,34 +7,41 @@ public class GrapplingHook : ASkills
     [SerializeField] private GameObject grappleGun;
     [SerializeField] private Material grapplingPointMaterial;
     [SerializeField] [Range(0f, 30f)] private float hookRange = 15f;
-    [SerializeField][Range(0f, 180f)] private float maxAngle = 60f;
+    [SerializeField] [Range(0f, 180f)] private float maxAngle = 60f;
     [SerializeField] private float grapplingCooldown = 0.5f;
     
+    [Header("Physics & Interaction (New)")]
+    [SerializeField] private float jointSpringForce = 100f; // Force du ressort
+    [SerializeField] private float jointDamping = 5f;       // Amortissement
+    [SerializeField] private float reelInSpeed = 10f;       // Vitesse du tiré (Secondary Action)
+    [SerializeField] private float minTensionToTrigger = 5f; // Seuil min pour notifier l'objet
+
     [Header("Rope Settings")]
     [SerializeField] private LineRenderer ropeRenderer;
     [SerializeField] private Transform ropeOrigin;
-    [SerializeField] private float ropeSpringStiffness = 50f;
-    [SerializeField] private float ropeDamping = 0.8f;
-    [SerializeField] private float gravityCounterFactor = 0.3f;
     [SerializeField] private int ropeSegments = 15;
     [SerializeField] private float ropeWaveAmount = 0.5f;
 
+    // --- NETWORK VARIABLES ---
     private NetworkVariable<bool> netIsGrappling = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server
     );
-
     private NetworkVariable<Vector3> netGrapplePoint = new NetworkVariable<Vector3>(
         Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server
     );
 
+    // --- LOCAL VARIABLES ---
     private Transform playerTransform;
-    private float lastGrappleTime = -Mathf.Infinity;
-    private float maxRopeLength;
-    private bool hasGrabbedLocal = false;
-    private GameObject currentSelectedPoint;
-    private Material originalMaterial;
     private Rigidbody playerRigidbody;
     private PlayerController playerController;
+
+    private float lastGrappleTime = -Mathf.Infinity;
+    private float currentRopeLength; // La longueur actuelle de la corde
+    private bool isReelingIn = false; // Est-ce qu'on tire sur la corde ?
+    
+    private GameObject currentSelectedPoint;
+    private GrappleInteractable currentInteractable; // L'objet qu'on tient (optionnel)
+    private Material originalMaterial;
 
     private void Start()
     {
@@ -43,11 +50,7 @@ public class GrapplingHook : ASkills
         playerController = GetComponentInParent<PlayerController>();
         
         if (grappleGun != null) grappleGun.SetActive(false);
-        if (ropeRenderer != null)
-        {
-            ropeRenderer.enabled = false;
-            ropeRenderer.positionCount = 0;
-        }
+        if (ropeRenderer != null) ropeRenderer.enabled = false;
     }
 
     public override void OnNetworkSpawn()
@@ -65,8 +68,14 @@ public class GrapplingHook : ASkills
         if (ropeRenderer != null)
         {
             ropeRenderer.enabled = current;
-            if (current) ropeRenderer.positionCount = ropeSegments;
-            else ropeRenderer.positionCount = 0;
+            ropeRenderer.positionCount = current ? ropeSegments : 0;
+        }
+
+        // Si on lâche, on prévient l'objet interactif (fermeture porte etc)
+        if (!current && IsOwner && currentInteractable != null)
+        {
+            currentInteractable.OnGrappleDetach();
+            currentInteractable = null;
         }
     }
 
@@ -82,76 +91,73 @@ public class GrapplingHook : ASkills
         }
         else if (IsOwner)
         {
-            FindBestGrapplingPoint();
+            FindBestGrapplingPoint(); // Ta méthode originale
         }
     }
     
     private void FixedUpdate()
     {
-        if (!isActive || !IsOwner || !netIsGrappling.Value)
-            return;
-            
-        ApplyRopeTension(netGrapplePoint.Value);
+        if (!isActive || !IsOwner || !netIsGrappling.Value) return;
+
+        // Reset du flag input à chaque frame physique (pour éviter qu'il reste coincé)
+        // Si SecondaryAction est maintenu, il sera remis à true avant la prochaine physique
+        ApplyGrapplePhysics(netGrapplePoint.Value);
+        isReelingIn = false; 
     }
-    
-    private void DrawRope(Vector3 targetPoint)
-    {
-        if (ropeRenderer == null || ropeOrigin == null) return;
 
-        float ropeLength = Vector3.Distance(ropeOrigin.position, targetPoint);
-        Vector3 startPoint = ropeOrigin.position;
-
-        for (int i = 0; i < ropeSegments; i++)
-        {
-            float t = i / (float)(ropeSegments - 1);
-            Vector3 position = Vector3.Lerp(startPoint, targetPoint, t);
-
-            float curveAmount = ropeWaveAmount * ropeLength;
-
-            if(IsOwner && hasGrabbedLocal) 
-            {
-                 float tensionFactor = Mathf.Clamp01(Vector3.Distance(playerTransform.position, targetPoint) / maxRopeLength);
-                 curveAmount *= 1f - tensionFactor;
-            }
-            
-            float curve = Mathf.Sin(t * Mathf.PI) * curveAmount;
-            position.y -= curve;
-            ropeRenderer.SetPosition(i, position);
-        }
-    }
-    
-    private void ApplyRopeTension(Vector3 anchorPoint)
+    // --- NOUVELLE PHYSIQUE (Tension & Boutons) ---
+    private void ApplyGrapplePhysics(Vector3 anchorPoint)
     {
         if (playerRigidbody == null) return;
 
-        Vector3 playerPosition = playerTransform.position;
+        Vector3 playerPos = playerTransform.position;
+        float distance = Vector3.Distance(playerPos, anchorPoint);
+        Vector3 direction = (anchorPoint - playerPos).normalized;
 
-        Vector3 anchorPhysics = new Vector3(anchorPoint.x, playerPosition.y + 0.2f, anchorPoint.z);
-        
-        float currentDistance = Vector3.Distance(playerPosition, anchorPhysics);
-        Vector3 directionToAnchor = (anchorPhysics - playerPosition).normalized;
+        // 1. Gestion de la longueur de corde
+        if (currentRopeLength <= 0.1f) currentRopeLength = distance; // Init safe
 
-        float distanceError = currentDistance - maxRopeLength;
-        if (distanceError > 0)
+        if (isReelingIn)
         {
-            float springForce = ropeSpringStiffness * distanceError;
-            playerRigidbody.AddForce(directionToAnchor * springForce, ForceMode.Force);
+            // On raccourcit la corde (on se tire vers le point)
+            currentRopeLength -= reelInSpeed * Time.fixedDeltaTime;
+            if (currentRopeLength < 1f) currentRopeLength = 1f;
+        }
+        else
+        {
+            // Pas de mou : si on se rapproche, la corde raccourcit
+            if (distance < currentRopeLength) currentRopeLength = distance;
         }
 
-        Vector3 velocityTowardsAnchor = Vector3.Project(playerRigidbody.linearVelocity, directionToAnchor);
-        float dampingForce = -ropeDamping * velocityTowardsAnchor.magnitude;
-        playerRigidbody.AddForce(directionToAnchor * dampingForce, ForceMode.Force);
+        // 2. Calcul de la Tension (Ressort)
+        float appliedForce = 0f;
 
-        Vector3 gravityForce = Physics.gravity * playerRigidbody.mass;
-        playerRigidbody.AddForce(-gravityForce * gravityCounterFactor, ForceMode.Force);
-
-        if (playerController != null)
+        if (distance > currentRopeLength)
         {
-            float speedFactor = Mathf.Clamp01(maxRopeLength / currentDistance);
-            playerController.SetSpeedFactor(speedFactor);
+            float stretch = distance - currentRopeLength;
+            float springForce = stretch * jointSpringForce;
+            
+            // Unity 6: linearVelocity / Unity <6: velocity
+            float velocityAlongRope = Vector3.Dot(playerRigidbody.linearVelocity, direction);
+            float dampingForce = velocityAlongRope * jointDamping;
+
+            float totalForce = springForce - dampingForce;
+
+            if (totalForce > 0)
+            {
+                playerRigidbody.AddForce(direction * totalForce, ForceMode.Force);
+                appliedForce = totalForce;
+            }
+        }
+
+        // 3. Interaction avec l'objet (Bouton)
+        if (currentInteractable != null && appliedForce > minTensionToTrigger)
+        {
+            currentInteractable.ApplyTension(appliedForce);
         }
     }
 
+    // --- MAIN ACTION (Tir / Lâcher) ---
     public override void MainAction()
     {
         if (!IsOwner) return;
@@ -167,17 +173,29 @@ public class GrapplingHook : ASkills
         {
             if (currentSelectedPoint != null)
             {
-                StartGrappleLocal(currentSelectedPoint.transform.position);
+                StartGrappleLocal(currentSelectedPoint);
             }
         }
     }
 
-    private void StartGrappleLocal(Vector3 point)
+    // --- SECONDARY ACTION (Tirer la corde) ---
+    public override void SecondaryAction()
     {
-        hasGrabbedLocal = true;
-        maxRopeLength = Vector3.Distance(playerTransform.position, point);
+        if (IsOwner && netIsGrappling.Value)
+        {
+            isReelingIn = true;
+        }
+    }
 
-        RequestStartGrappleServerRpc(point);
+    private void StartGrappleLocal(GameObject targetObj)
+    {
+        // On initialise la physique immédiatement
+        currentRopeLength = Vector3.Distance(playerTransform.position, targetObj.transform.position);
+        
+        // On regarde si c'est un objet interactif
+        currentInteractable = targetObj.GetComponent<GrappleInteractable>();
+
+        RequestStartGrappleServerRpc(targetObj.transform.position);
     }
 
     [ServerRpc]
@@ -193,20 +211,11 @@ public class GrapplingHook : ASkills
         netIsGrappling.Value = false;
     }
 
-    public override void SecondaryAction()
-    {
-        if (!IsOwner || !netIsGrappling.Value) return;
-
-        if (transform.position.y < netGrapplePoint.Value.y)
-        {
-            maxRopeLength *= 0.9f;
-            if (maxRopeLength < 0.1f) maxRopeLength = 0.1f;
-        }
-    }
-
+    // --- TA METHODE DE DETECTION ORIGINALE (RESTORED) ---
     private void FindBestGrapplingPoint()
     {
         if (playerTransform == null) return;
+        
         GameObject[] grapplingPoints = GameObject.FindGameObjectsWithTag("Grappling Point");
         GameObject bestPoint = null;
         float minDistance = float.MaxValue;
@@ -261,63 +270,27 @@ public class GrapplingHook : ASkills
         else originalMaterial = null;
     }
 
-    private void OnDrawGizmos()
+    private void DrawRope(Vector3 targetPoint)
     {
-        if (playerTransform == null)
-            return;
+        if (ropeRenderer == null || ropeOrigin == null) return;
 
-        Vector3 forward2D = new Vector3(playerTransform.forward.x, 0, playerTransform.forward.z).normalized;
-        
-        // Dessiner la portée du grappin (sphère complète)
-        Gizmos.color = new Color(1f, 1f, 0f, 0.1f);
-        Gizmos.DrawWireSphere(playerTransform.position, hookRange);
+        Vector3 startPoint = ropeOrigin.position;
+        // On utilise currentRopeLength pour la visualisation si possible pour voir le mou
+        float effectiveLength = (currentRopeLength > 0.1f) ? currentRopeLength : Vector3.Distance(startPoint, targetPoint);
+        float actualDist = Vector3.Distance(startPoint, targetPoint);
 
-        // Dessiner le cône de vision (angle de vue)
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f);
-        Vector3 leftBoundary = Quaternion.Euler(0, -maxAngle, 0) * forward2D;
-        Vector3 rightBoundary = Quaternion.Euler(0, maxAngle, 0) * forward2D;
-        
-        // Lignes des limites du cône
-        Gizmos.DrawLine(playerTransform.position, playerTransform.position + leftBoundary * hookRange);
-        Gizmos.DrawLine(playerTransform.position, playerTransform.position + rightBoundary * hookRange);
-        
-        // Arc pour visualiser le cône (approximation avec plusieurs lignes)
-        int arcSegments = 20;
-        Vector3 previousPoint = playerTransform.position + leftBoundary * hookRange;
-        for (int i = 1; i <= arcSegments; i++)
+        for (int i = 0; i < ropeSegments; i++)
         {
-            float angle = Mathf.Lerp(-maxAngle, maxAngle, i / (float)arcSegments);
-            Vector3 direction = Quaternion.Euler(0, angle, 0) * forward2D;
-            Vector3 point = playerTransform.position + direction * hookRange;
-            Gizmos.DrawLine(previousPoint, point);
-            previousPoint = point;
-        }
+            float t = i / (float)(ropeSegments - 1);
+            Vector3 position = Vector3.Lerp(startPoint, targetPoint, t);
 
-        // Dessiner la ligne de visée centrale
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(playerTransform.position, playerTransform.position + forward2D * hookRange);
+            // Simulation visuelle de la tension
+            float tensionRatio = Mathf.Clamp01(actualDist / effectiveLength);
+            float wave = (1f - tensionRatio) * ropeWaveAmount;
 
-        // Dessiner le point sélectionné
-        if (currentSelectedPoint != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(playerTransform.position, currentSelectedPoint.transform.position);
-            Gizmos.DrawWireSphere(currentSelectedPoint.transform.position, 0.5f);
-        }
-        
-        // Dessiner la longueur maximale de la corde quand le grappin est actif
-        if (netIsGrappling.Value && Application.isPlaying)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(netGrapplePoint.Value, maxRopeLength);
-            
-            // Indiquer si le joueur dépasse la longueur
-            float currentDistance = Vector3.Distance(playerTransform.position, netGrapplePoint.Value);
-            if (currentDistance > maxRopeLength)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(playerTransform.position, netGrapplePoint.Value);
-            }
+            float curve = Mathf.Sin(t * Mathf.PI) * wave;
+            position.y -= curve;
+            ropeRenderer.SetPosition(i, position);
         }
     }
 
@@ -334,6 +307,11 @@ public class GrapplingHook : ASkills
         if (grappleGun != null) grappleGun.SetActive(false);
         if(IsOwner && netIsGrappling.Value) RequestStopGrappleServerRpc();
         UpdateSelectedPoint(null);
+        if (currentInteractable != null) 
+        {
+            currentInteractable.OnGrappleDetach();
+            currentInteractable = null;
+        }
         return this;
     }
 }
