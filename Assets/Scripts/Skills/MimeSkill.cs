@@ -28,9 +28,9 @@ public class MimeSkill : ASkills
     private float morphCooldownTime = 2f;
     private float currentCooldownTime = 0f;
 
-    private Mesh basePlayerMesh;
-    private Material basePlayerMaterial;
-    private Vector3 baseplayerScale;
+    // Références au characterModel original (le vrai modèle du Mime)
+    private GameObject baseCharacterModel;
+    private Vector3 baseCharacterScale;
 
     // Buffers
     private List<Material> _originalMaterialsBuffer = new List<Material>();
@@ -183,27 +183,53 @@ public class MimeSkill : ASkills
             GameObject mimeObj = MimeObjects[i];
             if (targetName.Contains(mimeObj.name))
             {
-                MeshFilter targetMeshFilter = mimeObj.GetComponent<MeshFilter>();
-                MeshRenderer targetRenderer = mimeObj.GetComponent<MeshRenderer>();
+                if(morphVFX != null) morphVFX.Play();
 
-                if (targetMeshFilter != null && targetRenderer != null)
+                // Cacher le characterModel original du Mime
+                if (baseCharacterModel != null)
                 {
-                    MeshFilter playerFilter = GetComponent<MeshFilter>();
-                    MeshRenderer playerRenderer = GetComponent<MeshRenderer>();
-                    MeshCollider playerCollider = GetComponent<MeshCollider>();
-
-                    if (playerFilter != null && playerRenderer != null)
-                    {
-                        if(morphVFX != null) morphVFX.Play();
-                        
-                        playerFilter.sharedMesh = targetMeshFilter.sharedMesh;
-                        playerRenderer.sharedMaterial = targetRenderer.sharedMaterial;
-                        if(playerCollider != null) playerCollider.sharedMesh = targetMeshFilter.sharedMesh;
-                        
-                        StartCoroutine(AnimateScale(mimeObj.transform.localScale));
-                        currentCooldownTime = morphCooldownTime;
-                    }
+                    baseCharacterModel.SetActive(false);
                 }
+
+                // Créer une copie visuelle du MimeObject comme enfant du player
+                // On cherche si on a déjà un "MorphedModel" pour le remplacer
+                Transform existingMorph = transform.Find("MorphedModel");
+                if (existingMorph != null)
+                {
+                    Destroy(existingMorph.gameObject);
+                }
+
+                // Sauvegarder le scale cible AVANT de parenter
+                Vector3 targetWorldScale = mimeObj.transform.lossyScale;
+
+                // Instancier le nouveau modèle
+                GameObject morphedModel = Instantiate(mimeObj, transform);
+                morphedModel.name = "MorphedModel";
+                morphedModel.transform.localPosition = Vector3.zero;
+                morphedModel.transform.localRotation = Quaternion.identity;
+                
+                // Calculer le scale local nécessaire pour obtenir le world scale cible
+                // Le player garde son scale original (baseCharacterScale)
+                Vector3 parentScale = baseCharacterScale;
+                Vector3 finalLocalScale = new Vector3(
+                    targetWorldScale.x / parentScale.x,
+                    targetWorldScale.y / parentScale.y,
+                    targetWorldScale.z / parentScale.z
+                );
+                
+                // Désactiver les colliders et scripts du modèle copié (c'est juste visuel)
+                foreach (Collider col in morphedModel.GetComponentsInChildren<Collider>())
+                {
+                    col.enabled = false;
+                }
+                foreach (MonoBehaviour script in morphedModel.GetComponentsInChildren<MonoBehaviour>())
+                {
+                    if (script != null) script.enabled = false;
+                }
+
+                // Animer le scale du MorphedModel (de 0 à sa taille finale)
+                StartCoroutine(AnimateMorphedModelScale(morphedModel.transform, finalLocalScale));
+                currentCooldownTime = morphCooldownTime;
                 return;
             }
         }
@@ -213,11 +239,53 @@ public class MimeSkill : ASkills
     {
         if(morphVFX != null) morphVFX.Play();
         
-        GetComponent<MeshFilter>().mesh = basePlayerMesh;
-        GetComponent<MeshRenderer>().material = basePlayerMaterial;
-        GetComponent<MeshCollider>().sharedMesh = basePlayerMesh;
+        // Supprimer le modèle morphé
+        Transform existingMorph = transform.Find("MorphedModel");
+        if (existingMorph != null)
+        {
+            Destroy(existingMorph.gameObject);
+        }
+
+        // Réafficher le characterModel original
+        if (baseCharacterModel != null)
+        {
+            baseCharacterModel.SetActive(true);
+        }
         
-        StartCoroutine(AnimateScale(baseplayerScale));
+        // Pas besoin d'animer le scale du player, il n'a pas changé
+    }
+
+    // Animation du scale pour le MorphedModel (effet visuel de "pop")
+    private IEnumerator AnimateMorphedModelScale(Transform target, Vector3 targetScale)
+    {
+        if (target == null) yield break;
+        
+        Vector3 startScale = Vector3.zero;
+        target.localScale = startScale;
+        float elapsed = 0f;
+
+        if (morphVFX != null && morphVFX.transform.parent == transform) morphVFX.transform.SetParent(null);
+
+        while (elapsed < scaleAnimationDuration)
+        {
+            if (target == null) yield break; // Sécurité si détruit pendant l'anim
+            
+            elapsed += Time.deltaTime;
+            float t = elapsed / scaleAnimationDuration;
+            target.localScale = Vector3.Lerp(startScale, targetScale, scaleCurve.Evaluate(t));
+            
+            if (morphVFX != null) morphVFX.transform.position = transform.position;
+            yield return null;
+        }
+        
+        if (target != null) target.localScale = targetScale;
+        
+        if (morphVFX != null)
+        {
+            morphVFX.transform.SetParent(transform);
+            morphVFX.transform.localPosition = Vector3.zero;
+            morphVFX.transform.localScale = Vector3.one;
+        }
     }
 
     private IEnumerator AnimateScale(Vector3 targetScale)
@@ -289,11 +357,9 @@ public class MimeSkill : ASkills
         base.ActivateSkill();
         playerTransform = transform;
         
-        var filter = GetComponent<MeshFilter>();
-        var renderer = GetComponent<MeshRenderer>();
-        if(filter != null) basePlayerMesh = filter.sharedMesh;
-        if(renderer != null) basePlayerMaterial = renderer.sharedMaterial;
-        baseplayerScale = transform.localScale;
+        // Sauvegarder le characterModel original du Mime
+        baseCharacterModel = CharacterModel;
+        baseCharacterScale = transform.localScale;
 
         if(!netMorphName.Value.IsEmpty) ApplyMorphLocal(netMorphName.Value.ToString());
 
@@ -303,6 +369,14 @@ public class MimeSkill : ASkills
     public override ISkills DeactivateSkill()
     {
         if(IsOwner && currentSelectedObject != null) HighlightObject(null);
+        
+        // Supprimer le modèle morphé si présent
+        Transform existingMorph = transform.Find("MorphedModel");
+        if (existingMorph != null)
+        {
+            Destroy(existingMorph.gameObject);
+        }
+        
         base.DeactivateSkill();
         return this;
     }

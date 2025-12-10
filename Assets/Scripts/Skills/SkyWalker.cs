@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
-using Unity.Netcode; 
+using Unity.Netcode;
 
 public class SkyWalker : ASkills
 {
@@ -14,12 +14,12 @@ public class SkyWalker : ASkills
     private bool isAgainstGlass = false;
     private bool isHopping = false;
     private bool isDetaching = false;
-    
+
     private PlayerController playerController;
     private Rigidbody playerRigidbody;
     private PlayerInput playerInput;
     private Vector2 moveInput;
-    
+
     private void Start()
     {
         playerController = GetComponentInParent<PlayerController>();
@@ -53,7 +53,6 @@ public class SkyWalker : ASkills
 
     private void LateUpdate()
     {
-        // SÉCURITÉ RÉSEAU
         if (!IsOwner || !isActive) return;
 
         if (!isAgainstGlass || isHopping) return;
@@ -64,13 +63,10 @@ public class SkyWalker : ASkills
         }
         else
         {
-            // On force la vélocité à 0 pour coller à la vitre
-            // C'est de la physique locale, le NetworkTransform sync le résultat
             playerRigidbody.linearVelocity = Vector3.zero;
         }
     }
 
-    // ... (HopRoutine reste identique car physique locale) ...
     private IEnumerator HopRoutine()
     {
         isHopping = true;
@@ -85,7 +81,8 @@ public class SkyWalker : ASkills
 
     public override void MainAction()
     {
-        if (!IsOwner) return; // Sécurité
+        Debug.Log("SkyWalker: Detach from glass");
+        if (!IsOwner) return;
         if (!isAgainstGlass || isDetaching) return;
         StartCoroutine(DetachFromGlassRoutine());
     }
@@ -108,6 +105,7 @@ public class SkyWalker : ASkills
             }
         }
         isDetaching = false;
+        isSkillLocked = false;
     }
 
     public override void SecondaryAction()
@@ -118,7 +116,6 @@ public class SkyWalker : ASkills
     {
         if (!IsOwner || !isActive) return;
 
-        // Logique de Raycast locale
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1f) && status)
         {
             if (hit.collider.CompareTag("Glass"))
@@ -129,8 +126,8 @@ public class SkyWalker : ASkills
                     OnAgainstGlassChanged();
                 }
             }
-        } 
-        else if (!status) 
+        }
+        else if (!status)
         {
             if (isAgainstGlass != status)
             {
@@ -142,12 +139,11 @@ public class SkyWalker : ASkills
 
     private void OnAgainstGlassChanged()
     {
-        // Ces changements (Gravité, Enabled) doivent rester LOCAUX.
-        // On ne veut pas désactiver le NetworkTransform, juste la physique locale.
         if (isAgainstGlass)
         {
             playerRigidbody.useGravity = false;
-            playerController.enabled = false; // Désactive le mouvement standard
+            playerController.enabled = false;
+            isSkillLocked = true;
         }
         else
         {
@@ -159,10 +155,6 @@ public class SkyWalker : ASkills
     public override ISkills ActivateSkill()
     {
         base.ActivateSkill();
-        // Le changement de taille ici est purement visuel/local temporaire ?
-        // Si c'est important, voir SizeShifter.
-        transform.localScale = Vector3.one * 3.0f; 
-        
         if (IsOwner) SubscribeInputs();
         return this;
     }
@@ -170,10 +162,9 @@ public class SkyWalker : ASkills
     public override ISkills DeactivateSkill()
     {
         base.DeactivateSkill();
-        transform.localScale = Vector3.one;
-        
+
         if (IsOwner) UnsubscribeInputs();
         return this;
     }
-    
+
 }

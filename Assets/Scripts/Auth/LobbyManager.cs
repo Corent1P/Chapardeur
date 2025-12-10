@@ -28,10 +28,11 @@ public class LobbyManager : MonoBehaviour
     private bool isLeaving = false;
     private ILobbyEvents lobbyEvents; // Pour garder la connexion aux événements
     private List<string> bannedPlayerIds = new List<string>();
-
+    [Header("Chat System")]
+    [SerializeField] private VivoxManager vivoxManager;
     private async void Start()
     {
-        #if (!DISABLE_ONLINE)
+        #if DISABLE_ONLINE
             // Sur Xbox, on désactive ce composant immédiatement
             // car on n'a pas le droit d'utiliser l'Auth Unity.
             this.enabled = false; 
@@ -39,6 +40,11 @@ public class LobbyManager : MonoBehaviour
         #endif
         Debug.Log("Starting LobbyManager...");
         // S'assurer que les services sont initialisés
+        vivoxManager = FindObjectOfType<VivoxManager>();
+        if (vivoxManager == null)
+        {
+            Debug.LogWarning("VivoxManager not found. Text chat may not work properly.");
+        }
         if (UnityServices.State != ServicesInitializationState.Initialized)
         {
             Debug.Log("Initializing Unity Services...");
@@ -119,13 +125,12 @@ public class LobbyManager : MonoBehaviour
             {
                 IsPrivate = IsPrivate,
                 Player = player,
-
                 Data = new Dictionary<string, DataObject>
-                {
-                    { "GameMode", new DataObject(DataObject.VisibilityOptions.Public, gameMode) },
-                    { "Map", new DataObject(DataObject.VisibilityOptions.Public, map) },
-                    { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Member, "0") }
-                }
+            {
+                { "GameMode", new DataObject(DataObject.VisibilityOptions.Public, gameMode) },
+                { "Map", new DataObject(DataObject.VisibilityOptions.Public, map) },
+                { "RelayJoinCode", new DataObject(DataObject.VisibilityOptions.Member, "0") }
+            }
             };
 
             hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
@@ -133,14 +138,14 @@ public class LobbyManager : MonoBehaviour
 
             SubscribeToLobbyEvents();
 
+            // 🔥 INICIALIZAR CHAT - SIN ESPERAR (fire-and-forget)
+            InitializeChatForLobby();
+
             if (lobbyCodeText != null)
                 lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
-            if (voiceChatLobby != null)
-                voiceChatLobby.UpdateChannelName(joinLobby.Id);
 
             Debug.Log("Party created: " + hostLobby.Name + " | Players: " + hostLobby.Players.Count + "/" + hostLobby.MaxPlayers + " | Lobby Code: " + hostLobby.LobbyCode);
 
-            // Afficher l'UI d'attente pour l'hôte
             if (relayManager != null)
                 relayManager.ShowLobbyWaitingUI(true);
             if (menuManager != null)
@@ -236,13 +241,15 @@ public class LobbyManager : MonoBehaviour
             joinErrorText.gameObject.SetActive(false);
             joinSuccessText.gameObject.SetActive(true);
 
-            // 🔥 AJOUT CRITIQUE : Afficher l'UI d'attente pour le client
+            if (vivoxManager != null)
+            {
+                await vivoxManager.JoinLobbyChannel(joinLobby.Id);
+            }
+
             if (relayManager != null)
-                relayManager.ShowLobbyWaitingUI(false); // false = n'est pas l'hôte
+                relayManager.ShowLobbyWaitingUI(false);
             if (menuManager != null)
                 menuManager.HideAllMenus();
-            if (voiceChatLobby != null)
-                voiceChatLobby.UpdateChannelName(joinLobby.Id);
             if (lobbyCodeText != null)
                 lobbyCodeText.text = "Lobby Code: " + joinLobby.LobbyCode;
         }
@@ -252,6 +259,7 @@ public class LobbyManager : MonoBehaviour
             joinErrorText.gameObject.SetActive(true);
             Debug.Log(e);
         }
+        InitializeChatForLobby();
     }
 
     public void JoinLobby(Lobby lobby)
@@ -292,6 +300,7 @@ public class LobbyManager : MonoBehaviour
             joinErrorText.gameObject.SetActive(true);
             Debug.LogException(e);
         }
+        InitializeChatForLobby();
     }
 
     public async void JoinLobbyByCode(string lobbyCode)
@@ -327,6 +336,7 @@ public class LobbyManager : MonoBehaviour
             joinErrorText.gameObject.SetActive(true);
             Debug.LogException(e);
         }
+        InitializeChatForLobby();
     }
 
     public void JoinLobbyByCode()
@@ -422,7 +432,7 @@ public class LobbyManager : MonoBehaviour
         return true;
     }
 
-    // Méthode pour quitter proprement un lobby
+
     public async void LeaveLobby()
     {
         if (isLeaving) return;
@@ -432,14 +442,18 @@ public class LobbyManager : MonoBehaviour
             if (joinLobby != null)
             {
                 await LobbyService.Instance.RemovePlayerAsync(joinLobby.Id, AuthenticationService.Instance.PlayerId);
+
+                // 🔥 LIMPIAR CHAT
+                CleanupChat();
+
                 joinLobby = null;
                 hostLobby = null;
-                
+
                 if (relayManager != null)
                 {
                     relayManager.HideLobbyWaitingUI();
                 }
-                
+
                 Debug.Log("Left lobby successfully");
             }
         }
@@ -510,7 +524,31 @@ public class LobbyManager : MonoBehaviour
             }
         }
     }
+    private void InitializeChatForLobby()
+    {
+        if (VivoxManager.Instance == null)
+        {
+            Debug.LogWarning("VivoxManager not found. Chat will not be available.");
+            return;
+        }
 
+        if (joinLobby != null)
+        {
+            string channelName = joinLobby.Id;
+
+            // Iniciar el chat de forma asíncrona
+            _ = VivoxManager.Instance.JoinLobbyChannel(channelName);
+            Debug.Log($"Chat initialized for lobby: {channelName}");
+        }
+    }
+
+    private async void CleanupChat()
+    {
+        if (VivoxManager.Instance != null)
+        {
+            await VivoxManager.Instance.LeaveAllChannelsAsync();
+        }
+    }
     // On garde aussi celui-ci au cas où (pour les mises à jour de data), mais le travail principal est fait au-dessus
     private void OnLobbyChanged(ILobbyChanges changes)
     {

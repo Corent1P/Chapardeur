@@ -421,6 +421,7 @@ GameObject:
   - component: {fileID: 4335356251982444333}
   - component: {fileID: 8444851632396912088}
   - component: {fileID: 5076520747052153591}
+  - component: {fileID: 4855518942964534567}
   m_Layer: 5
   m_Name: 'Lobby Join UI '
   m_TagString: Untagged
@@ -562,6 +563,21 @@ MonoBehaviour:
   mapText: {fileID: 2145099663318038372}
   playerCountText: {fileID: 2191366010408023011}
   playerMaxCountText: {fileID: 4107578544829039838}
+--- !u!114 &4855518942964534567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4460382333375672196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99035ea75ac4478e8807561832b2e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoofyButton
+  scaleAmount: 1.1
+  wiggleSpeed: 8
+  wiggleStrength: 0.03
 --- !u!1 &5736812391541309816
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MenuManager : MonoBehaviour
 {
@@ -10,6 +11,15 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject hostMenu;
     [SerializeField] private GameObject usernameMenu;
     [SerializeField] private GameObject authMenu;
+
+    [SerializeField] private GameObject mainMenuFirstButton;
+    [SerializeField] private GameObject optionsMenuFirstButton;
+    [SerializeField] private GameObject playOnlineMenuFirstButton;
+    [SerializeField] private GameObject playLocalMenuFirstButton;
+    [SerializeField] private GameObject joinMenuFirstButton;
+    [SerializeField] private GameObject hostMenuFirstButton;
+    [SerializeField] private GameObject usernameMenuFirstButton;
+    [SerializeField] private GameObject authMenuFirstButton;
 
     private void Awake()
     {
@@ -26,6 +36,7 @@ public class MenuManager : MonoBehaviour
         usernameMenu.SetActive(false);
         authMenu.SetActive(false);
         playLocalMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(mainMenuFirstButton);
     }
     public void ShowOptionsMenu()
     {
@@ -37,6 +48,7 @@ public class MenuManager : MonoBehaviour
         usernameMenu.SetActive(false);
         authMenu.SetActive(false);
         playLocalMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(optionsMenuFirstButton);
     }
 
     public void ShowPlayOnlineMenu()
@@ -49,6 +61,7 @@ public class MenuManager : MonoBehaviour
         usernameMenu.SetActive(false);
         authMenu.SetActive(false);
         playLocalMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(playOnlineMenuFirstButton);
     }
 
     public void ShowPlayLocalMenu()
@@ -61,6 +74,7 @@ public class MenuManager : MonoBehaviour
         usernameMenu.SetActive(false);
         authMenu.SetActive(false);
         playLocalMenu.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(playLocalMenuFirstButton);
     }
 
     public void ShowJoinMenu()
@@ -73,6 +87,7 @@ public class MenuManager : MonoBehaviour
         usernameMenu.SetActive(false);
         authMenu.SetActive(false);
         playLocalMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(joinMenuFirstButton);
     }
 
     public void ShowUsernameMenu()
@@ -85,6 +100,7 @@ public class MenuManager : MonoBehaviour
         usernameMenu.SetActive(true);
         authMenu.SetActive(false);
         playLocalMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(usernameMenuFirstButton);
     }
 
     public void ShowAuthMenu()
@@ -97,6 +113,7 @@ public class MenuManager : MonoBehaviour
         usernameMenu.SetActive(false);
         authMenu.SetActive(true);
         playLocalMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(authMenuFirstButton);
     }
 
     public void ShowHostMenu()
@@ -109,6 +126,7 @@ public class MenuManager : MonoBehaviour
         authMenu.SetActive(false);
         hostMenu.SetActive(true);
         playLocalMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(hostMenuFirstButton);
     }
 
     public void QuitGame()

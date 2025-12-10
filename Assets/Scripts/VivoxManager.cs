@@ -1,434 +1,289 @@
-using System;
+using UnityEngine;
 using System.Threading.Tasks;
+using Unity.Services.Vivox;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
-using Unity.Services.Vivox;
-using UnityEngine;
+using System;
 
-/// <summary>
-/// Gestionnaire du chat audio Vivox pour le lobby/room d'attente (v16+)
-/// </summary>
 public class VivoxManager : MonoBehaviour
 {
     public static VivoxManager Instance { get; private set; }
+    public static event Action<ChatMessage> OnMessageReceivedUI;
+    public static event Action OnVivoxInitialized;
 
-    [Header("Configuration")]
-    [SerializeField] private string channelName = "LobbyChannel";
-    [SerializeField] private bool use3DAudio = false;
-    
-    [Header("Audio Settings (range -50 to 50)")]
-    [SerializeField] private int defaultSpeakerVolume = 0;
-    [SerializeField] private int defaultMicrophoneVolume = 0;
-    
-    // Events pour l'UI
-    public event Action<bool> OnLoginStatusChanged;
-    public event Action<bool> OnChannelConnectionChanged;
-    public event Action<string> OnErrorOccurred;
-    public event Action<string> OnParticipantAdded;
-    public event Action<string> OnParticipantRemoved;
-    
-    private string _currentChannelName = null;
-    private IVivoxService _vivoxService;
-    
-    // État
-    public bool IsLoggedIn => _vivoxService != null && _vivoxService.IsLoggedIn;
-    public bool IsInChannel => _vivoxService != null && _vivoxService.ActiveChannels != null && _vivoxService.ActiveChannels.Count > 0;
-    
+    [Header("Settings")]
+    [SerializeField] private bool autoInitialize = true;
+
+    // Estado
+    public bool IsLoggedIn => VivoxService.Instance != null && VivoxService.Instance.IsLoggedIn;
+    public bool IsInitialized { get; private set; } = false;
+    public string CurrentVoiceChannel { get; private set; }
+    public string CurrentTextChannel { get; private set; }
+
     private void Awake()
     {
+        // Singleton pattern
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
-        
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
     private async void Start()
     {
+        if (!autoInitialize) return;
+
+        await Task.Delay(1000); // Esperar para evitar conflictos de inicialización
+
         try
         {
-            // Initialiser Unity Services
+            // Inicializar Unity Services si no lo están
             if (UnityServices.State != ServicesInitializationState.Initialized)
             {
                 await UnityServices.InitializeAsync();
             }
-            
-            // S'authentifier si nécessaire
+
+            // Autenticación si no está logueado
             if (!AuthenticationService.Instance.IsSignedIn)
             {
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
             }
-            
-            // Récupérer le service Vivox
-            _vivoxService = VivoxService.Instance;
-            await _vivoxService.InitializeAsync();
-            
-            // S'abonner aux événements
-            _vivoxService.LoggedIn += OnVivoxLoggedIn;
-            _vivoxService.LoggedOut += OnVivoxLoggedOut;
-            _vivoxService.ChannelJoined += OnVivoxChannelJoined;
-            _vivoxService.ChannelLeft += OnVivoxChannelLeft;
-            _vivoxService.ParticipantAddedToChannel += OnVivoxParticipantAdded;
-            _vivoxService.ParticipantRemovedFromChannel += OnVivoxParticipantRemoved;
-            
+
+            // Inicializar Vivox
+            await InitializeVivox();
         }
         catch (Exception e)
         {
-            Debug.LogError($"Erreur lors de l'initialisation de Vivox: {e.Message}");
-            OnErrorOccurred?.Invoke($"Erreur d'initialisation: {e.Message}");
+            Debug.LogError($"Error initializing Vivox: {e.Message}");
         }
     }
 
-    /// <summary>
-    /// Se connecter au service Vivox
-    /// </summary>
-    public async void Login()
+    public async Task InitializeVivox()
     {
-        if (IsLoggedIn)
-        {
-            Debug.LogWarning("Déjà connecté à Vivox");
-            return;
-        }
+        if (IsLoggedIn) return;
 
         try
         {
-            var displayName = AuthenticationService.Instance.PlayerName ?? $"Player_{UnityEngine.Random.Range(1000, 9999)}";
-            
+            string displayName = AuthenticationService.Instance.PlayerName ?? $"Player_{UnityEngine.Random.Range(1000, 9999)}";
+
             var loginOptions = new LoginOptions
             {
                 DisplayName = displayName
             };
 
-            await _vivoxService.LoginAsync(loginOptions);
+            // Suscribir eventos ANTES del login
+            VivoxService.Instance.LoggedIn += OnVivoxLoggedIn;
+            VivoxService.Instance.ChannelMessageReceived += OnChannelMessageReceived;
+            VivoxService.Instance.DirectedMessageReceived += OnDirectMessageReceived;
+            VivoxService.Instance.ChannelJoined += OnChannelJoined;
+
+            await VivoxService.Instance.LoginAsync(loginOptions);
+
+            Debug.Log($"Vivox logged in as: {displayName}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"Erreur lors de la connexion à Vivox: {e.Message}");
-            OnErrorOccurred?.Invoke($"Erreur de connexion: {e.Message}");
+            Debug.LogError($"Vivox login failed: {e.Message}");
         }
     }
 
-    /// <summary>
-    /// Rejoindre un canal audio (lobby/room)
-    /// </summary>
-    public async void JoinChannel(string customChannelName = null)
+    public async Task JoinLobbyChannel(string channelName)
     {
         if (!IsLoggedIn)
         {
-            Login();
-            await Task.Delay(2000); // Attendre la connexion
+            await InitializeVivox();
+            if (!IsLoggedIn)
+            {
+                Debug.LogError("Cannot join channel without being logged in");
+                return;
+            }
         }
 
-        if (IsInChannel)
+        try
         {
-            Debug.LogWarning("Déjà dans un canal");
+            // Salir del canal actual si existe
+            if (!string.IsNullOrEmpty(CurrentTextChannel))
+            {
+                await VivoxService.Instance.LeaveChannelAsync(CurrentTextChannel);
+            }
+
+            CurrentVoiceChannel = channelName;
+            CurrentTextChannel = channelName;
+
+            // Unirse al canal con capacidades de texto y audio
+            await VivoxService.Instance.JoinGroupChannelAsync(channelName, ChatCapability.TextAndAudio);
+
+            Debug.Log($"Successfully joined channel: {channelName}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to join channel {channelName}: {e.Message}");
+        }
+    }
+
+    public async Task LeaveAllChannelsAsync()
+    {
+        if (!IsLoggedIn) return;
+
+        try
+        {
+            if (!string.IsNullOrEmpty(CurrentTextChannel))
+            {
+                await VivoxService.Instance.LeaveChannelAsync(CurrentTextChannel);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error leaving channels: {e.Message}");
+        }
+        finally
+        {
+            CurrentTextChannel = null;
+            CurrentVoiceChannel = null;
+            Debug.Log("Left all Vivox channels");
+        }
+    }
+
+    public async Task SendMessageToChannel(string message, string channelName = null)
+    {
+        if (!IsLoggedIn)
+        {
+            Debug.LogWarning("Cannot send message: Not logged into Vivox");
+            return;
+        }
+
+        string targetChannel = channelName ?? CurrentTextChannel;
+        if (string.IsNullOrEmpty(targetChannel))
+        {
+            Debug.LogError("No channel to send message to");
             return;
         }
 
         try
         {
-            string targetChannelName = customChannelName ?? channelName;
-            _currentChannelName = targetChannelName;
-            
-            if (use3DAudio)
-            {
-                // Canal 3D/positional
-                var props = new Channel3DProperties(
-                    audibleDistance: 32,
-                    conversationalDistance: 1,
-                    audioFadeIntensityByDistanceaudio: 1.0f,
-                    audioFadeModel: AudioFadeModel.InverseByDistance
-                );
-                
-                await _vivoxService.JoinPositionalChannelAsync(targetChannelName, ChatCapability.AudioOnly, props);
-            }
-            else
-            {
-                // Canal 2D standard
-                await _vivoxService.JoinGroupChannelAsync(targetChannelName, ChatCapability.AudioOnly);
-            }
-            
-            // Configurer les volumes par défaut
-            SetSpeakerVolume(defaultSpeakerVolume);
-            SetMicrophoneVolume(defaultMicrophoneVolume);
-            
-            Debug.Log($"Rejoint le canal: {targetChannelName}");
+            MessageOptions messageOptions = new MessageOptions();
+            await VivoxService.Instance.SendChannelTextMessageAsync(targetChannel, message, messageOptions);
+            Debug.Log($"Message sent to {targetChannel}: {message}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"Erreur lors de la connexion au canal: {e.Message}");
-            OnErrorOccurred?.Invoke($"Erreur de connexion au canal: {e.Message}");
+            Debug.LogError($"Failed to send message: {e.Message}");
         }
     }
 
-    /// <summary>
-    /// Quitter le canal audio actuel
-    /// </summary>
-    public async void LeaveChannel()
+    public async Task SendDirectMessage(string message, string targetPlayerId)
     {
-        if (!IsInChannel || string.IsNullOrEmpty(_currentChannelName))
-        {
-            Debug.LogWarning("Pas dans un canal");
-            return;
-        }
+        if (!IsLoggedIn || string.IsNullOrEmpty(message)) return;
 
         try
         {
-            await _vivoxService.LeaveChannelAsync(_currentChannelName);
-            _currentChannelName = null;
-            Debug.Log("Canal quitté");
+            // Obtener nombre del jugador desde el lobby
+            string displayName = GetPlayerDisplayName(targetPlayerId);
+            if (string.IsNullOrEmpty(displayName))
+            {
+                Debug.LogError($"Could not find player with ID {targetPlayerId}");
+                return;
+            }
+
+            MessageOptions messageOptions = new MessageOptions();
+            await VivoxService.Instance.SendDirectTextMessageAsync(displayName, message, messageOptions);
+
+            // Mostrar el mensaje localmente también
+            var localMessage = new ChatMessage
+            {
+                SenderDisplayName = AuthenticationService.Instance.PlayerName ?? "You",
+                RecipientDisplayName = displayName,
+                MessageText = message,
+                IsDirectMessage = true
+            };
+            OnMessageReceivedUI?.Invoke(localMessage);
         }
         catch (Exception e)
         {
-            Debug.LogError($"Erreur en quittant le canal: {e.Message}");
+            Debug.LogError($"Failed to send direct message: {e.Message}");
         }
     }
 
-    /// <summary>
-    /// Se déconnecter de Vivox
-    /// </summary>
-    public void Logout()
+    private string GetPlayerDisplayName(string playerId)
     {
-        if (IsLoggedIn)
+        // Buscar en el LobbyManager
+        var lobbyManager = FindObjectOfType<LobbyManager>();
+        if (lobbyManager != null && lobbyManager.joinLobby != null)
         {
-            LeaveChannel();
-            _vivoxService.LogoutAsync();
-            Debug.Log("Déconnecté de Vivox");
-        }
-    }
-
-    /// <summary>
-    /// Activer/Désactiver le microphone local
-    /// </summary>
-    public void ToggleMuteSelf()
-    {
-        if (!IsInChannel) return;
-        
-        try
-        {
-            bool currentMuteState = _vivoxService.IsInputDeviceMuted;
-            if (currentMuteState)
+            var player = lobbyManager.joinLobby.Players.Find(p => p.Id == playerId);
+            if (player != null && player.Data != null && player.Data.ContainsKey("PlayerName"))
             {
-                _vivoxService.UnmuteInputDevice();
-            }
-            else
-            {
-                _vivoxService.MuteInputDevice();
+                return player.Data["PlayerName"].Value;
             }
         }
-        catch (Exception e)
+
+        // Fallback
+        if (playerId == AuthenticationService.Instance.PlayerId)
         {
-            Debug.LogError($"Erreur toggle mute: {e.Message}");
+            return AuthenticationService.Instance.PlayerName ?? "You";
         }
+
+        return null;
     }
 
-    /// <summary>
-    /// Définir l'état mute du microphone
-    /// </summary>
-    public void SetMuteSelf(bool muted)
-    {
-        if (!IsInChannel) return;
-        
-        if (muted)
-            _vivoxService.MuteInputDevice();
-        else
-            _vivoxService.UnmuteInputDevice();
-    }
-
-    /// <summary>
-    /// Obtenir l'état mute du microphone
-    /// </summary>
-    public bool IsSelfMuted()
-    {
-        return _vivoxService?.IsInputDeviceMuted ?? false;
-    }
-
-    /// <summary>
-    /// Activer/Désactiver tous les haut-parleurs (autres joueurs)
-    /// </summary>
-    public void ToggleMuteAll()
-    {
-        if (!IsInChannel || _vivoxService.ActiveChannels == null) return;
-        
-        try
-        {
-            bool currentState = _vivoxService.IsOutputDeviceMuted;
-            if (currentState)
-            {
-                _vivoxService.UnmuteOutputDevice();
-            }
-            else
-            {
-                _vivoxService.MuteOutputDevice();
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Erreur toggle mute all: {e.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Définir l'état mute de tous les autres joueurs
-    /// </summary>
-    public void SetMuteAll(bool muted)
-    {
-        if (!IsInChannel || _vivoxService.ActiveChannels == null) return;
-        
-        if (muted)
-            _vivoxService.MuteOutputDevice();
-        else
-            _vivoxService.UnmuteOutputDevice();
-    }
-
-    /// <summary>
-    /// Obtenir l'état mute des autres joueurs
-    /// </summary>
-    public bool IsAllMuted()
-    {
-        return _vivoxService?.IsOutputDeviceMuted ?? false;
-    }
-
-    /// <summary>
-    /// Mute/Unmute un participant spécifique
-    /// </summary>
-    public async void SetParticipantMuted(string participantId, bool muted)
-    {
-        if (!IsInChannel || _vivoxService.ActiveChannels == null) return;
-        
-        try
-        {
-            if (muted)
-            {
-                await _vivoxService.BlockPlayerAsync(participantId);
-            }
-            else
-            {
-                await _vivoxService.UnblockPlayerAsync(participantId);
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Erreur mute participant: {e.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Définir le volume des haut-parleurs (-50 to 50)
-    /// </summary>
-    public void SetSpeakerVolume(int volume)
-    {
-        volume = Mathf.Clamp(volume, -50, 50);
-        _vivoxService.SetOutputDeviceVolume(volume);
-        _vivoxService.SetChannelVolumeAsync(_currentChannelName, volume);
-    }
-
-    /// <summary>
-    /// Obtenir le volume des haut-parleurs (-50 to 50)
-    /// </summary>
-    public int GetSpeakerVolume()
-    {
-        return _vivoxService?.OutputDeviceVolume ?? defaultSpeakerVolume;
-    }
-
-    /// <summary>
-    /// Définir le volume du microphone (-50 to 50)
-    /// </summary>
-    public void SetMicrophoneVolume(int volume)
-    {
-        volume = Mathf.Clamp(volume, -50, 50);
-        _vivoxService.SetInputDeviceVolume(volume);
-        Debug.Log($"Volume du microphone: {volume}");
-    }
-
-    /// <summary>
-    /// Obtenir le volume du microphone (-50 to 50)
-    /// </summary>
-    public int GetMicrophoneVolume()
-    {
-        return _vivoxService?.InputDeviceVolume ?? defaultMicrophoneVolume;
-    }
-
-    /// <summary>
-    /// Obtenir le nombre de participants dans le canal actuel
-    /// </summary>
-    public int GetParticipantCount()
-    {
-        if (!IsInChannel || _vivoxService.ActiveChannels == null) return 0;
-        
-        int count = 0;
-        foreach (var channel in _vivoxService.ActiveChannels)
-        {
-            count += channel.Value.Count;
-        }
-        return count;
-    }
-
-    // Gestionnaires d'événements Vivox v16+
     private void OnVivoxLoggedIn()
     {
-        OnLoginStatusChanged?.Invoke(true);
-        Debug.Log("Vivox: Logged in");
+        IsInitialized = true;
+        OnVivoxInitialized?.Invoke();
+        Debug.Log("Vivox login successful");
     }
 
-    private void OnVivoxLoggedOut()
+    private void OnChannelJoined(string channelName)
     {
-        OnLoginStatusChanged?.Invoke(false);
-        Debug.Log("Vivox: Logged out");
+        Debug.Log($"Joined channel: {channelName}");
     }
 
-    private void OnVivoxChannelJoined(string channelName)
+    private void OnChannelMessageReceived(VivoxMessage message)
     {
-        OnChannelConnectionChanged?.Invoke(true);
-        Debug.Log($"Vivox: Joined channel {channelName}");
-    }
-
-    private void OnVivoxChannelLeft(string channelName)
-    {
-        OnChannelConnectionChanged?.Invoke(false);
-        Debug.Log($"Vivox: Left channel {channelName}");
-    }
-
-    private void OnVivoxParticipantAdded(VivoxParticipant participant)
-    {
-        if (!participant.IsSelf)
+        var chatMessage = new ChatMessage
         {
-            Debug.Log($"Participant joined: {participant.DisplayName}");
-            OnParticipantAdded?.Invoke(participant.PlayerId);
-        }
+            SenderDisplayName = message.SenderDisplayName,
+            SenderPlayerId = message.SenderPlayerId,
+            ChannelName = message.ChannelName,
+            MessageText = message.MessageText,
+            IsDirectMessage = false
+        };
+
+        OnMessageReceivedUI?.Invoke(chatMessage);
     }
 
-    private void OnVivoxParticipantRemoved(VivoxParticipant participant)
+    private void OnDirectMessageReceived(VivoxMessage message)
     {
-        if (!participant.IsSelf)
+        var chatMessage = new ChatMessage
         {
-            Debug.Log($"Participant left: {participant.DisplayName}");
-            OnParticipantRemoved?.Invoke(participant.PlayerId);
-        }
+            SenderDisplayName = message.SenderDisplayName,
+            SenderPlayerId = message.SenderPlayerId,
+            ChannelName = message.ChannelName,
+            MessageText = message.MessageText,
+            IsDirectMessage = true,
+            RecipientDisplayName = message.RecipientPlayerId
+        };
+
+        OnMessageReceivedUI?.Invoke(chatMessage);
     }
 
     private void OnDestroy()
     {
-        if (_vivoxService != null)
+        if (VivoxService.Instance != null)
         {
-            _vivoxService.LoggedIn -= OnVivoxLoggedIn;
-            _vivoxService.LoggedOut -= OnVivoxLoggedOut;
-            _vivoxService.ChannelJoined -= OnVivoxChannelJoined;
-            _vivoxService.ChannelLeft -= OnVivoxChannelLeft;
-            _vivoxService.ParticipantAddedToChannel -= OnVivoxParticipantAdded;
-            _vivoxService.ParticipantRemovedFromChannel -= OnVivoxParticipantRemoved;
+            VivoxService.Instance.LoggedIn -= OnVivoxLoggedIn;
+            VivoxService.Instance.ChannelMessageReceived -= OnChannelMessageReceived;
+            VivoxService.Instance.DirectedMessageReceived -= OnDirectMessageReceived;
+            VivoxService.Instance.ChannelJoined -= OnChannelJoined;
         }
-        
-        LeaveChannel();
-        Logout();
     }
 
     private void OnApplicationQuit()
     {
-        LeaveChannel();
-        Logout();
+        _ = LeaveAllChannelsAsync();
     }
 }

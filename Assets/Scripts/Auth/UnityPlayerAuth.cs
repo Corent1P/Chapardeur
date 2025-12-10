@@ -44,7 +44,7 @@ public class UnityPlayerAuth : MonoBehaviour
 
     private async void Start()
     {
-        #if (!DISABLE_ONLINE)
+        #if DISABLE_ONLINE
             this.enabled = false; 
             return;
         #endif
