@@ -655,6 +655,7 @@ MonoBehaviour:
   MimeObjects:
   - {fileID: 2514267368294221660, guid: 8309838481d4b7f4cafa47dc6e918b65, type: 3}
   - {fileID: 6368758339070869532, guid: ce276c0a4fc418241961d4914e222db7, type: 3}
+  - {fileID: 1415069871308390564, guid: 4452d79ea4fa3493bac7fa1442b37e6a, type: 3}
   scaleAnimationDuration: 0.3
   scaleCurve:
     serializedVersion: 2
