@@ -18459,6 +18459,86 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.8631876, y: 0.97814846, z: 0.22425379}
   m_Center: {x: -0.00000011920929, y: -0.0000009536743, z: -0.008139335}
+--- !u!1 &577275957
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 577275960}
+  - component: {fileID: 577275958}
+  - component: {fileID: 577275959}
+  m_Layer: 0
+  m_Name: NetworkSoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &577275958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 577275957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1636652732
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &577275959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 577275957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59153bfb04b7342c39378b55bac2733f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkSoundManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  audioSource: {fileID: 0}
+  buttonPressedSound: {fileID: 8300000, guid: debf0d6c47bdc4993b86787f2e132860, type: 3}
+  footstepSounds: []
+  doorSound: {fileID: 8300000, guid: faf25bfe6185a4955bdf779051c6a00c, type: 3}
+  powerDownSound: {fileID: 8300000, guid: 1c94e55f699764f3a91018f41153f28e, type: 3}
+  powerUpSound: {fileID: 8300000, guid: 3988aa53dc18b4df89624fb265b923d7, type: 3}
+  alertSound: {fileID: 8300000, guid: 02c9946660efc483d9c9e345c9229c25, type: 3}
+  maxHearingDistance: 30
+  footstepVolume: 0.5
+--- !u!4 &577275960
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 577275957}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 17.22338, y: 0.04134, z: -1.12647}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &577349722
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -32170,6 +32250,7 @@ MonoBehaviour:
   originalPosition: {x: 2.41, y: 0, z: -1.79}
   targetPosition: {x: 2.41, y: 0, z: 0.27}
   openCloseDuration: 1
+  doorSound: {fileID: 8300000, guid: faf25bfe6185a4955bdf779051c6a00c, type: 3}
 --- !u!1001 &964504276
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -76447,3 +76528,4 @@ SceneRoots:
   - {fileID: 1971366781}
   - {fileID: 1664364402}
   - {fileID: 1301824677}
+  - {fileID: 577275960}

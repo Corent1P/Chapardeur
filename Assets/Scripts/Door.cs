@@ -5,8 +5,18 @@ public class Door : MonoBehaviour
     [SerializeField] private Vector3 originalPosition;
     [SerializeField] private Vector3 targetPosition;
     [SerializeField] private float openCloseDuration = 1f;
+    [SerializeField] private AudioClip doorSound;
     private bool isOpen = false;
     private bool isMoving = false;
+
+    private NetworkSoundManager networkSoundManager;
+    private SoundManager localSoundManager;
+
+    void Start()
+    {
+        networkSoundManager = FindAnyObjectByType<NetworkSoundManager>();
+        localSoundManager = FindAnyObjectByType<SoundManager>();
+    }
 
     public void ToggleDoor()
     {
@@ -27,6 +37,15 @@ public class Door : MonoBehaviour
     {
         isMoving = true;
         float elapsed = 0f;
+
+        if (networkSoundManager != null)
+        {
+            networkSoundManager.PlaySoundAtPosition(doorSound, transform.position);
+        }
+        else if (localSoundManager != null)
+        {
+            localSoundManager.PlaySound(doorSound, transform.position);
+        }
 
         while (elapsed < openCloseDuration)
         {

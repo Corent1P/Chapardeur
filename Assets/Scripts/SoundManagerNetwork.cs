@@ -10,26 +10,15 @@ public class NetworkSoundManager : NetworkBehaviour
 
     [Header("Sound Effects")]
     [SerializeField] private AudioClip buttonPressedSound;
-    [SerializeField] private AudioClip[] footstepSounds; // Plusieurs sons de parquet
-    [SerializeField] private AudioClip dashSound;
-    [SerializeField] private AudioClip catchSound;
+    [SerializeField] private AudioClip[] footstepSounds;
+    [SerializeField] private AudioClip doorSound;
+    [SerializeField] private AudioClip powerDownSound;
+    [SerializeField] private AudioClip powerUpSound;
+    [SerializeField] private AudioClip alertSound;
 
     [Header("3D Sound Settings")]
     [SerializeField] private float maxHearingDistance = 30f;
     [SerializeField] private float footstepVolume = 0.5f;
-
-    // private void Awake()
-    // {
-    //     if (Instance == null)
-    //     {
-    //         Instance = this;
-    //         DontDestroyOnLoad(gameObject);
-    //     }
-    //     else
-    //     {
-    //         Destroy(gameObject);
-    //     }
-    // }
 
     /// <summary>
     /// Joue un son 2D (UI, etc.) - Local uniquement
@@ -132,22 +121,6 @@ public class NetworkSoundManager : NetworkBehaviour
         PlaySound(buttonPressedSound);
     }
 
-    /// <summary>
-    /// Joue le son du dash
-    /// </summary>
-    public void PlayDashSound(Vector3 position)
-    {
-        PlaySoundAtPosition(dashSound, position, 0.7f);
-    }
-
-    /// <summary>
-    /// Joue le son du catch
-    /// </summary>
-    public void PlayCatchSound(Vector3 position)
-    {
-        PlaySoundAtPosition(catchSound, position, 1f);
-    }
-
     #region Helper Methods
     private int GetClipIndex(AudioClip clip)
     {
@@ -158,8 +131,10 @@ public class NetworkSoundManager : NetworkBehaviour
     private AudioClip GetClipFromIndex(int index)
     {
         // Recherche par ID (simplifié, marche pour les clips en Resources)
-        if (dashSound != null && dashSound.GetInstanceID() == index) return dashSound;
-        if (catchSound != null && catchSound.GetInstanceID() == index) return catchSound;
+        if (doorSound != null && doorSound.GetInstanceID() == index) return doorSound;
+        if (powerDownSound != null && powerDownSound.GetInstanceID() == index) return powerDownSound;
+        if (powerUpSound != null && powerUpSound.GetInstanceID() == index) return powerUpSound;
+        if (alertSound != null && alertSound.GetInstanceID() == index) return alertSound;
         if (buttonPressedSound != null && buttonPressedSound.GetInstanceID() == index) return buttonPressedSound;
         
         return null;
