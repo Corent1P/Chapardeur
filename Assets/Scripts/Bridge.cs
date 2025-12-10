@@ -8,10 +8,11 @@ public class Bridge : MonoBehaviour
     [SerializeField] Vector3 bridgeDirection = Vector3.forward;
 
     private bool isBridgeOpen = false;
+    private bool isMoving = false;
 
     public void OpenBridge()
     {
-        if (!isBridgeOpen)
+        if (!isBridgeOpen && !isMoving)
         {
             StartCoroutine(MoveBridgeSections());
         }
@@ -20,6 +21,7 @@ public class Bridge : MonoBehaviour
     // Move a bridge section at bridgeMoveSpeed to a distance of distanceBridgeSectionToMove after the other finished
     private System.Collections.IEnumerator MoveBridgeSections()
     {
+        isMoving = true;
         for (int i = 0; i < bridgeSections.Length; i++)
         {
             GameObject section = bridgeSections[i];
@@ -33,11 +35,12 @@ public class Bridge : MonoBehaviour
             }
         }
         isBridgeOpen = true;
+        isMoving = false;
     }
 
     public void CloseBridge()
     {
-        if (isBridgeOpen)
+        if (isBridgeOpen && !isMoving)
         {
             StartCoroutine(MoveBridgeSectionsBack());
         }
@@ -46,6 +49,7 @@ public class Bridge : MonoBehaviour
     // Move a bridge section back at bridgeMoveSpeed to its original position after the other finished
     private System.Collections.IEnumerator MoveBridgeSectionsBack()
     {
+        isMoving = true;
         GameObject[] reversedSections = (GameObject[])bridgeSections.Clone();
         System.Array.Reverse(reversedSections);
 
@@ -62,10 +66,12 @@ public class Bridge : MonoBehaviour
             }
         }
         isBridgeOpen = false;
+        isMoving = false;
     }
 
     public void ToggleBridge()
     {
+        if (isMoving) return;
         if (isBridgeOpen)
         {
             CloseBridge();

@@ -87,7 +87,7 @@ public class VivoxManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"Vivox login failed: {e.Message}");
+            Debug.Log($"Vivox login failed: {e.Message}");
         }
     }
 
